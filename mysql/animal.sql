@@ -1,0 +1,22 @@
+CREATE TABLE animal (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100),
+    porte VARCHAR(30),
+    especie VARCHAR(50),
+    raca VARCHAR(50),
+    data_nasc DATE,
+    caracteristicas VARCHAR(100),
+    data_resgate DATE,
+    obs VARCHAR(50),
+    status VARCHAR(20),
+    genero CHAR(1),
+    fotos BLOB,
+    castracao BOOLEAN,
+    estado_saude VARCHAR(50),
+    doencas_pre_ex VARCHAR(50),
+    pelo VARCHAR(20),
+    amputacao BOOLEAN,
+    cor VARCHAR(50),
+    adm_ong_id INT,
+    FOREIGN KEY (adm_ong_id) REFERENCES adm_ong(id)
+);
