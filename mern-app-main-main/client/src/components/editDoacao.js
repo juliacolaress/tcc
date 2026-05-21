@@ -95,7 +95,9 @@ export default function EditDoacao() {
         <div className="container-fluid py-2">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h3 style={{ color: primaryColor, fontWeight: 'bold' }}>Editar Cadastro de Doação</h3>
+                    <h3 style={{ color: primaryColor, fontWeight: 'bold' }}>
+                        <i className="bi bi-gift-fill me-2"></i> Editar Cadastro de Doação
+                    </h3>
                     <p className="text-muted mb-0">Atualize as informações de contribuição do doador</p>
                 </div>
                 <button 

@@ -57,7 +57,9 @@ export default function CreateVoluntario() {
         <div className="container-fluid py-2">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h3 style={{ color: primaryColor, fontWeight: 'bold' }}>Cadastrar Novo Voluntário</h3>
+                    <h3 style={{ color: primaryColor, fontWeight: 'bold' }}>
+                        <i className="bi bi-people-fill me-2"></i> Cadastrar Novo Voluntário
+                    </h3>
                     <p className="text-muted mb-0">Insira os dados do novo colaborador da ONG</p>
                 </div>
                 <button 

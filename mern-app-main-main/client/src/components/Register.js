@@ -1,6 +1,5 @@
 import { useState } from 'react';
-
-const REACT_APP_YOUR_HOSTNAME = 'http://localhost:5050'; // IP do Servidor
+import API_BASE_URL from "../api/config";
 
 export default function Register() {
     const [nome, setNome] = useState('');
@@ -12,9 +11,8 @@ export default function Register() {
         e.preventDefault();
         setMensagem('');
 
-        console.log(`${REACT_APP_YOUR_HOSTNAME}/user/register`);
         try {
-            const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/user/register`, {
+            const response = await fetch(`${API_BASE_URL}/user/register`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

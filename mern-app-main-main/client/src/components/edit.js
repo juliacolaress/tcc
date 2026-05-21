@@ -74,7 +74,9 @@ export default function Edit() {
 
     return (
         <div className="container mt-4">
-            <h3 className="mb-4" style={{ color: primaryColor, fontWeight: 'bold' }}>Alteração de dados do Usuário</h3>
+            <h3 className="mb-4" style={{ color: primaryColor, fontWeight: 'bold' }}>
+                <i className="bi bi-person-fill me-2"></i> Alteração de dados do Usuário
+            </h3>
             <hr />
             <form onSubmit={onSubmit}>
                 <div className="form-group mb-3">

@@ -72,7 +72,9 @@ export default function CreateDoacaoFinanceira() {
         <div className="container-fluid py-2">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h3 style={{ color: primaryColor, fontWeight: 'bold' }}>Cadastrar Doação Financeira</h3>
+                    <h3 style={{ color: primaryColor, fontWeight: 'bold' }}>
+                        <i className="bi bi-cash-coin me-2"></i> Cadastrar Doação Financeira
+                    </h3>
                     <p className="text-muted mb-0">Registre uma nova contribuição monetária para a ONG</p>
                 </div>
                 <button 

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Routes, Route, Navigate, Link, Outlet } from 'react-router-dom';
 
 // Importando as páginas principais
-import Dashboard from './components/dashboard';
+import Dashboard from './components/dashboard'; // <--- PAGINA INICIAL DO ADM (CARDS)
+import Home from './components/home';           // <--- PAGINA INICIAL DO USUARIO (SITE)
 import UserList from './components/userList';
 import AnimalList from './components/animalList';
 import DoacaoList from './components/doacaoList';
@@ -35,15 +36,19 @@ function DashboardLayout({ setToken }) {
 
   return (
     <div className="d-flex" style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
-      {/* Menu Lateral */}
-      <aside className="bg-white border-end" style={{ width: '280px', padding: '20px' }}>
-        <h4 style={{ color: '#8B5A2B', fontWeight: 'bold' }}>Patas & Lares</h4>
+      {/* Menu Lateral Fixo para o Administrador */}
+      <aside className="bg-white border-end" style={{ width: '280px', padding: '20px', position: 'fixed', height: '100vh' }}>
+        <h4 style={{ color: '#8B5A2B', fontWeight: 'bold' }}>
+          <i className="bi bi-paw-fill me-2" style={{ transform: 'rotate(-15deg)', display: 'inline-block' }}></i>
+          Patas & Lares
+        </h4>
         <p className="text-muted small">Painel Administrativo</p>
         <hr />
         
         <ul className="nav flex-column gap-2">
           <li className="nav-item">
-            <Link className="nav-link text-dark d-flex align-items-center" to="/home">
+            {/* O link de Início do ADM agora aponta para /dashboard */}
+            <Link className="nav-link text-dark d-flex align-items-center" to="/dashboard">
               <i className="bi bi-house-door me-3 fs-5"></i> Início
             </Link>
           </li>
@@ -54,7 +59,7 @@ function DashboardLayout({ setToken }) {
           </li>
           <li className="nav-item">
             <Link className="nav-link text-dark d-flex align-items-center" to="/animais">
-              <i className="bi bi-paw-fill me-3 fs-5"></i> Animais
+              <i className="bi bi-heart me-3 fs-5"></i> Animais
             </Link>
           </li>
           <li className="nav-item">
@@ -75,8 +80,8 @@ function DashboardLayout({ setToken }) {
         </Link>
       </aside>
 
-      {/* Conteúdo Principal (onde as telas aparecem) */}
-      <main className="flex-grow-1 p-4">
+      {/* Conteúdo Principal do Painel (Empurrado para o lado para não sobrepor a Sidebar) */}
+      <main className="flex-grow-1 p-4" style={{ marginLeft: '280px', width: 'calc(100% - 280px)' }}>
         <Outlet />
       </main>
     </div>
@@ -93,12 +98,18 @@ export default function App() {
 
   return (
     <Routes>
-      {/* Redirecionamento inicial */}
-      <Route path="/" element={token ? <Navigate to="/home" /> : <Navigate to="/login" />} />
+      {/* 1. ROTAS PÚBLICAS (Qualquer visitante acessa) */}
+      <Route path="/" element={<Home />} />
+      
+      {/* Se o administrador já estiver logado e tentar entrar no login, ele vai direto para o painel */}
+      <Route path="/login" element={token ? <Navigate to="/dashboard" replace /> : <Login onLogin={handleLogin} />} />
+      <Route path="/register" element={<Register />} />
 
-      {/* Rotas protegidas dentro do painel (exigem autenticação) */}
+      {/* 2. ROTAS PROTEGIDAS (Apenas para o Administrador logado) */}
       <Route element={token ? <DashboardLayout setToken={setToken} /> : <Navigate to="/login" replace />}>
-        <Route path="/home" element={<Dashboard />} />
+        
+        {/* A PAGINA INICIAL DO ADM AGORA É O DASHBOARD */}
+        <Route path="/dashboard" element={<Dashboard />} />
         
         {/* Dashboard Analytics */}
         <Route path="/estatisticas-doacoes" element={<DonationStats />} />
@@ -126,11 +137,7 @@ export default function App() {
         <Route path="/edit-voluntarios/:id" element={<EditVoluntarios />} />
       </Route>
 
-      {/* Telas de Login/Registro sem o menu lateral */}
-      <Route path="/login" element={<Login onLogin={handleLogin} />} />
-      <Route path="/register" element={<Register />} />
-
-      {/* Rota coringa caso digite algo errado */}
+      {/* Rota de segurança: se digitar qualquer coisa errada, volta para a Home pública */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

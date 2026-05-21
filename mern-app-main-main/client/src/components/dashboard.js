@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import API_BASE_URL from "../api/config";
-import Logo from './Logo.png';
 
 export default function Dashboard() {
   const [totalAnimais, setTotalAnimais] = useState(0);
@@ -24,7 +23,7 @@ export default function Dashboard() {
         ]);
 
         if (animaisRes && animaisRes.ok) {
-          const animaisData = await animaisRes.json();
+          const animaisData = await animaisRes.json(); // Corrigido aqui!
           const listaAnimais = Array.isArray(animaisData) ? animaisData : (animaisData.data || []);
           setTotalAnimais(listaAnimais.length);
         }
@@ -59,55 +58,90 @@ export default function Dashboard() {
 
   const primaryColor = '#5c3a21';
 
+  const cardStyle = {
+    cursor: 'pointer',
+    transition: 'transform 0.2s, box-shadow 0.2s',
+    borderRadius: '12px'
+  };
+
+  const handleMouseEnter = (e) => {
+    e.currentTarget.style.transform = 'translateY(-5px)';
+    e.currentTarget.style.boxShadow = '0 8px 15px rgba(0,0,0,0.1)';
+  };
+
+  const handleMouseLeave = (e) => {
+    e.currentTarget.style.transform = 'translateY(0)';
+    e.currentTarget.style.boxShadow = '0 0.125rem 0.25rem rgba(0,0,0,0.075)';
+  };
+
   return (
-    <div className="container-fluid py-4">
+    <div className="container-fluid py-2">
+      {/* Cabeçalho Interno */}
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <div>          
-          <h3 style={{ color: primaryColor, fontWeight: 'bold' }}>Patas & Lares</h3>
-          <p className="text-muted mb-0">Painel de Controle</p>
+        <div>         
+          <h2 style={{ color: primaryColor, fontWeight: 'bold' }} className="mb-1">Painel de Controle</h2>
+          <p className="text-muted mb-0">Visão geral do sistema de apoio e resgate</p>
         </div>
         <div>
-          <Link to="/animais" className="btn btn-outline-secondary px-4 py-2" style={{ borderRadius: '6px' }}>
-            <i className="bi bi-list me-2"></i> Gerenciar Animais
-          </Link>
+          <span className="badge bg-light text-dark border p-2 small">
+            <i className="bi bi-person-circle me-1"></i> Administrador
+          </span>
         </div>
       </div>
 
-      <div className="row g-4 mb-4">
+      <hr className="mb-4" />
+
+      {/* Grid de Cards Indicadores */}
+      <div className="row g-4 mb-5">
+        
         {/* CARD ANIMAIS */}
-        <div className="col-xl-4 col-md-6">
-          <div className="card border-0 shadow-sm p-3 h-100">
-            <div className="card-body d-flex flex-column justify-content-center">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <span className="text-muted small text-uppercase fw-bold">Animais Cadastrados</span>
-                  <h2 className="mt-2 fw-bold" style={{ color: primaryColor }}>
-                    {loading ? <span className="spinner-border spinner-border-sm" role="status"></span> : totalAnimais}
-                  </h2>
-                </div>
-                <div style={{ backgroundColor: '#fdf7f2', borderRadius: '50%', padding: '15px' }}>
-                  <i className="bi bi-paw-fill fs-4" style={{ color: primaryColor }}></i>
+        <div className="col-lg-4 col-md-6">
+          <Link to="/animais" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div 
+              className="card border-0 shadow-sm p-3 h-100 bg-white" 
+              style={cardStyle}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
+              <div className="card-body d-flex flex-column justify-content-center">
+                <div className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <span className="text-muted small text-uppercase fw-bold">Animais Cadastrados</span>
+                    <h2 className="mt-2 fw-bold mb-0" style={{ color: primaryColor }}>
+                      {loading ? <span className="spinner-border spinner-border-sm" role="status"></span> : totalAnimais}
+                    </h2>
+                  </div>
+                  <div style={{ backgroundColor: '#fdf7f2', borderRadius: '50%', padding: '15px' }}>
+                    <i className="bi bi-paw-fill fs-3" style={{ color: primaryColor }}></i>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
         </div>
 
-        {/* CARD DOAÇÕES LINKADO */}
-        <div className="col-xl-4 col-md-12">
+        {/* CARD DOAÇÕES */}
+        <div className="col-lg-4 col-md-6">
           <Link to="/estatisticas-doacoes" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <div className="card border-0 shadow-sm p-3 h-100" style={{ cursor: 'pointer', transition: 'transform 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+            <div 
+              className="card border-0 shadow-sm p-3 h-100 bg-white" 
+              style={cardStyle}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
               <div className="card-body d-flex flex-column justify-content-center">
                 <div className="d-flex justify-content-between align-items-center">
                   <div>
                     <span className="text-muted small text-uppercase fw-bold">Total Arrecadado</span>
-                    <h2 className="mt-2 fw-bold" style={{ color: primaryColor }}>
+                    <h2 className="mt-2 fw-bold mb-1" style={{ color: primaryColor }}>
                       {loading ? <span className="spinner-border spinner-border-sm" role="status"></span> : formatCurrency(totalArrecadado)}
                     </h2>
-                    <small className="text-primary" style={{ fontSize: '0.75rem' }}>+ Clique para ver análise detalhada</small>
+                    <small className="text-primary" style={{ fontSize: '0.75rem', fontWeight: '500' }}>
+                      <i className="bi bi-graph-up me-1"></i> Ver análise detalhada
+                    </small>
                   </div>
                   <div style={{ backgroundColor: '#fdf7f2', borderRadius: '50%', padding: '15px' }}>
-                    <i className="bi bi-cash-coin fs-4" style={{ color: primaryColor }}></i>
+                    <i className="bi bi-cash-coin fs-3" style={{ color: primaryColor }}></i>
                   </div>
                 </div>
               </div>
@@ -116,31 +150,45 @@ export default function Dashboard() {
         </div>
 
         {/* CARD VOLUNTÁRIOS */}
-        <div className="col-xl-4 col-md-6">
-          <div className="card border-0 shadow-sm p-3 h-100">
-            <div className="card-body d-flex flex-column justify-content-center">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <span className="text-muted small text-uppercase fw-bold">Voluntários</span>
-                  <h2 className="mt-2 fw-bold" style={{ color: primaryColor }}>
-                    {loading ? <span className="spinner-border spinner-border-sm" role="status"></span> : totalVoluntarios}
-                  </h2>
-                </div>
-                <div style={{ backgroundColor: '#fdf7f2', borderRadius: '50%', padding: '15px' }}>
-                  <i className="bi bi-people-fill fs-4" style={{ color: primaryColor }}></i>
+        <div className="col-lg-4 col-md-12">
+          <Link to="/voluntarios" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div 
+              className="card border-0 shadow-sm p-3 h-100 bg-white" 
+              style={cardStyle}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
+              <div className="card-body d-flex flex-column justify-content-center">
+                <div className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <span className="text-muted small text-uppercase fw-bold">Voluntários Ativos</span>
+                    <h2 className="mt-2 fw-bold mb-0" style={{ color: primaryColor }}>
+                      {loading ? <span className="spinner-border spinner-border-sm" role="status"></span> : totalVoluntarios}
+                    </h2>
+                  </div>
+                  <div style={{ backgroundColor: '#fdf7f2', borderRadius: '50%', padding: '15px' }}>
+                    <i className="bi bi-people-fill fs-3" style={{ color: primaryColor }}></i>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
         </div>
+
       </div>
 
-      <div className="card border-0 shadow-sm">
-        <div className="card-body p-4">
-          <h4 style={{ color: primaryColor, fontWeight: 'bold' }}>Gerenciamento do Patas & Lares</h4>
-          <p className="text-muted">A partir do menu lateral ou dos cards informativos, você consegue acessar os dados e manter o controle total do projeto.</p>
-          <Link to="/animais" className="btn px-4 py-2 text-white mt-2" style={{ backgroundColor: primaryColor, borderRadius: '6px' }}>
-            Gerenciar Animais
+      {/* Bloco de Boas-vindas / Informativo */}
+      <div className="card border-0 shadow-sm bg-white" style={{ borderRadius: '12px' }}>
+        <div className="card-body p-5">
+          <h4 style={{ color: primaryColor, fontWeight: 'bold' }} className="mb-3">
+            Gerenciamento Interno Patas & Lares
+          </h4>
+          <p className="text-muted mb-4" style={{ maxWidth: '800px', lineHeight: '1.6' }}>
+            Utilize o menu fixo localizado à esquerda da tela para navegar entre os módulos do sistema. 
+            Você pode cadastrar novos acolhidos, registrar doações recebidas em dinheiro ou materiais, além de coordenar a lista de voluntários parceiros.
+          </p>
+          <Link to="/animais" className="btn px-4 py-2 text-white shadow-sm" style={{ backgroundColor: primaryColor, borderRadius: '6px', fontWeight: '500' }}>
+            <i className="bi bi-plus-circle me-2"></i> Gerenciar Animais
           </Link>
         </div>
       </div>

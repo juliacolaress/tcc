@@ -46,7 +46,9 @@ export default function Create() {
     return (
         <div className="container mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h3 style={{ color: primaryColor, fontWeight: 'bold' }}>Cadastrar novo usuário</h3>
+                <h3 style={{ color: primaryColor, fontWeight: 'bold' }}>
+                    <i className="bi bi-person-fill me-2"></i> Cadastrar novo usuário
+                </h3>
                 <button 
                     type="button"
                     onClick={() => navigate(-1)} 

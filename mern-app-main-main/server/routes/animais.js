@@ -6,7 +6,8 @@ const ObjectId = require("mongodb").ObjectId;
 const { auth } = require("../middleware/auth");
 
 // 1. LISTAR TODOS OS ANIMAIS (Corrigido para "/animais" no plural e sem 'auth')
-animalRoutes.route("/animais").get(async function (req, res) {
+// 1. LISTAR TODOS OS ANIMAIS
+animalRoutes.route("/animal").get(async function (req, res) {
     const db_connect = dbo.getDb();
     try {
         const result = await db_connect.collection("animais").find({}).toArray();
@@ -15,7 +16,6 @@ animalRoutes.route("/animais").get(async function (req, res) {
         res.status(500).json({ message: error.message });
     }
 });
-
 // 2. BUSCAR UM ANIMAL ESPECÍFICO (Sem 'auth')
 animalRoutes.route("/animal/:id").get(async function (req, res) {
     const db_connect = dbo.getDb();
