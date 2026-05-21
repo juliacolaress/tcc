@@ -1,7 +1,6 @@
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
-
-const REACT_APP_YOUR_HOSTNAME = 'http://localhost:5050'; // IP do Servidor
+import API_BASE_URL from "../api/config";
 
 export default function Create() {
     const [form, setForm] = useState({
@@ -22,10 +21,12 @@ export default function Create() {
         e.preventDefault()
 
         const newPerson = { ...form }
-        const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/user/add`, {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE_URL}/user/add`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
             },
             body: JSON.stringify(newPerson)
         })
@@ -37,18 +38,31 @@ export default function Create() {
         }
 
         setForm({ name: "", user: "", email: "", function: "" })
-        navigate("/")
+        navigate("/usuarios")
     }
 
+    const primaryColor = '#5c3a21';
+
     return (
-        <div>
-            <h3>Cadastrar novo usuário</h3>
+        <div className="container mt-4">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h3 style={{ color: primaryColor, fontWeight: 'bold' }}>Cadastrar novo usuário</h3>
+                <button 
+                    type="button"
+                    onClick={() => navigate(-1)} 
+                    className="btn px-4 py-2" 
+                    style={{ borderRadius: '6px', color: primaryColor, borderColor: primaryColor, fontWeight: '500' }}
+                >
+                    <i className="bi bi-arrow-left me-2"></i> Voltar
+                </button>
+            </div>
+            <hr />
             <form onSubmit={onSubmit}>
-                <div className="form-group">
-                    <label htmlFor="name">Nome completo</label>
+                <div className="form-group mb-3">
+                    <label htmlFor="name" className="fw-bold">Nome completo</label>
                     <input
                         type="text"
-                        className="form-control"
+                        className="form-control shadow-sm"
                         id="name"
                         value={form.name}
                         onChange={(e) => updateForm({ name: e.target.value })}
@@ -112,11 +126,12 @@ export default function Create() {
                         <label htmlFor="positionTae" className="form-check-label">Técnico Administrativo</label>
                     </div>
                 </div>
-                <div className="form-group">
+                <div className="form-group mt-4">
                     <input
                         type="submit"
                         value="Enviar dados"
-                        className="btn btn-primary"
+                        className="btn text-white px-5 shadow-sm"
+                        style={{ backgroundColor: primaryColor, borderRadius: '6px', fontWeight: '500' }}
                     />
                 </div>
             </form>

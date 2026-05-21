@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-
-const REACT_APP_YOUR_HOSTNAME = 'http://localhost:5050'; // IP do Servidor
+import API_BASE_URL from "../api/config";
 
 export default function Edit() {
     const [form, setForm] = useState({
@@ -12,11 +11,17 @@ export default function Edit() {
     })
     const params = useParams()
     const navigate = useNavigate()
+    const primaryColor = '#5c3a21';
 
     useEffect(() => {
         async function fetchData() {
             const id = params.id
-            const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/user/${id}`)
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/user/${id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
             if (!response.ok) {
                 const message = `An error occurred: ${response.statusText}`
                 window.alert(message)
@@ -26,7 +31,7 @@ export default function Edit() {
             const user = await response.json()
             if (!user) {
                 window.alert(`Usuário com id ${id} não encontrado`)
-                navigate("/")
+                navigate("/usuarios")
                 return
             }
 
@@ -48,10 +53,12 @@ export default function Edit() {
         e.preventDefault()
 
         const editedPerson = { ...form }
-        const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/update/${params.id}`, {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE_URL}/update/${params.id}`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
             },
             body: JSON.stringify(editedPerson)
         })
@@ -62,44 +69,46 @@ export default function Edit() {
             return
         }
 
-        navigate("/")
+        navigate("/usuarios")
     }
 
     return (
-        <div>
-            <h3>Alteração de dados</h3>
+        <div className="container mt-4">
+            <h3 className="mb-4" style={{ color: primaryColor, fontWeight: 'bold' }}>Alteração de dados do Usuário</h3>
+            <hr />
             <form onSubmit={onSubmit}>
-                <div className="form-group">
-                    <label htmlFor="name">Nome</label>
+                <div className="form-group mb-3">
+                    <label htmlFor="name" className="fw-bold">Nome completo</label>
                     <input
                         type="text"
-                        className="form-control"
+                        className="form-control shadow-sm"
                         id="name"
                         value={form.name}
                         onChange={(e) => updateForm({ name: e.target.value })}
                     />
                 </div>
-                <div className="form-group">
-                    <label htmlFor="user">Username</label>
+                <div className="form-group mb-3">
+                    <label htmlFor="user" className="fw-bold">Username</label>
                     <input
                         type="text"
-                        className="form-control"
+                        className="form-control shadow-sm"
                         id="user"
                         value={form.user}
                         onChange={(e) => updateForm({ user: e.target.value })}
                     />
                 </div>
-                <div className="form-group">
-                    <label htmlFor="email">E-mail</label>
+                <div className="form-group mb-3">
+                    <label htmlFor="email" className="fw-bold">E-mail</label>
                     <input
                         type="text"
-                        className="form-control"
+                        className="form-control shadow-sm"
                         id="email"
                         value={form.email}
                         onChange={(e) => updateForm({ email: e.target.value })}
                     />
                 </div>
-                <div className="form-group">
+                <div className="form-group mb-4">
+                    <label className="fw-bold d-block mb-2">Função</label>
                     <div className="form-check form-check-inline">
                         <input
                             className="form-check-input"
@@ -137,12 +146,13 @@ export default function Edit() {
                         <label htmlFor="positionTae" className="form-check-label">Técnico Administrativo</label>
                     </div>
                 </div>
-                <div className="form-group">
-                    <input
-                        type="submit"
-                        value="Salvar"
-                        className="btn btn-primary"
-                    />
+                <div className="form-group d-flex gap-2">
+                    <button type="submit" className="btn text-white px-5 shadow-sm" style={{ backgroundColor: primaryColor, borderRadius: '6px', fontWeight: '500' }}>
+                        Salvar Alterações
+                    </button>
+                    <button type="button" className="btn btn-outline-secondary px-5 shadow-sm" style={{ borderRadius: '6px' }} onClick={() => navigate(-1)}>
+                        Cancelar
+                    </button>
                 </div>
             </form>
         </div>

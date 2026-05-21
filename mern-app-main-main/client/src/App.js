@@ -2,15 +2,18 @@ import React, { useState } from 'react';
 import { Routes, Route, Navigate, Link, Outlet } from 'react-router-dom';
 
 // Importando as páginas principais
-import Home from './components/home';
+import Dashboard from './components/dashboard';
 import UserList from './components/userList';
 import AnimalList from './components/animalList';
 import DoacaoList from './components/doacaoList';
 import VoluntariosList from './components/voluntariosList';
+import DonationStats from './components/donationStats';
 
 // Importando os cadastros
 import CreateAnimais from './components/createAnimais';
 import CreateDoacao from './components/createDoacao';
+import CreateDoacaoFinanceira from './components/createDoacaoFinanceira';
+import CreateDoacaoMaterial from './components/createDoacaoMaterial';
 import CreateVoluntarios from './components/createVoluntarios';
 import Create from './components/create'; 
 
@@ -51,7 +54,7 @@ function DashboardLayout({ setToken }) {
           </li>
           <li className="nav-item">
             <Link className="nav-link text-dark d-flex align-items-center" to="/animais">
-              <i className="bi bi-heart me-3 fs-5"></i> Animais
+              <i className="bi bi-paw-fill me-3 fs-5"></i> Animais
             </Link>
           </li>
           <li className="nav-item">
@@ -95,8 +98,11 @@ export default function App() {
 
       {/* Rotas protegidas dentro do painel (exigem autenticação) */}
       <Route element={token ? <DashboardLayout setToken={setToken} /> : <Navigate to="/login" replace />}>
-        <Route path="/home" element={<Home />} />
+        <Route path="/home" element={<Dashboard />} />
         
+        {/* Dashboard Analytics */}
+        <Route path="/estatisticas-doacoes" element={<DonationStats />} />
+
         {/* Usuários */}
         <Route path="/usuarios" element={<UserList />} />
         <Route path="/cadastrar-usuario" element={<Create />} />
@@ -110,6 +116,8 @@ export default function App() {
         {/* Doações */}
         <Route path="/doacoes" element={<DoacaoList />} />
         <Route path="/cadastrar-doacao" element={<CreateDoacao />} />
+        <Route path="/cadastrar-doacao-financeira" element={<CreateDoacaoFinanceira />} />
+        <Route path="/cadastrar-doacao-material" element={<CreateDoacaoMaterial />} />
         <Route path="/edit-doacao/:id" element={<EditDoacao />} />
 
         {/* Voluntários */}

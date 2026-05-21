@@ -2,9 +2,10 @@ const express = require("express");
 const doacoesRoutes = express.Router();
 const dbo = require("../db/conn");
 const ObjectId = require("mongodb").ObjectId;
+const { auth } = require("../middleware/auth");
 
 // 1. LISTAR TODAS AS DOAÇÕES
-doacoesRoutes.route("/doacoes").get(async function (req, res) {
+doacoesRoutes.route("/doacoes").get(auth, async function (req, res) {
     const db_connect = dbo.getDb();
     try {
         const result = await db_connect.collection("doacoes").find({}).toArray();
@@ -15,7 +16,7 @@ doacoesRoutes.route("/doacoes").get(async function (req, res) {
 });
 
 // 2. BUSCAR UMA DOAÇÃO ESPECÍFICA
-doacoesRoutes.route("/doacao/:id").get(async function (req, res) {
+doacoesRoutes.route("/doacao/:id").get(auth, async function (req, res) {
     const db_connect = dbo.getDb();
     const myquery = { _id: new ObjectId(req.params.id) };
     try {
@@ -28,7 +29,7 @@ doacoesRoutes.route("/doacao/:id").get(async function (req, res) {
 });
 
 // 3. CADASTRAR NOVA DOAÇÃO
-doacoesRoutes.route("/doacao/add").post(async function (req, res) {
+doacoesRoutes.route("/doacao/add").post(auth, async function (req, res) {
     const db_connect = dbo.getDb();
     
     const myobj = {
@@ -53,7 +54,7 @@ doacoesRoutes.route("/doacao/add").post(async function (req, res) {
 });
 
 // 4. DELETAR UMA DOAÇÃO
-doacoesRoutes.route("/doacao/:id").delete(async function (req, res) {
+doacoesRoutes.route("/doacao/:id").delete(auth, async function (req, res) {
     const db_connect = dbo.getDb();
     const myquery = { _id: new ObjectId(req.params.id) };
     try {
@@ -65,7 +66,7 @@ doacoesRoutes.route("/doacao/:id").delete(async function (req, res) {
 });
 
 //Atualizar uma doação
-doacoesRoutes.route("/doacao/update/:id").post(async function (req, res) {
+doacoesRoutes.route("/doacao/update/:id").post(auth, async function (req, res) {
     const db_connect = dbo.getDb();
     const myquery = { _id: new ObjectId(req.params.id) };
     

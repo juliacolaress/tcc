@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
-
-const REACT_APP_YOUR_HOSTNAME = 'http://localhost:5050'; // IP do Servidor
+import API_BASE_URL from "../api/config";
 
 const Record = (props) => {
     return (
@@ -30,7 +29,12 @@ export default function UserList() {
 
     useEffect(() => {
         async function getUsers() {
-            const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/user/`)
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/user/`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
 
             if (!response.ok) {
                 const message = `Um erro ocorreu: ${response.statusText}`
@@ -53,8 +57,12 @@ export default function UserList() {
             return
         }
 
-        await fetch(`${REACT_APP_YOUR_HOSTNAME}/${id}`, {
-            method: "DELETE"
+        const token = localStorage.getItem('token');
+        await fetch(`${API_BASE_URL}/user/${id}`, {
+            method: "DELETE",
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         })
 
         const newUsers = users.filter((record) => record._id !== id)

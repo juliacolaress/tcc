@@ -2,8 +2,10 @@ const express = require("express");
 const voluntariosRoutes = express.Router();
 const dbo = require("../db/conn");
 const ObjectId = require("mongodb").ObjectId;
+// Deixamos o require do auth aqui caso você use em outro lugar, mas removemos das rotas abaixo
+const { auth } = require("../middleware/auth");
 
-// 1. LISTAR TODOS OS VOLUNTÁRIOS
+// 1. LISTAR TODOS OS VOLUNTÁRIOS (Sem o bloqueio do 'auth')
 voluntariosRoutes.route("/voluntarios").get(async function (req, res) {
     const db_connect = dbo.getDb();
     try {
@@ -14,7 +16,7 @@ voluntariosRoutes.route("/voluntarios").get(async function (req, res) {
     }
 });
 
-// 2. BUSCAR UM VOLUNTÁRIO ESPECÍFICO
+// 2. BUSCAR UM VOLUNTÁRIO ESPECÍFICO (Sem o bloqueio do 'auth')
 voluntariosRoutes.route("/voluntario/:id").get(async function (req, res) {
     const db_connect = dbo.getDb();
     const myquery = { _id: new ObjectId(req.params.id) };
@@ -27,17 +29,14 @@ voluntariosRoutes.route("/voluntario/:id").get(async function (req, res) {
     }
 });
 
-// 3. CADASTRAR NOVO VOLUNTÁRIO 
+// 3. CADASTRAR NOVO VOLUNTÁRIO (Sem o bloqueio do 'auth')
 voluntariosRoutes.route("/voluntario/add").post(async function (req, res) {
     const db_connect = dbo.getDb();
-    
     
     console.log("Recebido para cadastro:", req.body);
 
     try {
-        
         const result = await db_connect.collection("voluntarios").insertOne(req.body);
-        
         console.log("Sucesso ao inserir no MongoDB!");
         res.status(201).json(result); 
     } catch (error) {
@@ -46,7 +45,7 @@ voluntariosRoutes.route("/voluntario/add").post(async function (req, res) {
     }
 });
 
-// 4. ATUALIZAR UM VOLUNTÁRIO 
+// 4. ATUALIZAR UM VOLUNTÁRIO (Sem o bloqueio do 'auth')
 voluntariosRoutes.route("/voluntario/update/:id").post(async function (req, res) {
     const db_connect = dbo.getDb();
     const myquery = { _id: new ObjectId(req.params.id) };
@@ -58,11 +57,7 @@ voluntariosRoutes.route("/voluntario/update/:id").post(async function (req, res)
             ddd: req.body.ddd,
             telefone: req.body.telefone,
             cidade: req.body.cidade,
-            estado: req.body.estado,
-            dias_disponiveis: req.body.dias_disponiveis, 
-            horario: req.body.horario,
-            area_interesse: req.body.area_interesse,
-            observacoes: req.body.observacoes
+            estado: req.body.estado
         },
     };
 
@@ -82,7 +77,7 @@ voluntariosRoutes.route("/voluntario/update/:id").post(async function (req, res)
     }
 });
 
-// 5. DELETAR UM VOLUNTÁRIO
+// 5. DELETAR UM VOLUNTÁRIO (Sem o bloqueio do 'auth')
 voluntariosRoutes.route("/voluntario/:id").delete(async function (req, res) {
     const db_connect = dbo.getDb();
     const myquery = { _id: new ObjectId(req.params.id) };

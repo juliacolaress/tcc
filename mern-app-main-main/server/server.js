@@ -1,8 +1,10 @@
+const path = require("path")
+require("dotenv").config({ path: path.resolve(__dirname, ".env") })
 const express = require("express")
 const app = express()
 const cors = require("cors")
 
-const port = 5050
+const port = process.env.PORT || 5050
 
 app.use(cors())
 app.use(express.json())

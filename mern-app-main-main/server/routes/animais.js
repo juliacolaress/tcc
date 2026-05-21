@@ -2,9 +2,11 @@ const express = require("express");
 const animalRoutes = express.Router();
 const dbo = require("../db/conn");
 const ObjectId = require("mongodb").ObjectId;
+// Deixado aqui caso use em outros arquivos, mas removido das rotas abaixo
+const { auth } = require("../middleware/auth");
 
-// 1. LISTAR TODOS OS ANIMAIS
-animalRoutes.route("/animal").get(async function (req, res) {
+// 1. LISTAR TODOS OS ANIMAIS (Corrigido para "/animais" no plural e sem 'auth')
+animalRoutes.route("/animais").get(async function (req, res) {
     const db_connect = dbo.getDb();
     try {
         const result = await db_connect.collection("animais").find({}).toArray();
@@ -14,7 +16,7 @@ animalRoutes.route("/animal").get(async function (req, res) {
     }
 });
 
-// 2. BUSCAR UM ANIMAL ESPECÍFICO (Para edição)
+// 2. BUSCAR UM ANIMAL ESPECÍFICO (Sem 'auth')
 animalRoutes.route("/animal/:id").get(async function (req, res) {
     const db_connect = dbo.getDb();
     const myquery = { _id: new ObjectId(req.params.id) };
@@ -27,7 +29,7 @@ animalRoutes.route("/animal/:id").get(async function (req, res) {
     }
 });
 
-// 3. CADASTRAR NOVO ANIMAL
+// 3. CADASTRAR NOVO ANIMAL (Sem 'auth')
 animalRoutes.route("/animal/add").post(async function (req, res) {
     const db_connect = dbo.getDb();
     
@@ -60,7 +62,7 @@ animalRoutes.route("/animal/add").post(async function (req, res) {
     }
 });
 
-// 4. ATUALIZAR UM ANIMAL 
+// 4. ATUALIZAR UM ANIMAL (Sem 'auth')
 animalRoutes.route("/animal/update/:id").post(async function (req, res) {
     const db_connect = dbo.getDb();
     const myquery = { _id: new ObjectId(req.params.id) };
@@ -92,14 +94,14 @@ animalRoutes.route("/animal/update/:id").post(async function (req, res) {
         if (result.matchedCount === 0) {
             return res.status(404).json({ message: "Animal não encontrado" });
         }
-        console.log("Animal atualizado com sucesso!");
+        console.log("Animal updated com sucesso!");
         res.status(200).json(result);
     } catch (error) {
         res.status(500).json({ message: "Erro ao atualizar animal: " + error.message });
     }
 });
 
-// 5. DELETAR UM ANIMAL
+// 5. DELETAR UM ANIMAL (Sem 'auth')
 animalRoutes.route("/animal/:id").delete(async function (req, res) {
     const db_connect = dbo.getDb();
     const myquery = { _id: new ObjectId(req.params.id) };

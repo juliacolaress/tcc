@@ -1,141 +1,119 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const REACT_APP_YOUR_HOSTNAME = 'http://localhost:5050';
+const REACT_APP_YOUR_HOSTNAME = 'http://localhost:5050'; 
 
 export default function CreateVoluntario() {
-    // Estado inicial totalmente vazio para um novo cadastro
     const [form, setForm] = useState({
         nome: "",
         email: "",
         ddd: "",
         telefone: "",
-        cidade: "",
-        estado: "",
-        dias_disponiveis: [], 
-        horario: "",
-        area_interesse: "",
-        observacoes: ""
+        cidade: "",     
+        estado: ""
     });
-
+    
     const navigate = useNavigate();
 
-    // Atualiza o estado do formulário
     function updateForm(value) {
         setForm((prev) => ({ ...prev, ...value }));
     }
 
-    // Lógica para os Checkboxes (Dias da Semana)
-    const handleCheckboxChange = (dia) => {
-        const { dias_disponiveis } = form;
-        if (dias_disponiveis.includes(dia)) {
-            updateForm({ dias_disponiveis: dias_disponiveis.filter(d => d !== dia) });
-        } else {
-            updateForm({ dias_disponiveis: [...dias_disponiveis, dia] });
+    const handleTelefoneChange = (e) => {
+        let val = e.target.value.replace(/\D/g, ""); 
+        if (val.length > 5) {
+            val = `${val.slice(0, 5)}-${val.slice(5, 9)}`; 
         }
+        updateForm({ telefone: val });
     };
 
     async function onSubmit(e) {
         e.preventDefault();
-        
-        // Enviamos para a rota de criação (/voluntario/add) usando POST
-        const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/voluntario/add`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(form)
-        });
+        try {
+            const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/voluntario/add`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(form)
+            });
 
-        if (response.ok) {
+            if (!response.ok) {
+                window.alert(`Erro ao salvar voluntário: ${response.statusText}`);
+                return;
+            }
+
             window.alert("Voluntário cadastrado com sucesso!");
-            setForm({ nome: "", email: "", ddd: "", telefone: "", cidade: "", estado: "", dias_disponiveis: [], horario: "", area_interesse: "", observacoes: "" });
             navigate("/voluntarios");
-        } else {
-            window.alert("Erro ao cadastrar voluntário.");
+        } catch (error) {
+            console.error("Erro na requisição:", error);
+            window.alert("Não foi possível conectar ao servidor backend.");
         }
     }
 
+    const primaryColor = '#5c3a21';
+    const labelStyle = { color: '#5c3a21', fontWeight: '600', marginBottom: '6px' };
+    const inputStyle = { borderRadius: '6px', border: '1px solid #ced4da' };
+
     return (
-        <div className="container mt-4 mb-5">
-            <h3>Cadastrar Novo Voluntário</h3>
-            <hr />
+        <div className="container-fluid py-2">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 style={{ color: primaryColor, fontWeight: 'bold' }}>Cadastrar Novo Voluntário</h3>
+                    <p className="text-muted mb-0">Insira os dados do novo colaborador da ONG</p>
+                </div>
+                <button 
+                    type="button"
+                    onClick={() => navigate("/voluntarios")} 
+                    className="btn btn-outline-secondary px-4 py-2" 
+                    style={{ borderRadius: '6px' }}
+                >
+                    <i className="bi bi-arrow-left me-2"></i> Voltar
+                </button>
+            </div>
+
             <form onSubmit={onSubmit}>
-                <div className="row">
-                    <div className="form-group col-md-6 mb-3">
-                        <label>Nome Completo</label>
-                        <input type="text" className="form-control" placeholder="Digite o nome" value={form.nome} onChange={(e) => updateForm({ nome: e.target.value })} required />
-                    </div>
-                    <div className="form-group col-md-6 mb-3">
-                        <label>E-mail</label>
-                        <input type="email" className="form-control" placeholder="exemplo@email.com" value={form.email} onChange={(e) => updateForm({ email: e.target.value })} required />
-                    </div>
-                </div>
+                <div className="card border-0 shadow-sm p-4 mb-4" style={{ borderRadius: '8px' }}>
+                    <h5 className="mb-4 pb-2 border-bottom text-muted text-uppercase small fw-bold" style={{ letterSpacing: '0.5px' }}>
+                        Dados Cadastrais do Voluntário
+                    </h5>
 
-                <div className="row">
-                    <div className="form-group col-md-2 mb-3">
-                        <label>DDD</label>
-                        <input type="text" className="form-control" maxLength="2" value={form.ddd} onChange={(e) => updateForm({ ddd: e.target.value.replace(/\D/g, "") })} />
-                    </div>
-                    <div className="form-group col-md-4 mb-3">
-                        <label>Telefone</label>
-                        <input type="text" className="form-control" value={form.telefone} onChange={(e) => updateForm({ telefone: e.target.value })} />
-                    </div>
-                    <div className="form-group col-md-4 mb-3">
-                        <label>Cidade</label>
-                        <input type="text" className="form-control" value={form.cidade} onChange={(e) => updateForm({ cidade: e.target.value })} />
-                    </div>
-                    <div className="form-group col-md-2 mb-3">
-                        <label>Estado</label>
-                        <input type="text" className="form-control" value={form.estado} onChange={(e) => updateForm({ estado: e.target.value })} />
-                    </div>
-                </div>
-
-                <hr />
-
-                <div className="mb-3">
-                    <label className="d-block mb-2"><strong>Disponibilidade de dias da semana:</strong></label>
-                    {["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"].map(dia => (
-                        <div key={dia} className="form-check form-check-inline">
-                            <input 
-                                className="form-check-input" 
-                                type="checkbox" 
-                                checked={form.dias_disponiveis.includes(dia)} 
-                                onChange={() => handleCheckboxChange(dia)} 
-                            />
-                            <label className="form-check-label">{dia}</label>
+                    <div className="row">
+                        <div className="form-group col-md-6 mb-3">
+                            <label htmlFor="nome" style={labelStyle}>Nome Completo</label>
+                            <input type="text" className="form-control px-3 py-2" id="nome" style={inputStyle} value={form.nome} onChange={(e) => updateForm({ nome: e.target.value })} placeholder="Ex: Lucas Mendes" required />
                         </div>
-                    ))}
-                </div>
-
-                <div className="row">
-                    <div className="form-group col-md-6 mb-3">
-                        <label>Horário</label>
-                        <select className="form-control" value={form.horario} onChange={(e) => updateForm({ horario: e.target.value })}>
-                            <option value="">Selecione...</option>
-                            <option value="Manhã">Manhã (08h às 12h)</option>
-                            <option value="Tarde">Tarde (14h às 18h)</option>
-                            <option value="Noite">Noite (18h às 20h)</option>
-                        </select>
+                        <div className="form-group col-md-6 mb-3">
+                            <label htmlFor="email" style={labelStyle}>E-mail</label>
+                            <input type="email" className="form-control px-3 py-2" id="email" style={inputStyle} value={form.email} onChange={(e) => updateForm({ email: e.target.value })} placeholder="Ex: lucas@email.com" required />
+                        </div>
                     </div>
-                    <div className="form-group col-md-6 mb-3">
-                        <label>Área de Interesse</label>
-                        <select className="form-control" value={form.area_interesse} onChange={(e) => updateForm({ area_interesse: e.target.value })}>
-                            <option value="">Selecione...</option>
-                            <option value="Cuidados">Cuidados com animais</option>
-                            <option value="Eventos">Eventos e campanhas</option>
-                            <option value="Divulgação">Divulgação e redes sociais</option>
-                            <option value="Outros">Outros</option>
-                        </select>
+
+                    <div className="row">
+                        <div className="form-group col-md-2 mb-3">
+                            <label htmlFor="ddd" style={labelStyle}>DDD</label>
+                            <input type="text" className="form-control px-3 py-2" id="ddd" style={inputStyle} maxLength="2" placeholder="48" value={form.ddd} onChange={(e) => updateForm({ ddd: e.target.value.replace(/\D/g, "") })} />
+                        </div>
+                        <div className="form-group col-md-4 mb-3">
+                            <label htmlFor="telefone" style={labelStyle}>Telefone</label>
+                            <input type="text" className="form-control px-3 py-2" id="telefone" style={inputStyle} maxLength="10" placeholder="99999-9999" value={form.telefone} onChange={handleTelefoneChange} />
+                        </div>
+                        <div className="form-group col-md-4 mb-3">
+                            <label htmlFor="cidade" style={labelStyle}>Cidade</label>
+                            <input type="text" className="form-control px-3 py-2" id="cidade" style={inputStyle} value={form.cidade} onChange={(e) => updateForm({ cidade: e.target.value })} placeholder="Ex: Araranguá" />
+                        </div>
+                        <div className="form-group col-md-2 mb-3">
+                            <label htmlFor="estado" style={labelStyle}>UF</label>
+                            <select className="form-select px-3 py-2" id="estado" style={inputStyle} value={form.estado} onChange={(e) => updateForm({ estado: e.target.value })} required>
+                                <option value="">...</option>
+                                <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option><option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option><option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option><option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option><option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option><option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option><option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option><option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
-                <div className="form-group mb-3">
-                    <label>Observações Gerais</label>
-                    <textarea className="form-control" rows="3" value={form.observacoes} onChange={(e) => updateForm({ observacoes: e.target.value })}></textarea>
-                </div>
-
-                <div className="form-group mt-4">
-                    <input type="submit" value="Salvar Cadastro" className="btn btn-primary" />
-                    <button type="button" className="btn btn-secondary ms-2" onClick={() => navigate("/voluntarios")}>Voltar</button>
+                <div className="form-group text-end mb-4">
+                    <button type="submit" className="btn text-white px-5 py-2 shadow-sm" style={{ backgroundColor: primaryColor, borderRadius: '6px', fontSize: '1rem', fontWeight: '500' }}>
+                        <i className="bi bi-check-lg me-2"></i> Confirmar Cadastro
+                    </button>
                 </div>
             </form>
         </div>

@@ -4,8 +4,9 @@ const dbo = require("../db/conn")
 const ObjectId = require("mongodb").ObjectId
 const jwt = require("jsonwebtoken")
 const bcrypt = require("bcrypt")
+const { auth } = require("../middleware/auth");
 
-const JWT_SECRET = "secret-key"
+const JWT_SECRET = process.env.JWT_SECRET || "secret-key"
 
 userRoutes.route('/user/login').post(async function (req, res) {
     const db_connect = dbo.getDb()
@@ -69,7 +70,7 @@ userRoutes.route('/user/register').post(async function (req, res) {
 
 
 // This section will help you get a list of all the users.
-userRoutes.route("/user").get(async function (req, res) {
+userRoutes.route("/user").get(auth, async function (req, res) {
     const db_connect = dbo.getDb()
     // console.log("ROUTE: /user")
 
@@ -82,7 +83,7 @@ userRoutes.route("/user").get(async function (req, res) {
 })
 
 // This section will help you get a single user by id
-userRoutes.route("/user/:id").get(async function (req, res) {
+userRoutes.route("/user/:id").get(auth, async function (req, res) {
     const db_connect = dbo.getDb()
     const myquery = { _id: new ObjectId(req.params.id) }
     try {
@@ -94,7 +95,7 @@ userRoutes.route("/user/:id").get(async function (req, res) {
 })
 
 // This section will help you create a new user.
-userRoutes.route("/user/add").post(async function (req, res) {
+userRoutes.route("/user/add").post(auth, async function (req, res) {
     const db_connect = dbo.getDb()
     const myobj = {
         name: req.body.name,
@@ -112,7 +113,7 @@ userRoutes.route("/user/add").post(async function (req, res) {
 })
 
 // This section will help you update a user by id.
-userRoutes.route("/update/:id").post(async function (req, res) {
+userRoutes.route("/update/:id").post(auth, async function (req, res) {
     const db_connect = dbo.getDb()
     const myquery = { _id: new ObjectId(req.params.id) }
     const newvalues = {
@@ -133,7 +134,7 @@ userRoutes.route("/update/:id").post(async function (req, res) {
 })
 
 // This section will help you delete a user
-userRoutes.route("/:id").delete(async function (req, res) {
+userRoutes.route("/:id").delete(auth, async function (req, res) {
     const db_connect = dbo.getDb()
     const myquery = { _id: new ObjectId(req.params.id) }
     try {
