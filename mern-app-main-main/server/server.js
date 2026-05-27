@@ -8,7 +8,7 @@ const port = process.env.PORT || 5050
 
 app.use(cors())
 app.use(express.json())
-app.use(require("./routes/user")) // cria as rotas para manipulação de usuários
+app.use(require("./routes/user")) 
 app.use(require("./routes/animais"));
 app.use(require("./routes/doacao"));
 app.use(require("./routes/voluntarios"))

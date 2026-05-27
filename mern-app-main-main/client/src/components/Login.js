@@ -15,7 +15,7 @@ export default function Login({ onLogin }) {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/usuarios/login`, {
+      const response = await fetch(`${API_BASE_URL}/user/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -29,7 +29,7 @@ export default function Login({ onLogin }) {
         // Envia o token para o App.js salvar no estado global e localStorage
         onLogin(data.token);
         
-        // MUDANÇA PRINCIPAL: Agora o ADM vai direto para a tela de controle/cards
+       
         navigate('/dashboard'); 
       } else {
         setErro(data.message || 'E-mail ou senha incorretos.');

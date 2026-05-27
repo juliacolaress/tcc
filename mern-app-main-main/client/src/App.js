@@ -4,6 +4,7 @@ import { Routes, Route, Navigate, Link, Outlet } from 'react-router-dom';
 // Importando as páginas principais
 import Dashboard from './components/dashboard'; // <--- PAGINA INICIAL DO ADM (CARDS)
 import Home from './components/home';           // <--- PAGINA INICIAL DO USUARIO (SITE)
+import Contato from './components/contato';
 import UserList from './components/userList';
 import AnimalList from './components/animalList';
 import DoacaoList from './components/doacaoList';
@@ -100,6 +101,7 @@ export default function App() {
     <Routes>
       {/* 1. ROTAS PÚBLICAS (Qualquer visitante acessa) */}
       <Route path="/" element={<Home />} />
+      <Route path="/contato" element={<Contato />} />
       
       {/* Se o administrador já estiver logado e tentar entrar no login, ele vai direto para o painel */}
       <Route path="/login" element={token ? <Navigate to="/dashboard" replace /> : <Login onLogin={handleLogin} />} />
