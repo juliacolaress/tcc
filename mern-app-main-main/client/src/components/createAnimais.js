@@ -40,7 +40,7 @@ export default function CreateAnimais() {
         caracteristicas: "",
         data_resgate: "",
         obs: "",
-        status: true,
+        status: "Disponível", // Mantido como String para suportar o fluxo de histórico
         genero: "",
         castracao: false,
         estado_saude: "",
@@ -60,6 +60,12 @@ export default function CreateAnimais() {
 
     async function onSubmit(e) {
         e.preventDefault();
+
+        if (!form.genero) {
+            window.alert("Por favor, selecione o gênero do animal.");
+            return;
+        }
+
         const newAnimal = { ...form };
         const token = localStorage.getItem('token');
 
@@ -170,8 +176,47 @@ export default function CreateAnimais() {
                     </div>
 
                     <h5 className="mb-4 mt-4 pb-2 border-bottom text-muted text-uppercase small fw-bold" style={{ letterSpacing: '0.5px' }}>
-                        Saúde e Detalhes
+                        Situação e Detalhes de Saúde
                     </h5>
+
+                    {/* STATUS DE ADOÇÃO (Adicionado dinamicamente seguindo o padrão estético) */}
+                    <div className="row mb-4">
+                        <div className="form-group col-md-12">
+                            <label style={labelStyle}>Status de Adoção</label>
+                            <div className="mt-1">
+                                <div className="form-check form-check-inline me-4">
+                                    <input 
+                                        className="form-check-input" 
+                                        type="radio" 
+                                        name="status" 
+                                        id="statusDisponivel" 
+                                        value="Disponível" 
+                                        checked={form.status === "Disponível"} 
+                                        onChange={(e) => updateForm({ status: e.target.value })} 
+                                        style={{ borderColor: primaryColor }}
+                                    />
+                                    <label className="form-check-label" htmlFor="statusDisponivel">
+                                        <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Disponível para Adoção</span>
+                                    </label>
+                                </div>
+                                <div className="form-check form-check-inline">
+                                    <input 
+                                        className="form-check-input" 
+                                        type="radio" 
+                                        name="status" 
+                                        id="statusAdotado" 
+                                        value="Adotado" 
+                                        checked={form.status === "Adotado"} 
+                                        onChange={(e) => updateForm({ status: e.target.value })} 
+                                        style={{ borderColor: primaryColor }}
+                                    />
+                                    <label className="form-check-label" htmlFor="statusAdotado">
+                                        <span className="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">Adotado</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <div className="row mb-3">
                         <div className="col-md-12">

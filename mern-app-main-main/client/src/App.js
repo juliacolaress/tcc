@@ -19,6 +19,10 @@ import CreateDoacaoMaterial from './components/createDoacaoMaterial';
 import CreateVoluntarios from './components/createVoluntarios';
 import Create from './components/create'; 
 
+// NOVAS PAGINAS: Histórico de Adoções 
+import AdotadosList from './components/adotadosList';
+import AdotadosEdit from './components/adotadosEdit';
+
 // Importando as edições
 import Edit from './components/edit';
 import EditAnimais from './components/editAnimais';
@@ -61,6 +65,12 @@ function DashboardLayout({ setToken }) {
           <li className="nav-item">
             <Link className="nav-link text-dark d-flex align-items-center" to="/animais">
               <i className="bi bi-heart me-3 fs-5"></i> Animais
+            </Link>
+          </li>
+          {/* LINK ADICIONADO: Direciona para a nova listagem modular de Adotados */}
+          <li className="nav-item">
+            <Link className="nav-link text-dark d-flex align-items-center" to="/adotados">
+              <i className="bi bi-heart-fill text-danger me-3 fs-5"></i> Histórico de Adotados
             </Link>
           </li>
           <li className="nav-item">
@@ -125,6 +135,9 @@ export default function App() {
         <Route path="/animais" element={<AnimalList />} />
         <Route path="/cadastrar-animal" element={<CreateAnimais />} />
         <Route path="/edit-animal/:id" element={<EditAnimais />} />
+
+        <Route path="/adotados" element={<adotadosList />} />
+        <Route path="/adotados/editar/:id" element={<adotadosEdit />} />
 
         {/* Doações */}
         <Route path="/doacoes" element={<DoacaoList />} />

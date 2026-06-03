@@ -40,7 +40,7 @@ export default function EditAnimais() {
         caracteristicas: "",
         data_resgate: "",
         obs: "",
-        status: true,
+        status: "Disponível", // Corrigido para String
         genero: "",
         castracao: false,
         estado_saude: "",
@@ -55,7 +55,6 @@ export default function EditAnimais() {
     const navigate = useNavigate();
     const primaryColor = '#5c3a21';
 
-    // 1. CARREGA OS DADOS DO ANIMAL AO ABRIR A PÁGINA
     useEffect(() => {
         async function fetchData() {
             const id = params.id.toString();
@@ -79,8 +78,6 @@ export default function EditAnimais() {
                 return;
             }
 
-            // Preenche o formulário com o que veio do banco
-            // Garantindo que data_nasc esteja no formato YYYY-MM-DD para o input type="date"
             let formattedDate = "";
             if (record.data_nasc) {
                 formattedDate = record.data_nasc.split('T')[0];
@@ -89,7 +86,9 @@ export default function EditAnimais() {
             setForm({
                 ...record,
                 data_nasc: formattedDate,
-                obs: record.obs || ""
+                obs: record.obs || "" ,
+                // Garante compatibilidade caso haja booleano antigo salvo no banco de dados
+                status: typeof record.status === "boolean" ? (record.status ? "Disponível" : "Adotado") : (record.status || "Disponível")
             });
         }
         fetchData();
@@ -105,9 +104,8 @@ export default function EditAnimais() {
         const token = localStorage.getItem('token');
 
         try {
-            // 2. ENVIA OS DADOS ATUALIZADOS PARA O BACKEND
             const response = await fetch(`${API_BASE_URL}/animal/update/${params.id}`, {
-                method: "POST", // ou PUT, dependendo do seu backend
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
@@ -129,7 +127,6 @@ export default function EditAnimais() {
         }
     }
 
-    // Normalização para busca segura no objeto RACAS_POR_ESPECIE
     const especieChave = form.especie ? form.especie.charAt(0).toUpperCase() + form.especie.slice(1).toLowerCase() : "";
     const racasDisponiveis = RACAS_POR_ESPECIE[especieChave] || [];
 
@@ -236,6 +233,41 @@ export default function EditAnimais() {
                             value={form.data_nasc}
                             onChange={(e) => updateForm({ data_nasc: e.target.value })}
                         />
+                    </div>
+                </div>
+
+                {/* NOVO: SELETOR DE STATUS DE ADOÇÃO ATUALIZADO */}
+                <div className="form-group mb-4">
+                    <label className="fw-bold d-block mb-2">Status de Adoção</label>
+                    <div className="mt-1">
+                        <div className="form-check form-check-inline me-4">
+                            <input 
+                                className="form-check-input" 
+                                type="radio" 
+                                name="status" 
+                                id="statusDisponivel" 
+                                value="Disponível" 
+                                checked={form.status === "Disponível"} 
+                                onChange={(e) => updateForm({ status: e.target.value })} 
+                            />
+                            <label className="form-check-label" htmlFor="statusDisponivel">
+                                <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Disponível para Adoção</span>
+                            </label>
+                        </div>
+                        <div className="form-check form-check-inline">
+                            <input 
+                                className="form-check-input" 
+                                type="radio" 
+                                name="status" 
+                                id="statusAdotado" 
+                                value="Adotado" 
+                                checked={form.status === "Adotado"} 
+                                onChange={(e) => updateForm({ status: e.target.value })} 
+                            />
+                            <label className="form-check-label" htmlFor="statusAdotado">
+                                <span className="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">Adotado</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
 

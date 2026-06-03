@@ -126,7 +126,7 @@ export default function Home() {
         <div className="container py-2 text-start">
           <h2 className="fw-bold mb-3" style={{ color: cores.textoMarrom }}>Sobre a ONG</h2>
           <p className="text-muted mb-0 lh-lg" style={{ maxWidth: '1000px', fontSize: '1.05rem' }}>
-            Na ONG Patas & Lares, acreditamos que cada life importa. Nosso propósito é resgatar, cuidar e transformar a vida de cães e gatos abandonados, oferecendo-lhes uma segunda chance de ter um lar seguro e cheio de afeto. Junte-se à nossa missão!
+            Na ONG Patas & Lares, acreditamos que cada vida importa. Nosso propósito é resgatar, cuidar e transformar a vida de cães e gatos abandonados, oferecendo-lhes uma segunda chance de ter um lar seguro e cheio de afeto. Junte-se à nossa missão!
           </p>
         </div>
       </div>
