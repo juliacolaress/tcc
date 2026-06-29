@@ -1,0 +1,198 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Cores da Identidade Visual */
+  --color-brand-menu: #4a2511;
+  --color-brand-banner: #aa7a44;
+  --color-bg-cream: #fdf8f4;
+  --color-text-dark: #4a2511;
+  --color-text-highlight: #4a2511;
+  --color-footer-bg: #0a0a0a;
+
+  /* Cores de Botões */
+  --color-btn-adote: #e2a36f;
+  --color-btn-doe: #f0c27b;
+  --color-btn-voluntario: #cf9b72;
+  --color-btn-hover-adote: #d4935e;
+  --color-btn-hover-doe: #e2b36a;
+  --color-btn-hover-voluntario: #c08b61;
+
+  /* Outras Cores */
+  --color-red-campaign: #dd1c1a;
+  --color-card-bg: #f2e8df;
+
+  /* Tokens de Design */
+  --font-family: 'Poppins', sans-serif;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 50rem;
+  
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+  
+  --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Estilos de Reset e Base */
+body {
+  font-family: var(--font-family) !important;
+  background-color: #ffffff;
+  color: #212529;
+}
+
+/* Transições Suaves globais */
+a, button, span, select, input, textarea {
+  transition: var(--transition-smooth);
+}
+
+/* --- COMPONENTES PADRONIZADOS --- */
+
+/* 1. Botões Personalizados */
+.btn-adote {
+  background-color: var(--color-btn-adote) !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-sm);
+}
+.btn-adote:hover {
+  background-color: var(--color-btn-hover-adote) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-doe {
+  background-color: var(--color-btn-doe) !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-sm);
+}
+.btn-doe:hover {
+  background-color: var(--color-btn-hover-doe) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-voluntario {
+  background-color: var(--color-btn-voluntario) !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-sm);
+}
+.btn-voluntario:hover {
+  background-color: var(--color-btn-hover-voluntario) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Botões do Tipo Pill */
+.btn-pill-action {
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+.btn-pill-action:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* 2. Cards com Hover Nativo CSS */
+.hover-card {
+  transition: var(--transition-smooth) !important;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+.hover-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Cards do Painel Admin */
+.admin-indicator-card {
+  transition: var(--transition-smooth) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-sm);
+}
+.admin-indicator-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+/* 3. Estilização da Navbar (Efeitos Hover Nativo) */
+.navbar-nav .nav-link {
+  position: relative;
+  opacity: 0.9;
+}
+.navbar-nav .nav-link:hover {
+  opacity: 1;
+}
+
+/* Dropdown da Navbar */
+.nav-dropdown-menu {
+  background-color: var(--color-brand-menu) !important;
+  width: 150px;
+  z-index: 1000;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-md);
+}
+
+.nav-dropdown-menu .dropdown-item {
+  color: rgba(255, 255, 255, 0.75) !important;
+  transition: var(--transition-smooth);
+}
+.nav-dropdown-menu .dropdown-item:hover {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 4. Caixa Flutuante de Tutorial/Chat */
+.floating-chat-container {
+  background-color: rgba(173, 130, 98, 0.95) !important;
+  width: 380px;
+  right: 30px;
+  bottom: 100px;
+  z-index: 1050;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-xl);
+  transition: var(--transition-smooth);
+}
+
+.floating-chat-trigger:hover {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-lg);
+}
+
+/* 5. Inputs e Selects Modernizados */
+.form-select-custom {
+  border-radius: var(--radius-sm);
+  border: 1px solid #ced4da;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  color: #495057;
+}
+.form-select-custom:focus {
+  border-color: var(--color-brand-banner);
+  box-shadow: 0 0 0 0.2rem rgba(170, 122, 68, 0.25);
+  outline: 0;
+}
+
+/* Botão de Doação de Material */
+.btn-donate-material {
+  background-color: #a46843 !important;
+  color: #ffffff !important;
+  border-radius: var(--radius-pill) !important;
+  font-weight: bold;
+  border: none;
+  font-size: 1rem;
+}
+.btn-donate-material:hover {
+  background-color: #8b5636 !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}

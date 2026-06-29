@@ -11,7 +11,7 @@ export default function Edit() {
     });
     const params = useParams();
     const navigate = useNavigate();
-    const primaryColor = '#5c3a21';
+    const primaryColor = '#4a2511';
 
     useEffect(() => {
         async function fetchData() {

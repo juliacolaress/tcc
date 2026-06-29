@@ -3,6 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import API_BASE_URL from "../api/config";
 
 const AdoptedRow = ({ record }) => {
+    // Formata a data de adoção para o padrão brasileiro
+    const formatDate = (dateStr) => {
+        if (!dateStr) return "---";
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('pt-BR');
+    };
+
     return (
         <tr className="align-middle">
             <td className="fw-semibold text-dark ps-3">{record.nome}</td>
@@ -12,20 +19,21 @@ const AdoptedRow = ({ record }) => {
                 </span>
             </td>
             <td className="text-muted">{record.raca || "---"}</td>
-            <td className="text-muted">{record.porte || "---"}</td>
+            <td className="text-dark fw-medium">{record.adotante || "Não informado"}</td>
+            <td className="text-muted">{formatDate(record.data_adocao)}</td>
             <td>
-                <span className="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">
+                <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
                     Adotado
                 </span>
             </td>
             <td>
-             
+                {/* Redireciona para a tela exclusiva de edição/devolução do adotado */}
                 <Link 
                     className="btn btn-sm btn-outline-primary d-inline-flex align-items-center" 
                     to={`/adotados/editar/${record._id}`}
                     style={{ borderRadius: '4px' }}
                 >
-                    <i className="bi bi-pencil-square me-1"></i> Gerenciar / Devolver
+                    <i className="bi bi-pencil-square me-1"></i> Gerenciar
                 </Link>
             </td>
         </tr>
@@ -39,7 +47,7 @@ export default function AdotadosList() {
     const [error, setError] = useState(null);
     
     const navigate = useNavigate();
-    const primaryColor = '#5c3a21';
+    const primaryColor = '#4a2511';
 
     useEffect(() => {
         async function getAdotados() {
@@ -73,7 +81,8 @@ export default function AdotadosList() {
         const termo = pesquisa.toLowerCase();
         return (animal.nome || "").toLowerCase().includes(termo) || 
                (animal.especie || "").toLowerCase().includes(termo) ||
-               (animal.raca || "").toLowerCase().includes(termo);
+               (animal.raca || "").toLowerCase().includes(termo) ||
+               (animal.adotante || "").toLowerCase().includes(termo);
     });
 
     return (
@@ -81,7 +90,7 @@ export default function AdotadosList() {
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h3 style={{ color: primaryColor, fontWeight: 'bold' }}>
-                        <i className="bi bi-heart-fill me-2"></i> Histórico de Adotados
+                        <i className="bi bi-heart-fill me-2"></i> Histórico de Adoções
                     </h3>
                 </div>
                 <button className="btn btn-outline-secondary px-4 py-2" onClick={() => navigate("/animais")} style={{ borderRadius: '6px' }}>
@@ -96,13 +105,15 @@ export default function AdotadosList() {
                     <input
                         type="text"
                         className="form-control border-start-0 py-2"
-                        placeholder="Pesquisar por nome, espécie ou raça..."
+                        placeholder="Pesquisar por nome, espécie, raça ou adotante..."
                         value={pesquisa}
                         onChange={(e) => setPesquisa(e.target.value)}
                         style={{ boxShadow: 'none', borderRadius: '0 6px 6px 0', border: '1px solid #ced4da' }}
                     />
                 </div>
             </div>
+
+            {error && <div className="alert alert-danger">{error}</div>}
 
             <div className="table-responsive shadow-sm" style={{ borderRadius: '8px' }}>
                 <table className="table table-hover table-striped mb-0">
@@ -111,18 +122,19 @@ export default function AdotadosList() {
                             <th className="py-3 ps-3">Nome</th>
                             <th className="py-3">Espécie</th>
                             <th className="py-3">Raça</th>
-                            <th className="py-3">Porte</th>
+                            <th className="py-3">Adotante</th>
+                            <th className="py-3">Data Adoção</th>
                             <th className="py-3">Status</th>
-                            <th className="py-3 pe-3" style={{ width: '200px' }}>Ações</th>
+                            <th className="py-3 pe-3" style={{ width: '150px' }}>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         {loading ? (
-                            <tr><td colSpan="6" className="text-center py-5"><div className="spinner-border" style={{ color: primaryColor }}></div></td></tr>
+                            <tr><td colSpan="7" className="text-center py-5"><div className="spinner-border" style={{ color: primaryColor }}></div></td></tr>
                         ) : filtrados.length > 0 ? (
                             filtrados.map((animal) => <AdoptedRow record={animal} key={animal._id} />)
                         ) : (
-                            <tr><td colSpan="6" className="text-center text-muted py-5">Nenhum pet adotado encontrado.</td></tr>
+                            <tr><td colSpan="7" className="text-center text-muted py-5">Nenhum pet adotado encontrado.</td></tr>
                         )}
                     </tbody>
                 </table>

@@ -9,7 +9,7 @@ export default function DonationStats() {
         material: { dia: 0, semana: 0, mes: 0, total: 0 }
     });
     const [loading, setLoading] = useState(true);
-    const primaryColor = '#5c3a21';
+    const primaryColor = '#4a2511';
 
     useEffect(() => {
         async function fetchStats() {

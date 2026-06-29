@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Logo from './gatoecachorro.png'
+import Logo from './gatoecachorro.png';
 
 export default function Home() {
   const navigate = useNavigate();
 
-  const [dropdownAdocao, setDropdownAdocao] = useState(false);
+  // Estado para controlar o dropdown de doações via clique
   const [dropdownDoacoes, setDropdownDoacoes] = useState(false);
 
-  // Identidade visual extraída dos seus prints reais
+  // Identidade visual oficial do Patas & Lares
   const cores = {
     marromMenu: '#4a2511',       // Marrom clássico do topo
     marromBanner: '#aa7a44',     // Tom queimado do banner principal
@@ -16,7 +16,7 @@ export default function Home() {
     textoMarrom: '#4a2511',      // Títulos em marrom
     cardBege: '#f2e8df',         // Fundo dos cards "Como Ajudar"
 
-    // Cores exatas dos botões baseadas no novo print
+    // Cores dos botões
     btnAdote: '#e2a36f',         // Marrom pastel
     btnDoe: '#f0c27b',           // Amarelo/Dourado pastel
     btnVoluntario: '#cf9b72',    // Marrom médio pastel
@@ -31,7 +31,6 @@ export default function Home() {
       {/* 1. NAVBAR SUPERIOR */}
       <nav className="navbar navbar-expand-lg navbar-dark p-3" style={{ backgroundColor: cores.marromMenu }}>
         <div className="container d-flex justify-content-between align-items-center">
-          {/* CORREÇÃO: Agora voltar para a Home ao clicar no nome da ONG */}
           <span className="navbar-brand fw-bold d-flex align-items-center fs-4" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
             <i className="bi bi-paw-fill me-2" style={{ transform: 'rotate(-15deg)' }}></i>
             Patas & Lares
@@ -40,46 +39,56 @@ export default function Home() {
           <div className="d-flex align-items-center gap-4">
             <ul className="navbar-nav flex-row gap-3 text-white align-items-center mb-0 d-none d-md-flex">
 
-              <li className="nav-item"><span className="nav-link text-white" style={{ cursor: 'pointer' }}
-              onClick={() => navigate('/')}>Início</span></li>
-
-
-              {/* Dropdown 1: Animais para Adoção */}
-              <li className="nav-item position-relative" style={{ cursor: 'pointer' }}>
-                <span className="nav-link text-white" onClick={() => { setDropdownAdocao(!dropdownAdocao); setDropdownDoacoes(false); }}>
-                  Animais para Adoção <i className="bi bi-chevron-down small ms-1"></i>
+              <li className="nav-item">
+                <span className="nav-link text-white" style={{ cursor: 'pointer' }} onClick={() => { navigate('/'); setDropdownDoacoes(false); }}>
+                  Início
                 </span>
-                {dropdownAdocao && (
-                  <ul className="position-absolute list-unstyled p-2 rounded shadow mt-2"
-                    style={{ backgroundColor: cores.marromMenu, width: '150px', zIndex: 1000, left: 0 }}>
-                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }}>Cães</span></li>
-                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }}>Gatos</span></li>
-                  </ul>
-                )}
               </li>
 
-              {/* Dropdown 2: Doações */}
-              <li className="nav-item position-relative" style={{ cursor: 'pointer' }}>
-                <span className="nav-link text-white" onClick={() => { setDropdownDoacoes(!dropdownDoacoes); setDropdownAdocao(false); }}>
+              <li className="nav-item">
+                <span 
+                  className="nav-link text-white" 
+                  style={{ cursor: 'pointer' }} 
+                  onClick={() => { navigate('/animais-adocao'); setDropdownDoacoes(false); }}
+                >
+                  Animais para Adoção
+                </span>
+              </li>
+
+              {/* Dropdown: Doações (Corrigido para clique constante e seguro) */}
+              <li className="nav-item position-relative">
+                <span 
+                  className="nav-link text-white" 
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setDropdownDoacoes(!dropdownDoacoes)}
+                >
                   Doações <i className="bi bi-chevron-down small ms-1"></i>
                 </span>
                 {dropdownDoacoes && (
-                  <ul className="position-absolute list-unstyled p-2 rounded shadow mt-2"
-                    style={{ backgroundColor: cores.marromMenu, width: '150px', zIndex: 1000, left: 0 }}>
-                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }}>Financeira</span></li>
-                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }}>Material</span></li>
+                  <ul className="position-absolute list-unstyled p-2 rounded shadow"
+                      style={{ backgroundColor: cores.marromMenu, width: '150px', zIndex: 1000, left: 0, marginTop: '5px' }}>
+                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }} onClick={() => { navigate('/doacao-financeira'); setDropdownDoacoes(false); }}>Financeira</span></li>
+                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }} onClick={() => { navigate('/doacao-material'); setDropdownDoacoes(false); }}>Material</span></li>
                   </ul>
                 )}
               </li>
 
-              <li className="nav-item"><span className="nav-link text-white" style={{ cursor: 'pointer' }}>Eventos</span></li>
+              {/* ABA DE EVENTOS CORRIGIDA (Redirecionando perfeitamente) */}
+              <li className="nav-item">
+                <span 
+                  className="nav-link text-white" 
+                  style={{ cursor: 'pointer' }} 
+                  onClick={() => { navigate('/eventos'); setDropdownDoacoes(false); }}
+                >
+                  Eventos
+                </span>
+              </li>
 
-              {/* CORREÇÃO AQUI: Adicionado onClick para redirecionar para a página de contato */}
               <li className="nav-item">
                 <span
                   className="nav-link text-white"
                   style={{ cursor: 'pointer' }}
-                  onClick={() => navigate('/contato')}
+                  onClick={() => { navigate('/contato'); setDropdownDoacoes(false); }}
                 >
                   Contato
                 </span>
@@ -98,7 +107,7 @@ export default function Home() {
       </nav>
 
       {/* 2. HERO SECTION / BANNER PRINCIPAL */}
-      <div className="text-white py-5 px-4" style={{ backgroundColor: cores.marromBanner }}>
+      <div className="text-white py-5 px-4" style={{ backgroundColor: cores.marromBanner }} onClick={() => setDropdownDoacoes(false)}>
         <div className="container py-4">
           <div className="row align-items-center">
             <div className="col-lg-7 text-start">
@@ -122,7 +131,7 @@ export default function Home() {
       </div>
 
       {/* 3. SOBRE A ONG */}
-      <div className="py-5" style={{ backgroundColor: '#ffffff' }}>
+      <div className="py-5" style={{ backgroundColor: '#ffffff' }} onClick={() => setDropdownDoacoes(false)}>
         <div className="container py-2 text-start">
           <h2 className="fw-bold mb-3" style={{ color: cores.textoMarrom }}>Sobre a ONG</h2>
           <p className="text-muted mb-0 lh-lg" style={{ maxWidth: '1000px', fontSize: '1.05rem' }}>
@@ -132,7 +141,7 @@ export default function Home() {
       </div>
 
       {/* 4. COMO VOCÊ PODE AJUDAR + CAMPANHAS */}
-      <div className="py-5" style={{ backgroundColor: cores.cremeFundo }}>
+      <div className="py-5" style={{ backgroundColor: cores.cremeFundo }} onClick={() => setDropdownDoacoes(false)}>
         <div className="container text-center">
 
           <h2 className="fw-bold mb-5" style={{ color: cores.textoMarrom }}>Como Você Pode Ajudar</h2>
@@ -142,14 +151,18 @@ export default function Home() {
 
             {/* Card Adote */}
             <div className="col-md-4">
-              <div className="card h-100 border-0 p-4 shadow-sm" style={{ backgroundColor: cores.cardBege, borderRadius: '16px' }}>
+              <div className="card h-100 border-0 p-4" style={{ backgroundColor: cores.cardBege }}>
                 <div className="card-body d-flex flex-column align-items-center">
                   <i className="bi bi-paw-fill fs-1 mb-2" style={{ color: cores.textoMarrom }}></i>
                   <h4 className="card-title fw-bold mb-3" style={{ color: cores.textoMarrom }}>Adote</h4>
                   <p className="card-text text-muted small px-2 mb-4">
                     Dê um lar cheio de amor para um amigo de quatro patas.
                   </p>
-                  <button className="btn mt-auto text-white px-4 fw-bold shadow-sm" style={{ backgroundColor: cores.btnAdote, border: 'none', borderRadius: '8px' }}>
+                  <button 
+                    className="btn mt-auto text-white px-4 py-2 shadow-sm" 
+                    style={{ backgroundColor: cores.btnAdote, border: 'none', borderRadius: '8px', fontWeight: '500' }}
+                    onClick={() => navigate('/animais-adocao')}
+                  >
                     Ver Animais
                   </button>
                 </div>
@@ -158,14 +171,18 @@ export default function Home() {
 
             {/* Card Doe */}
             <div className="col-md-4">
-              <div className="card h-100 border-0 p-4 shadow-sm" style={{ backgroundColor: cores.cardBege, borderRadius: '16px' }}>
+              <div className="card h-100 border-0 p-4" style={{ backgroundColor: cores.cardBege }}>
                 <div className="card-body d-flex flex-column align-items-center">
-                  <i className="bi bi-heart-fill fs-1 mb-2" style={{ color: cores.btnDoe }}></i>
+                  <i className="bi bi-heart-fill fs-1 mb-2" style={{ color: '#d99862' }}></i>
                   <h4 className="card-title fw-bold mb-3" style={{ color: cores.textoMarrom }}>Doe</h4>
                   <p className="card-text text-muted small px-2 mb-4">
                     Contribua para cuidados, resgates e tratamentos.
                   </p>
-                  <button className="btn mt-auto text-white px-4 fw-bold shadow-sm" style={{ backgroundColor: cores.btnDoe, border: 'none', borderRadius: '8px' }}>
+                  <button 
+                    className="btn mt-auto text-white px-4 py-2 shadow-sm" 
+                    style={{ backgroundColor: cores.btnDoe, border: 'none', borderRadius: '8px', fontWeight: '500' }}
+                    onClick={() => navigate('/doacao-financeira')}
+                  >
                     Doe Agora
                   </button>
                 </div>
@@ -174,14 +191,18 @@ export default function Home() {
 
             {/* Card Seja Voluntário */}
             <div className="col-md-4">
-              <div className="card h-100 border-0 p-4 shadow-sm" style={{ backgroundColor: cores.cardBege, borderRadius: '16px' }}>
+              <div className="card h-100 border-0 p-4" style={{ backgroundColor: cores.cardBege }}>
                 <div className="card-body d-flex flex-column align-items-center">
                   <i className="bi bi-person-fill fs-1 mb-2" style={{ color: cores.textoMarrom }}></i>
                   <h4 className="card-title fw-bold mb-3" style={{ color: cores.textoMarrom }}>Seja Voluntário</h4>
                   <p className="card-text text-muted small px-2 mb-4">
                     Participe de eventos, ajude nos cuidados e inscreva-se.
                   </p>
-                  <button className="btn mt-auto text-white px-4 fw-bold shadow-sm" style={{ backgroundColor: cores.btnVoluntario, border: 'none', borderRadius: '8px' }}>
+                  <button 
+                    className="btn mt-auto text-white px-4 py-2 shadow-sm" 
+                    style={{ backgroundColor: cores.btnVoluntario, border: 'none', borderRadius: '8px', fontWeight: '500' }}
+                    onClick={() => navigate('/contato')}
+                  >
                     Inscreva-se
                   </button>
                 </div>
@@ -222,7 +243,7 @@ export default function Home() {
       </div>
 
       {/* 5. ADOÇÃO RESPONSÁVEL */}
-      <div className="py-5 bg-white">
+      <div className="py-5 bg-white" onClick={() => setDropdownDoacoes(false)}>
         <div className="container text-start" style={{ maxWidth: '1000px' }}>
 
           <h2 className="fw-bold mb-4 text-center text-md-start" style={{ color: cores.textoMarrom, fontSize: '2rem' }}>
@@ -234,7 +255,7 @@ export default function Home() {
           </h5>
 
           <p className="text-dark lh-lg mb-4" style={{ textAlign: 'justify', fontSize: '0.95rem' }}>
-            A adoção de um animal de estimação é um gesture de amor e compaixão que transforma vidas, a do pet e também a sua. Na <strong>Patas & Lares</strong>, acreditamos que adotar é mais do que acolher: é oferecer uma nova oportunidade de carinho, cuidado e felicidade. Nossa missão é promover a adoção responsável, conectando animais que precisam de uma segunda chance a famílias dispostas a proporcionar um lar cheio de segurança e afeto.
+            A adoção de um animal de estimação é um gesto de amor e compaixão que transforma vidas, a do pet e também a sua. Na <strong>Patas & Lares</strong>, acreditamos que adotar é mais do que acolher: é oferecer uma nova oportunidade de carinho, cuidado e felicidade. Nossa missão é promover a adoção responsável, conectando animais que precisam de uma segunda chance a famílias dispostas a proporcionar um lar cheio de segurança e afeto.
           </p>
 
           <h5 className="fw-bold mb-3" style={{ color: cores.textoMarrom }}>
@@ -242,7 +263,7 @@ export default function Home() {
           </h5>
 
           <p className="text-dark lh-lg mb-0" style={{ textAlign: 'justify', fontSize: '0.95rem' }}>
-            A adoção responsável é importante porque garante o bem-estar do animal e a harmonia da convivência com a família que o acolhe. Ao adotar com consciência, a pessoa entende que o pet é um ser vivo que precisa de cuidados contínuos, como alimentação adequada, atenção, vacinação, acompanhamento veterinário e espaço para brincar e se exercitar. Esse cuidado reduz o abandono, promove qualidade de vida, fortalece a empatia e o respeito pelos animais e ajuda a controlar a superpopulação, oferecendo a eles uma segunda chance de ter um lar seguro e cheio de afeto.
+            A adoção responsável é importante porque garante o bem-estar do animal e a harmonia da convivência com a family que o acolhe. Ao adotar com consciência, a pessoa entende que o pet é um ser vivo que precisa de cuidados contínuos, como alimentação adequada, atenção, vacinação, acompanhamento veterinário e espaço para brincar e se exercitar. Esse cuidado reduz o abandono, promove qualidade de vida, fortalece a empatia e o respeito pelos animais e ajuda a controlar a superpopulação, oferecendo a eles uma segunda chance de ter um lar seguro e cheio de afeto.
           </p>
 
         </div>
@@ -255,7 +276,7 @@ export default function Home() {
 
             <div className="col-md-4 d-flex align-items-center justify-content-center justify-content-md-start">
               <div className="d-flex align-items-center">
-                <div className="p-2 me-2 rounded text-center" style={{ backgroundColor: '#aa7a44', color: '#000000', width: '50px', height: '50px', display: 'flex', alignItems: 'center', justify: 'center' }}>
+                <div className="p-2 me-2 rounded text-center" style={{ backgroundColor: '#aa7a44', color: '#000000', width: '50px', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <i className="bi bi-house-heart-fill fs-3"></i>
                 </div>
                 <div className="text-start lh-1">

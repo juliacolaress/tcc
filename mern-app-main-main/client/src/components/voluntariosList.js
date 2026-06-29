@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import API_BASE_URL from "../api/config";
 
 const VoluntarioRecord = (props) => {
-    const primaryColor = '#5c3a21';
+    const primaryColor = '#4a2511';
     return (
         <tr className="align-middle">
             <td className="fw-semibold text-dark" style={{ paddingLeft: '1.5rem' }}>{props.record.nome}</td>
@@ -91,7 +91,7 @@ export default function VoluntarioList() {
         );
     });
 
-    const primaryColor = '#5c3a21';
+    const primaryColor = '#4a2511';
 
     return (
         <div className="container-fluid py-2">

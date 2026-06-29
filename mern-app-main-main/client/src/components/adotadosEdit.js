@@ -3,11 +3,19 @@ import { useParams, useNavigate } from "react-router-dom";
 import API_BASE_URL from "../api/config";
 
 export default function AdotadosEdit() {
-    const [form, setForm] = useState({ nome: "", especie: "", raca: "", status: "Adotado", obs: "" });
+    const [form, setForm] = useState({ 
+        nome: "", 
+        especie: "", 
+        raca: "", 
+        status: "Adotado", 
+        obs: "",
+        adotante: "",
+        data_adocao: ""
+    });
     const [loading, setLoading] = useState(true);
     const { id } = useParams();
     const navigate = useNavigate();
-    const primaryColor = '#5c3a21';
+    const primaryColor = '#4a2511';
 
     useEffect(() => {
         async function fetchAnimal() {
@@ -18,7 +26,11 @@ export default function AdotadosEdit() {
                 });
                 if (response.ok) {
                     const data = await response.json();
-                    setForm(data);
+                    setForm({
+                        ...data,
+                        adotante: data.adotante || "",
+                        data_adocao: data.data_adocao ? data.data_adocao.split('T')[0] : ""
+                    });
                 } else {
                     window.alert("Erro ao carregar dados do animal.");
                     navigate("/adotados");
@@ -42,12 +54,16 @@ export default function AdotadosEdit() {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
                 },
-                body: JSON.stringify({ status: form.status, obs: form.obs })
+                body: JSON.stringify({ 
+                    status: form.status, 
+                    obs: form.obs,
+                    adotante: form.adotante,
+                    data_adocao: form.data_adocao
+                })
             });
 
             if (response.ok) {
                 window.alert("Registro atualizado com sucesso!");
-                // Se foi devolvido (Disponível), volta para a lista de abrigados, senão volta para a de adotados
                 if (form.status === "Disponível") {
                     navigate("/animais");
                 } else {
@@ -99,6 +115,27 @@ export default function AdotadosEdit() {
                             />
                             <label className="form-check-label fw-bold text-danger" htmlFor="statusDevolvido">Devolvido ao Abrigo (Disponível)</label>
                         </div>
+                    </div>
+                </div>
+
+                {/* INFORMAÇÕES DO ADOTANTE */}
+                <div className="row mb-3">
+                    <div className="form-group col-md-8">
+                        <label className="fw-bold mb-2" style={{ color: primaryColor }}>Nome do Adotante</label>
+                        <input 
+                            type="text" className="form-control" value={form.adotante} 
+                            onChange={(e) => setForm({ ...form, adotante: e.target.value })}
+                            placeholder="Nome completo do novo dono"
+                            style={{ borderRadius: '6px' }}
+                        />
+                    </div>
+                    <div className="form-group col-md-4">
+                        <label className="fw-bold mb-2" style={{ color: primaryColor }}>Data da Adoção</label>
+                        <input 
+                            type="date" className="form-control" value={form.data_adocao} 
+                            onChange={(e) => setForm({ ...form, data_adocao: e.target.value })}
+                            style={{ borderRadius: '6px' }}
+                        />
                     </div>
                 </div>
 

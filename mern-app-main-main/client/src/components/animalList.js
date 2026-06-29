@@ -53,7 +53,7 @@ export default function AnimalList() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     
-    const primaryColor = '#5c3a21';
+    const primaryColor = '#4a2511';
 
     // 1. BUSCA TODOS OS ANIMAIS DO BANCO
     useEffect(() => {
@@ -91,7 +91,16 @@ export default function AnimalList() {
 
     // 2. FUNÇÃO PARA MARCAR COMO ADOTADO (Move para o Histórico)
     async function marcarComoAdotado(id) {
-        if (!window.confirm("Confirmar a adoção deste animal? Ele será movido para o histórico.")) return;
+        const adotante = window.prompt("Digite o nome do adotante:");
+        if (adotante === null) return; // Cancelou
+        
+        if (!adotante.trim()) {
+            window.alert("O nome do adotante é obrigatório para registrar a adoção.");
+            return;
+        }
+
+        if (!window.confirm(`Confirmar a adoção de este animal por ${adotante}?`)) return;
+
         try {
             const token = localStorage.getItem('token');
             const response = await fetch(`${API_BASE_URL}/animal/update/${id}`, {
@@ -100,12 +109,17 @@ export default function AnimalList() {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
                 },
-                body: JSON.stringify({ status: "Adotado" })
+                body: JSON.stringify({ 
+                    status: "Adotado",
+                    adotante: adotante,
+                    data_adocao: new Date().toISOString().split('T')[0] // Data de hoje
+                })
             });
 
             if (response.ok) {
                 // Remove visualmente da tela atual na mesma hora
                 setAnimais(animais.filter((el) => el._id !== id));
+                window.alert("Adoção registrada com sucesso!");
             } else {
                 window.alert("Erro ao registrar adoção.");
             }
@@ -161,7 +175,7 @@ export default function AnimalList() {
                     {/* Atalho para ver a nova tela de Histórico */}
                     <Link 
                         className="btn btn-outline-secondary px-3 py-2 d-inline-flex align-items-center"
-                        to="/historico-adocoes"
+                        to="/adotados"
                         style={{ fontWeight: '500', borderRadius: '6px' }}
                     >
                         <i className="bi bi-archive me-2"></i> Histórico de Adoções

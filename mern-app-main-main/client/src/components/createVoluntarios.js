@@ -49,8 +49,8 @@ export default function CreateVoluntario() {
         }
     }
 
-    const primaryColor = '#5c3a21';
-    const labelStyle = { color: '#5c3a21', fontWeight: '600', marginBottom: '6px' };
+    const primaryColor = '#4a2511';
+    const labelStyle = { color: '#4a2511', fontWeight: '600', marginBottom: '6px' };
     const inputStyle = { borderRadius: '6px', border: '1px solid #ced4da' };
 
     return (

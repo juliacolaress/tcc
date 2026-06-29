@@ -86,7 +86,7 @@ export default function DoacaoList() {
         );
     });
 
-    const primaryColor = '#5c3a21';
+    const primaryColor = '#4a2511';
 
     return (
         <div className="container-fluid py-2">

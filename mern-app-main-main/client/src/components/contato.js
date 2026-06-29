@@ -4,8 +4,7 @@ import { useNavigate } from 'react-router-dom';
 function Contato() {
   const navigate = useNavigate();
   
-  // Estados para o controle independente dos menus da Navbar
-  const [dropdownAdocao, setDropdownAdocao] = useState(false);
+  // Controle do menu de Doações via clique (estável)
   const [dropdownDoacoes, setDropdownDoacoes] = useState(false);
 
   // Paleta de cores oficial do Patas & Lares
@@ -13,7 +12,7 @@ function Contato() {
     marromMenu: '#4a2511',       // Marrom clássico do topo
     cremeFundo: '#fdf8f4',       // Fundo off-white suave da página
     textoMarrom: '#4a2511',      // Tom marrom escuro dos títulos principais
-    textoDestaque: '#6b3d1e',    // Tom marrom médio para os subtítulos/ícones
+    textoDestaque: '#4a2511',    // Tom marrom médio para os subtítulos/ícones
     rodapePreto: '#0a0a0a'       // Fundo escuro do rodapé
   };
 
@@ -31,39 +30,50 @@ function Contato() {
           <div className="d-flex align-items-center gap-4">
             <ul className="navbar-nav flex-row gap-3 text-white align-items-center mb-0 d-none d-md-flex">
               
-              <li className="nav-item"><span className="nav-link text-white" style={{ cursor: 'pointer' }}
-              onClick={() => navigate('/')}>Início</span></li>
-
-
-              {/* Dropdown 1: Animais para Adoção */}
-              <li className="nav-item position-relative" style={{ cursor: 'pointer' }}>
-                <span className="nav-link text-white" onClick={() => { setDropdownAdocao(!dropdownAdocao); setDropdownDoacoes(false); }}>
-                  Animais para Adoção <i className="bi bi-chevron-down small ms-1"></i>
+              <li className="nav-item">
+                <span className="nav-link text-white" style={{ cursor: 'pointer' }} onClick={() => { navigate('/'); setDropdownDoacoes(false); }}>
+                  Início
                 </span>
-                {dropdownAdocao && (
-                  <ul className="position-absolute list-unstyled p-2 rounded shadow mt-2" 
-                      style={{ backgroundColor: cores.marromMenu, width: '150px', zIndex: 1000, left: 0 }}>
-                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }}>Cães</span></li>
-                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }}>Gatos</span></li>
-                  </ul>
-                )}
               </li>
 
-              {/* Dropdown 2: Doações */}
-              <li className="nav-item position-relative" style={{ cursor: 'pointer' }}>
-                <span className="nav-link text-white" onClick={() => { setDropdownDoacoes(!dropdownDoacoes); setDropdownAdocao(false); }}>
+              <li className="nav-item">
+                <span 
+                  className="nav-link text-white" 
+                  style={{ cursor: 'pointer' }} 
+                  onClick={() => { navigate('/animais-adocao'); setDropdownDoacoes(false); }}
+                >
+                  Animais para Adoção
+                </span>
+              </li>
+
+              {/* Dropdown: Doações (Corrigido para clique constante e seguro) */}
+              <li className="nav-item position-relative">
+                <span 
+                  className="nav-link text-white" 
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setDropdownDoacoes(!dropdownDoacoes)}
+                >
                   Doações <i className="bi bi-chevron-down small ms-1"></i>
                 </span>
                 {dropdownDoacoes && (
-                  <ul className="position-absolute list-unstyled p-2 rounded shadow mt-2" 
-                      style={{ backgroundColor: cores.marromMenu, width: '150px', zIndex: 1000, left: 0 }}>
-                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }}>Financeira</span></li>
-                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }}>Material</span></li>
+                  <ul className="position-absolute list-unstyled p-2 rounded shadow" 
+                      style={{ backgroundColor: cores.marromMenu, width: '150px', zIndex: 1000, left: 0, marginTop: '5px' }}>
+                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }} onClick={() => { navigate('/doacao-financeira'); setDropdownDoacoes(false); }}>Financeira</span></li>
+                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }} onClick={() => { navigate('/doacao-material'); setDropdownDoacoes(false); }}>Material</span></li>
                   </ul>
                 )}
               </li>
 
-              <li className="nav-item"><span className="nav-link text-white" style={{ cursor: 'pointer' }}>Eventos</span></li>
+              {/* ABA DE EVENTOS CORRIGIDA */}
+              <li className="nav-item">
+                <span 
+                  className="nav-link text-white" 
+                  style={{ cursor: 'pointer' }} 
+                  onClick={() => { navigate('/eventos'); setDropdownDoacoes(false); }}
+                >
+                  Eventos
+                </span>
+              </li>
               
               {/* Link de Contato ativo/destacado */}
               <li className="nav-item">
@@ -85,7 +95,7 @@ function Contato() {
       </nav>
 
       {/* 2. CORPO DA PÁGINA DE CONTATO */}
-      <div className="container py-5 flex-grow-1">
+      <div className="container py-5 flex-grow-1" onClick={() => setDropdownDoacoes(false)}>
         
         {/* Título Principal */}
         <div className="text-start mb-5 pb-2">
@@ -106,9 +116,9 @@ function Contato() {
               <i className="bi bi-geo-alt fs-4 me-2"></i> Localização
             </h4>
             <div className="ps-4 text-dark lh-lg" style={{ fontSize: '0.98rem' }}>
-              <p className="mb-0"><strong>Patas & Lares— Sede Central</strong></p>
+              <p className="mb-0"><strong>Patas & Lares — Sede Central</strong></p>
               <p className="mb-0">Rua Central, nº 245 — Bairro São José</p>
-              <p className="mb-0">Cidade Sombrio— SC</p>
+              <p className="mb-0">Cidade Sombrio — SC</p>
               <p className="mb-0">CEP 88960-000</p>
             </div>
           </div>
@@ -125,7 +135,7 @@ function Contato() {
                   <span className="me-2">•</span> Caixa Postal 000 — CEP 88960-000
                 </li>
                 <li className="d-flex align-items-center">
-                  <span className="me-2">•</span> Cidade Sombrio— SC
+                  <span className="me-2">•</span> Cidade Sombrio — SC
                 </li>
               </ul>
             </div>
@@ -154,7 +164,7 @@ function Contato() {
         </div>
 
         {/* SEGUNDA FILEIRA: Outros canais e Informações adicionais */}
-        <div className="row g-4 text-start pt-4 border-top border-2" style={{ borderColor: 'rgba(74, 37, 17, 0.1) !important' }}>
+        <div className="row g-4 text-start pt-4 border-top border-2" style={{ borderColor: 'rgba(74, 37, 17, 0.1)' }}>
           
           {/* Coluna 4: Outros canais de contato */}
           <div className="col-md-4">
@@ -190,7 +200,7 @@ function Contato() {
       </div>
 
       {/* 3. RODAPÉ OFICIAL */}
-      <footer className="text-white py-4" style={{ backgroundColor: cores.rodapePreto, fontSize: '0.9rem', borderTop: '4px solid #aa7a44' }}>
+      <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapePreto, fontSize: '0.9rem', borderTop: '4px solid #aa7a44' }}>
         <div className="container">
           <div className="row align-items-center g-3">
             

@@ -56,23 +56,9 @@ export default function Dashboard() {
     }).format(value);
   };
 
-  const primaryColor = '#5c3a21';
+  const primaryColor = '#4a2511';
 
-  const cardStyle = {
-    cursor: 'pointer',
-    transition: 'transform 0.2s, box-shadow 0.2s',
-    borderRadius: '12px'
-  };
 
-  const handleMouseEnter = (e) => {
-    e.currentTarget.style.transform = 'translateY(-5px)';
-    e.currentTarget.style.boxShadow = '0 8px 15px rgba(0,0,0,0.1)';
-  };
-
-  const handleMouseLeave = (e) => {
-    e.currentTarget.style.transform = 'translateY(0)';
-    e.currentTarget.style.boxShadow = '0 0.125rem 0.25rem rgba(0,0,0,0.075)';
-  };
 
   return (
     <div className="container-fluid py-2">
@@ -98,10 +84,7 @@ export default function Dashboard() {
         <div className="col-lg-4 col-md-6">
           <Link to="/animais" style={{ textDecoration: 'none', color: 'inherit' }}>
             <div 
-              className="card border-0 shadow-sm p-3 h-100 bg-white" 
-              style={cardStyle}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
+              className="card border-0 p-3 h-100 bg-white admin-indicator-card" 
             >
               <div className="card-body d-flex flex-column justify-content-center">
                 <div className="d-flex justify-content-between align-items-center">
@@ -124,10 +107,7 @@ export default function Dashboard() {
         <div className="col-lg-4 col-md-6">
           <Link to="/estatisticas-doacoes" style={{ textDecoration: 'none', color: 'inherit' }}>
             <div 
-              className="card border-0 shadow-sm p-3 h-100 bg-white" 
-              style={cardStyle}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
+              className="card border-0 p-3 h-100 bg-white admin-indicator-card" 
             >
               <div className="card-body d-flex flex-column justify-content-center">
                 <div className="d-flex justify-content-between align-items-center">
@@ -153,10 +133,7 @@ export default function Dashboard() {
         <div className="col-lg-4 col-md-12">
           <Link to="/voluntarios" style={{ textDecoration: 'none', color: 'inherit' }}>
             <div 
-              className="card border-0 shadow-sm p-3 h-100 bg-white" 
-              style={cardStyle}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
+              className="card border-0 p-3 h-100 bg-white admin-indicator-card" 
             >
               <div className="card-body d-flex flex-column justify-content-center">
                 <div className="d-flex justify-content-between align-items-center">

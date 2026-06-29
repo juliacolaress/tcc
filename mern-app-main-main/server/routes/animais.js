@@ -67,26 +67,22 @@ animalRoutes.route("/animal/update/:id").post(async function (req, res) {
     const db_connect = dbo.getDb();
     const myquery = { _id: new ObjectId(req.params.id) };
     
+    const fields = [
+        "nome", "porte", "especie", "raca", "data_nasc", 
+        "caracteristicas", "data_resgate", "obs", "status", 
+        "genero", "castracao", "estado_saude", "doencas_pre_ex", 
+        "pelo", "amputacao", "cor", "ong", "data_adocao", "adotante"
+    ];
+
+    const updateDoc = {};
+    fields.forEach(field => {
+        if (req.body[field] !== undefined) {
+            updateDoc[field] = req.body[field];
+        }
+    });
+
     const newvalues = {
-        $set: {
-            nome: req.body.nome,
-            porte: req.body.porte,
-            especie: req.body.especie,
-            raca: req.body.raca,
-            data_nasc: req.body.data_nasc,
-            caracteristicas: req.body.caracteristicas,
-            data_resgate: req.body.data_resgate,
-            obs: req.body.obs,
-            status: req.body.status,
-            genero: req.body.genero,
-            castracao: req.body.castracao,
-            estado_saude: req.body.estado_saude,
-            doencas_pre_ex: req.body.doencas_pre_ex,
-            pelo: req.body.pelo,
-            amputacao: req.body.amputacao,
-            cor: req.body.cor,
-            ong: req.body.ong,
-        },
+        $set: updateDoc,
     };
 
     try {

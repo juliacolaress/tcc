@@ -52,7 +52,7 @@ export default function CreateAnimais() {
     });
     
     const navigate = useNavigate();
-    const primaryColor = '#5c3a21';
+    const primaryColor = '#4a2511';
 
     function updateForm(value) {
         setForm((prev) => ({ ...prev, ...value }));
@@ -93,7 +93,7 @@ export default function CreateAnimais() {
         }
     }
 
-    const labelStyle = { color: '#5c3a21', fontWeight: '600', marginBottom: '6px' };
+    const labelStyle = { color: '#4a2511', fontWeight: '600', marginBottom: '6px' };
     const inputStyle = { borderRadius: '6px', border: '1px solid #ced4da' };
 
     return (

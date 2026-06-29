@@ -11,6 +11,10 @@ import DoacaoList from './components/doacaoList';
 import VoluntariosList from './components/voluntariosList';
 import DonationStats from './components/donationStats';
 
+import AnimaisAdocao from './animaisAdocao';
+import DoacaoFinanceira from './components/doacaoFinanceira';
+import DoacaoMaterial from './components/doacaoMaterial';
+
 // Importando os cadastros
 import CreateAnimais from './components/createAnimais';
 import CreateDoacao from './components/createDoacao';
@@ -18,8 +22,6 @@ import CreateDoacaoFinanceira from './components/createDoacaoFinanceira';
 import CreateDoacaoMaterial from './components/createDoacaoMaterial';
 import CreateVoluntarios from './components/createVoluntarios';
 import Create from './components/create'; 
-
-// NOVAS PAGINAS: Histórico de Adoções 
 import AdotadosList from './components/adotadosList';
 import AdotadosEdit from './components/adotadosEdit';
 
@@ -31,6 +33,7 @@ import EditVoluntarios from './components/editVoluntarios';
 
 import Login from './components/Login';
 import Register from './components/Register';
+import Eventos from './eventos';
 
 // Layout do Painel Administrativo (Menu Lateral Fixo)
 function DashboardLayout({ setToken }) {
@@ -43,7 +46,7 @@ function DashboardLayout({ setToken }) {
     <div className="d-flex" style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
       {/* Menu Lateral Fixo para o Administrador */}
       <aside className="bg-white border-end" style={{ width: '280px', padding: '20px', position: 'fixed', height: '100vh' }}>
-        <h4 style={{ color: '#8B5A2B', fontWeight: 'bold' }}>
+        <h4 style={{ color: '#4a2511', fontWeight: 'bold' }}>
           <i className="bi bi-paw-fill me-2" style={{ transform: 'rotate(-15deg)', display: 'inline-block' }}></i>
           Patas & Lares
         </h4>
@@ -52,7 +55,6 @@ function DashboardLayout({ setToken }) {
         
         <ul className="nav flex-column gap-2">
           <li className="nav-item">
-            {/* O link de Início do ADM agora aponta para /dashboard */}
             <Link className="nav-link text-dark d-flex align-items-center" to="/dashboard">
               <i className="bi bi-house-door me-3 fs-5"></i> Início
             </Link>
@@ -67,12 +69,13 @@ function DashboardLayout({ setToken }) {
               <i className="bi bi-heart me-3 fs-5"></i> Animais
             </Link>
           </li>
-          {/* LINK ADICIONADO: Direciona para a nova listagem modular de Adotados */}
+         
           <li className="nav-item">
             <Link className="nav-link text-dark d-flex align-items-center" to="/adotados">
               <i className="bi bi-heart-fill text-danger me-3 fs-5"></i> Histórico de Adotados
             </Link>
           </li>
+          
           <li className="nav-item">
             <Link className="nav-link text-dark d-flex align-items-center" to="/doacoes">
               <i className="bi bi-cash-coin me-3 fs-5"></i> Doações
@@ -91,7 +94,7 @@ function DashboardLayout({ setToken }) {
         </Link>
       </aside>
 
-      {/* Conteúdo Principal do Painel (Empurrado para o lado para não sobrepor a Sidebar) */}
+      {/* Conteúdo Principal do Painel*/}
       <main className="flex-grow-1 p-4" style={{ marginLeft: '280px', width: 'calc(100% - 280px)' }}>
         <Outlet />
       </main>
@@ -109,9 +112,13 @@ export default function App() {
 
   return (
     <Routes>
-      {/* 1. ROTAS PÚBLICAS (Qualquer visitante acessa) */}
+      {/* 1. ROTAS PÚBLICAS (Qualquer visitante acessa sem token) */}
       <Route path="/" element={<Home />} />
       <Route path="/contato" element={<Contato />} />
+      <Route path="/animais-adocao" element={<AnimaisAdocao />} />
+      <Route path="/doacao-financeira" element={<DoacaoFinanceira />} />
+      <Route path="/doacao-material" element={<DoacaoMaterial />} />
+      <Route path="/eventos" element={<Eventos />} />
       
       {/* Se o administrador já estiver logado e tentar entrar no login, ele vai direto para o painel */}
       <Route path="/login" element={token ? <Navigate to="/dashboard" replace /> : <Login onLogin={handleLogin} />} />
@@ -120,7 +127,7 @@ export default function App() {
       {/* 2. ROTAS PROTEGIDAS (Apenas para o Administrador logado) */}
       <Route element={token ? <DashboardLayout setToken={setToken} /> : <Navigate to="/login" replace />}>
         
-        {/* A PAGINA INICIAL DO ADM AGORA É O DASHBOARD */}
+        {/* A PAGINA INICIAL DO ADM É O DASHBOARD */}
         <Route path="/dashboard" element={<Dashboard />} />
         
         {/* Dashboard Analytics */}
@@ -136,8 +143,9 @@ export default function App() {
         <Route path="/cadastrar-animal" element={<CreateAnimais />} />
         <Route path="/edit-animal/:id" element={<EditAnimais />} />
 
-        <Route path="/adotados" element={<adotadosList />} />
-        <Route path="/adotados/editar/:id" element={<adotadosEdit />} />
+        {/* Histórico de Adoções (Visão do Admin) */}
+        <Route path="/adotados" element={<AdotadosList />} />
+        <Route path="/adotados/editar/:id" element={<AdotadosEdit />} />
 
         {/* Doações */}
         <Route path="/doacoes" element={<DoacaoList />} />
