@@ -10,10 +10,7 @@ module.exports = {
             return callback(new Error("ATLAS_URI is not defined in environment variables"))
         }
 
-        client = new MongoClient(Db, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-        })
+        client = new MongoClient(Db)
 
         try {
             await client.connect()

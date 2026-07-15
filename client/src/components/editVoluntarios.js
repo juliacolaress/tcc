@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-
-const REACT_APP_YOUR_HOSTNAME = 'http://localhost:5050';
+import API_BASE_URL from "../api/config";
 
 export default function EditVoluntario() {
     const [form, setForm] = useState({
@@ -19,7 +18,12 @@ export default function EditVoluntario() {
     useEffect(() => {
         async function fetchData() {
             const id = params.id.toString();
-            const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/voluntario/${id}`);
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/voluntario/${id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
 
             if (!response.ok) {
                 window.alert(`Erro ao buscar dados do voluntário: ${response.statusText}`);
@@ -54,9 +58,13 @@ export default function EditVoluntario() {
     async function onSubmit(e) {
         e.preventDefault();
         try {
-            const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/voluntario/update/${params.id}`, {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/voluntario/update/${params.id}`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify(form),
             });
 

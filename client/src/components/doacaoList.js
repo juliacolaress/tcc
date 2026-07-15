@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-
-const REACT_APP_YOUR_HOSTNAME = 'http://localhost:5050';
+import API_BASE_URL from "../api/config";
 
 const DoacaoRecord = (props) => {
     const getBadgeClass = (tipo) => {
@@ -56,7 +55,12 @@ export default function DoacaoList() {
     useEffect(() => {
         async function getDoacoes() {
             try {
-                const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/doacoes`);
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/doacoes`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 if (!response.ok) return;
                 const data = await response.json();
                 setDoacoes(data);
@@ -70,7 +74,13 @@ export default function DoacaoList() {
     async function deleteDoacao(id) {
         if (!window.confirm("Deseja excluir permanentemente esta doação?")) return;
         try {
-            await fetch(`${REACT_APP_YOUR_HOSTNAME}/doacao/${id}`, { method: "DELETE" });
+            const token = localStorage.getItem('token');
+            await fetch(`${API_BASE_URL}/doacao/${id}`, { 
+                method: "DELETE",
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             setDoacoes(doacoes.filter((el) => el._id !== id));
         } catch (error) {
             console.error("Erro ao deletar:", error);

@@ -32,7 +32,7 @@ export default function Login({ onLogin }) {
        
         navigate('/dashboard'); 
       } else {
-        setErro(data.message || 'E-mail ou senha incorretos.');
+        setErro(data.mensagem || 'E-mail ou senha incorretos.');
       }
     } catch (error) {
       console.error('Erro ao fazer login:', error);

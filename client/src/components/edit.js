@@ -57,7 +57,7 @@ export default function Edit() {
 
         const editedPerson = { ...form };
         const token = localStorage.getItem('token');
-        const response = await fetch(`${API_BASE_URL}/update/${params.id}`, {
+        const response = await fetch(`${API_BASE_URL}/user/update/${params.id}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

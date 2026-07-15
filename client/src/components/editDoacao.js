@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-
-const REACT_APP_YOUR_HOSTNAME = 'http://localhost:5050';
+import API_BASE_URL from "../api/config";
 
 export default function EditDoacao() {
     const [form, setForm] = useState({
@@ -23,7 +22,12 @@ export default function EditDoacao() {
     useEffect(() => {
         async function fetchData() {
             const id = params.id.toString();
-            const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/doacao/${id}`);
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/doacao/${id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
 
             if (!response.ok) {
                 window.alert(`Erro ao buscar doação: ${response.statusText}`);
@@ -68,9 +72,13 @@ export default function EditDoacao() {
         };
 
         try {
-            const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/doacao/update/${params.id}`, {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/doacao/update/${params.id}`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify(updatedDoacao),
             });
 

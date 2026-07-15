@@ -1,38 +1,46 @@
-const express = require("express");
-const animalRoutes = express.Router();
-const dbo = require("../db/conn");
-const ObjectId = require("mongodb").ObjectId;
-// Deixado aqui caso use em outros arquivos, mas removido das rotas abaixo
-const { auth } = require("../middleware/auth");
+const express = require("express")
+const animalRoutes = express.Router()
+const dbo = require("../db/conn")
+const ObjectId = require("mongodb").ObjectId
+const { body, validationResult } = require("express-validator")
+const { auth } = require("../middleware/auth")
 
-// 1. LISTAR TODOS OS ANIMAIS (Corrigido para "/animais" no plural e sem 'auth')
-// 1. LISTAR TODOS OS ANIMAIS
+const validarAnimal = [
+    body("nome").trim().notEmpty().withMessage("Nome é obrigatório").isLength({ max: 100 }),
+    body("especie").trim().notEmpty().withMessage("Espécie é obrigatória"),
+    body("status").trim().notEmpty().withMessage("Status é obrigatório"),
+]
+
 animalRoutes.route("/animal").get(async function (req, res) {
-    const db_connect = dbo.getDb();
+    const db_connect = dbo.getDb()
     try {
-        const result = await db_connect.collection("animais").find({}).toArray();
-        res.status(200).json(result);
+        const result = await db_connect.collection("animais").find({}).toArray()
+        res.status(200).json(result)
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ mensagem: error.message })
     }
-});
-// 2. BUSCAR UM ANIMAL ESPECÍFICO (Sem 'auth')
-animalRoutes.route("/animal/:id").get(async function (req, res) {
-    const db_connect = dbo.getDb();
-    const myquery = { _id: new ObjectId(req.params.id) };
-    try {
-        const result = await db_connect.collection("animais").findOne(myquery);
-        if (!result) return res.status(404).json({ message: "Animal não encontrado" });
-        res.status(200).json(result);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
+})
 
-// 3. CADASTRAR NOVO ANIMAL (Sem 'auth')
-animalRoutes.route("/animal/add").post(async function (req, res) {
-    const db_connect = dbo.getDb();
-    
+animalRoutes.route("/animal/:id").get(async function (req, res) {
+    const db_connect = dbo.getDb()
+    const myquery = { _id: new ObjectId(req.params.id) }
+    try {
+        const result = await db_connect.collection("animais").findOne(myquery)
+        if (!result) return res.status(404).json({ mensagem: "Animal não encontrado" })
+        res.status(200).json(result)
+    } catch (error) {
+        res.status(500).json({ mensagem: error.message })
+    }
+})
+
+animalRoutes.route("/animal/add").post(auth, validarAnimal, async function (req, res) {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ mensagem: errors.array()[0].msg })
+    }
+
+    const db_connect = dbo.getDb()
+
     const myobj = {
         nome: req.body.nome,
         porte: req.body.porte,
@@ -51,62 +59,56 @@ animalRoutes.route("/animal/add").post(async function (req, res) {
         amputacao: req.body.amputacao,
         cor: req.body.cor,
         ong: req.body.ong,
-    };
+    }
 
     try {
-        const result = await db_connect.collection("animais").insertOne(myobj);
-        console.log("Animal cadastrado com sucesso!");
-        res.status(201).json(result); 
+        const result = await db_connect.collection("animais").insertOne(myobj)
+        res.status(201).json(result)
     } catch (error) {
-        res.status(409).json({ message: error.message });
+        res.status(409).json({ mensagem: error.message })
     }
-});
+})
 
-// 4. ATUALIZAR UM ANIMAL (Sem 'auth')
-animalRoutes.route("/animal/update/:id").post(async function (req, res) {
-    const db_connect = dbo.getDb();
-    const myquery = { _id: new ObjectId(req.params.id) };
-    
+animalRoutes.route("/animal/update/:id").post(auth, async function (req, res) {
+    const db_connect = dbo.getDb()
+    const myquery = { _id: new ObjectId(req.params.id) }
+
     const fields = [
-        "nome", "porte", "especie", "raca", "data_nasc", 
-        "caracteristicas", "data_resgate", "obs", "status", 
-        "genero", "castracao", "estado_saude", "doencas_pre_ex", 
+        "nome", "porte", "especie", "raca", "data_nasc",
+        "caracteristicas", "data_resgate", "obs", "status",
+        "genero", "castracao", "estado_saude", "doencas_pre_ex",
         "pelo", "amputacao", "cor", "ong", "data_adocao", "adotante"
-    ];
+    ]
 
-    const updateDoc = {};
+    const updateDoc = {}
     fields.forEach(field => {
         if (req.body[field] !== undefined) {
-            updateDoc[field] = req.body[field];
+            updateDoc[field] = req.body[field]
         }
-    });
+    })
 
-    const newvalues = {
-        $set: updateDoc,
-    };
+    const newvalues = { $set: updateDoc }
 
     try {
-        const result = await db_connect.collection("animais").updateOne(myquery, newvalues);
+        const result = await db_connect.collection("animais").updateOne(myquery, newvalues)
         if (result.matchedCount === 0) {
-            return res.status(404).json({ message: "Animal não encontrado" });
+            return res.status(404).json({ mensagem: "Animal não encontrado" })
         }
-        console.log("Animal updated com sucesso!");
-        res.status(200).json(result);
+        res.status(200).json(result)
     } catch (error) {
-        res.status(500).json({ message: "Erro ao atualizar animal: " + error.message });
+        res.status(500).json({ mensagem: "Erro ao atualizar animal: " + error.message })
     }
-});
+})
 
-// 5. DELETAR UM ANIMAL (Sem 'auth')
-animalRoutes.route("/animal/:id").delete(async function (req, res) {
-    const db_connect = dbo.getDb();
-    const myquery = { _id: new ObjectId(req.params.id) };
+animalRoutes.route("/animal/:id").delete(auth, async function (req, res) {
+    const db_connect = dbo.getDb()
+    const myquery = { _id: new ObjectId(req.params.id) }
     try {
-        const result = await db_connect.collection("animais").deleteOne(myquery);
-        res.status(200).json(result);
+        const result = await db_connect.collection("animais").deleteOne(myquery)
+        res.status(200).json(result)
     } catch (error) {
-        res.status(500).json({ message: "Erro ao deletar" });
+        res.status(500).json({ mensagem: "Erro ao deletar" })
     }
-});
+})
 
-module.exports = animalRoutes;
+module.exports = animalRoutes

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-const REACT_APP_YOUR_HOSTNAME = 'http://localhost:5050'; 
+import API_BASE_URL from "../api/config";
 
 export default function CreateDoacao() {
     const [form, setForm] = useState({
@@ -39,10 +38,15 @@ export default function CreateDoacao() {
             valor: parseFloat(form.valor) || 0 
         };
 
+        const token = localStorage.getItem('token');
+
         try {
-            const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/doacao/add`, {
+            const response = await fetch(`${API_BASE_URL}/doacao/add`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify(newDoacao)
             });
 

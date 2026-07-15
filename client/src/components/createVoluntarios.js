@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-const REACT_APP_YOUR_HOSTNAME = 'http://localhost:5050'; 
+import API_BASE_URL from "../api/config";
 
 export default function CreateVoluntario() {
     const [form, setForm] = useState({
@@ -29,10 +28,14 @@ export default function CreateVoluntario() {
 
     async function onSubmit(e) {
         e.preventDefault();
+        const token = localStorage.getItem('token');
         try {
-            const response = await fetch(`${REACT_APP_YOUR_HOSTNAME}/voluntario/add`, {
+            const response = await fetch(`${API_BASE_URL}/voluntario/add`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify(form)
             });
 
