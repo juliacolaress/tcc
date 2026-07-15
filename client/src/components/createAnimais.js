@@ -50,12 +50,54 @@ export default function CreateAnimais() {
         cor: "",
         ong: false
     });
+
+    const [fotosFiles, setFotosFiles] = useState([]);
+    const [fotosPreview, setFotosPreview] = useState([]);
+    const [uploading, setUploading] = useState(false);
     
     const navigate = useNavigate();
     const primaryColor = '#4a2511';
 
     function updateForm(value) {
         setForm((prev) => ({ ...prev, ...value }));
+    }
+
+    function handleFileSelect(e) {
+        const files = Array.from(e.target.files);
+        const novos = files.filter(f => f.type.startsWith("image/"));
+        if (novos.length === 0) return;
+
+        setFotosFiles(prev => [...prev, ...novos].slice(0, 3));
+
+        novos.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                setFotosPreview(prev => [...prev, ev.target.result].slice(0, 3));
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function removerFoto(index) {
+        setFotosFiles(prev => prev.filter((_, i) => i !== index));
+        setFotosPreview(prev => prev.filter((_, i) => i !== index));
+    }
+
+    async function uploadFotos(token) {
+        const urls = [];
+        for (const file of fotosFiles) {
+            const formData = new FormData();
+            formData.append("foto", file);
+            const response = await fetch(`${API_BASE_URL}/upload`, {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${token}` },
+                body: formData
+            });
+            if (!response.ok) throw new Error("Erro ao enviar imagem");
+            const data = await response.json();
+            urls.push(data.url);
+        }
+        return urls;
     }
 
     async function onSubmit(e) {
@@ -66,10 +108,21 @@ export default function CreateAnimais() {
             return;
         }
 
-        const newAnimal = { ...form };
         const token = localStorage.getItem('token');
+        setUploading(true);
 
         try {
+            let urls = [];
+            if (fotosFiles.length > 0) {
+                urls = await uploadFotos(token);
+            }
+
+            const newAnimal = {
+                ...form,
+                fotoUrl: urls[0] || "",
+                fotos: urls
+            };
+
             const response = await fetch(`${API_BASE_URL}/animal/add`, {
                 method: "POST",
                 headers: {
@@ -90,6 +143,8 @@ export default function CreateAnimais() {
         } catch (error) {
             console.error("Erro na requisição:", error);
             window.alert("Erro ao conectar ao servidor.");
+        } finally {
+            setUploading(false);
         }
     }
 
@@ -176,6 +231,46 @@ export default function CreateAnimais() {
                     </div>
 
                     <h5 className="mb-4 mt-4 pb-2 border-bottom text-muted text-uppercase small fw-bold" style={{ letterSpacing: '0.5px' }}>
+                        Fotos do Animal
+                    </h5>
+
+                    <div className="form-group mb-4">
+                        <label style={labelStyle}>Fotos (máximo 3)</label>
+                        <input
+                            type="file"
+                            className="form-control px-3 py-2"
+                            style={inputStyle}
+                            multiple
+                            accept="image/jpeg,image/png,image/gif,image/webp"
+                            onChange={handleFileSelect}
+                            disabled={fotosFiles.length >= 3}
+                        />
+                        <small className="text-muted">Formatos: JPG, PNG, GIF, WebP. Tamanho máximo: 5MB cada.</small>
+                        
+                        {fotosPreview.length > 0 && (
+                            <div className="d-flex gap-2 mt-3 flex-wrap">
+                                {fotosPreview.map((preview, index) => (
+                                    <div key={index} className="position-relative" style={{ width: '100px', height: '100px' }}>
+                                        <img
+                                            src={preview}
+                                            alt={`Preview ${index + 1}`}
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '6px', border: '1px solid #dee2e6' }}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="btn btn-danger btn-sm position-absolute"
+                                            style={{ top: '-8px', right: '-8px', borderRadius: '50%', width: '24px', height: '24px', padding: '0', fontSize: '12px' }}
+                                            onClick={() => removerFoto(index)}
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <h5 className="mb-4 mt-4 pb-2 border-bottom text-muted text-uppercase small fw-bold" style={{ letterSpacing: '0.5px' }}>
                         Situação e Detalhes de Saúde
                     </h5>
 
@@ -238,8 +333,17 @@ export default function CreateAnimais() {
                 </div>
 
                 <div className="form-group text-end mb-4">
-                    <button type="submit" className="btn text-white px-5 py-2 shadow-sm" style={{ backgroundColor: primaryColor, borderRadius: '6px', fontWeight: '500' }}>
-                        <i className="bi bi-check-lg me-2"></i> Cadastrar Animal
+                    <button type="submit" className="btn text-white px-5 py-2 shadow-sm" style={{ backgroundColor: primaryColor, borderRadius: '6px', fontWeight: '500' }} disabled={uploading}>
+                        {uploading ? (
+                            <>
+                                <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                                Enviando fotos...
+                            </>
+                        ) : (
+                            <>
+                                <i className="bi bi-check-lg me-2"></i> Cadastrar Animal
+                            </>
+                        )}
                     </button>
                 </div>
             </form>

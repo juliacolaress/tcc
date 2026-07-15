@@ -4,6 +4,27 @@ const dbo = require("../db/conn")
 const ObjectId = require("mongodb").ObjectId
 const { body, validationResult } = require("express-validator")
 const { auth } = require("../middleware/auth")
+const fs = require("fs")
+const path = require("path")
+
+function extrairFilename(url) {
+    if (!url || typeof url !== "string") return null
+    const match = url.match(/\/uploads\/(.+)$/)
+    return match ? match[1] : null
+}
+
+function deletarArquivo(filename) {
+    if (!filename) return
+    const caminho = path.join(__dirname, "..", "uploads", filename)
+    fs.unlink(caminho, () => {})
+}
+
+function extrairUrls(animal) {
+    const urls = []
+    if (animal.fotoUrl) urls.push(animal.fotoUrl)
+    if (Array.isArray(animal.fotos)) urls.push(...animal.fotos)
+    return urls.filter(Boolean)
+}
 
 const validarAnimal = [
     body("nome").trim().notEmpty().withMessage("Nome é obrigatório").isLength({ max: 100 }),
@@ -59,6 +80,8 @@ animalRoutes.route("/animal/add").post(auth, validarAnimal, async function (req,
         amputacao: req.body.amputacao,
         cor: req.body.cor,
         ong: req.body.ong,
+        fotoUrl: req.body.fotoUrl || "",
+        fotos: req.body.fotos || [],
     }
 
     try {
@@ -77,7 +100,8 @@ animalRoutes.route("/animal/update/:id").post(auth, async function (req, res) {
         "nome", "porte", "especie", "raca", "data_nasc",
         "caracteristicas", "data_resgate", "obs", "status",
         "genero", "castracao", "estado_saude", "doencas_pre_ex",
-        "pelo", "amputacao", "cor", "ong", "data_adocao", "adotante"
+        "pelo", "amputacao", "cor", "ong", "data_adocao", "adotante",
+        "fotoUrl", "fotos"
     ]
 
     const updateDoc = {}
@@ -90,10 +114,22 @@ animalRoutes.route("/animal/update/:id").post(auth, async function (req, res) {
     const newvalues = { $set: updateDoc }
 
     try {
-        const result = await db_connect.collection("animais").updateOne(myquery, newvalues)
-        if (result.matchedCount === 0) {
+        const antigo = await db_connect.collection("animais").findOne(myquery)
+        if (!antigo) {
             return res.status(404).json({ mensagem: "Animal não encontrado" })
         }
+
+        const result = await db_connect.collection("animais").updateOne(myquery, newvalues)
+
+        const urlsAntigas = new Set(extrairUrls(antigo))
+        const urlsNovas = new Set(extrairUrls(updateDoc))
+
+        for (const url of urlsAntigas) {
+            if (!urlsNovas.has(url)) {
+                deletarArquivo(extrairFilename(url))
+            }
+        }
+
         res.status(200).json(result)
     } catch (error) {
         res.status(500).json({ mensagem: "Erro ao atualizar animal: " + error.message })
@@ -104,6 +140,11 @@ animalRoutes.route("/animal/:id").delete(auth, async function (req, res) {
     const db_connect = dbo.getDb()
     const myquery = { _id: new ObjectId(req.params.id) }
     try {
+        const animal = await db_connect.collection("animais").findOne(myquery)
+        if (animal) {
+            const urls = extrairUrls(animal)
+            urls.forEach(url => deletarArquivo(extrairFilename(url)))
+        }
         const result = await db_connect.collection("animais").deleteOne(myquery)
         res.status(200).json(result)
     } catch (error) {

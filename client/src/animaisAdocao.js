@@ -1,24 +1,53 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API_BASE_URL from "./api/config";
+import { normalizeFotos } from "./utils/fotos";
 
 // Componente do Card do Animal
 const AnimalCard = ({ animal }) => {
+    const [imagemAtual, setImagemAtual] = useState(0);
+    const fotos = normalizeFotos(animal);
+    
     // Definindo uma imagem padrão caso o banco não tenha foto cadastrada ainda
     const imagemPadrao = animal.especie === "Cachorro" 
         ? "https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=500" // Foto de cachorro
         : "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=500"; // Foto de gato
+
+    const imagemExibida = fotos.length > 0 ? fotos[imagemAtual] : imagemPadrao;
 
     return (
         <div className="card border-0 shadow-sm h-100" style={{ borderRadius: '0px', backgroundColor: '#FFFDF9' }}>
             {/* Imagem do Pet */}
             <div className="position-relative" style={{ height: '250px', overflow: 'hidden' }}>
                 <img 
-                    src={animal.fotoUrl || imagemPadrao} 
+                    src={imagemExibida} 
                     className="card-img-top w-100 h-100" 
                     style={{ objectFit: 'cover' }} 
                     alt={animal.nome}
                 />
+                
+                {/* Carousel com thumbnails */}
+                {fotos.length > 1 && (
+                    <div className="position-absolute bottom-0 start-0 end-0 d-flex justify-content-center gap-1 pb-2" style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.5))' }}>
+                        {fotos.map((url, index) => (
+                            <img
+                                key={index}
+                                src={url}
+                                alt={`Thumbnail ${index + 1}`}
+                                onClick={() => setImagemAtual(index)}
+                                style={{
+                                    width: '40px',
+                                    height: '40px',
+                                    objectFit: 'cover',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    border: index === imagemAtual ? '2px solid white' : '2px solid transparent',
+                                    opacity: index === imagemAtual ? 1 : 0.7
+                                }}
+                            />
+                        ))}
+                    </div>
+                )}
             </div>
             
             {/* Corpo do Card */}

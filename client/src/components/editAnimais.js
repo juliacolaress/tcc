@@ -51,6 +51,12 @@ export default function EditAnimais() {
         ong: false
     });
 
+    const [fotosExistentes, setFotosExistentes] = useState([]);
+    const [novasFotosFiles, setNovasFotosFiles] = useState([]);
+    const [novasFotosPreview, setNovasFotosPreview] = useState([]);
+    const [fotosRemovidas, setFotosRemovidas] = useState([]);
+    const [uploading, setUploading] = useState(false);
+
     const params = useParams();
     const navigate = useNavigate();
     const primaryColor = '#4a2511';
@@ -90,6 +96,12 @@ export default function EditAnimais() {
                 // Garante compatibilidade caso haja booleano antigo salvo no banco de dados
                 status: typeof record.status === "boolean" ? (record.status ? "Disponível" : "Adotado") : (record.status || "Disponível")
             });
+
+            const fotos = [
+                ...(record.fotos || []),
+                record.fotoUrl
+            ].filter(Boolean);
+            setFotosExistentes(fotos);
         }
         fetchData();
     }, [params.id, navigate]);
@@ -98,12 +110,73 @@ export default function EditAnimais() {
         setForm((prev) => ({ ...prev, ...value }));
     }
 
+    function handleFileSelect(e) {
+        const files = Array.from(e.target.files);
+        const novos = files.filter(f => f.type.startsWith("image/"));
+        if (novos.length === 0) return;
+
+        const totalFotos = fotosExistentes.length - fotosRemovidas.length + novasFotosFiles.length;
+        const espacoDisponivel = 3 - totalFotos;
+        const arquivosAdicionar = novos.slice(0, espacoDisponivel);
+
+        setNovasFotosFiles(prev => [...prev, ...arquivosAdicionar]);
+
+        arquivosAdicionar.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                setNovasFotosPreview(prev => [...prev, ev.target.result]);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function removerExistente(index) {
+        const url = fotosExistentes[index];
+        setFotosRemovidas(prev => [...prev, url]);
+        setFotosExistentes(prev => prev.filter((_, i) => i !== index));
+    }
+
+    function removerNova(index) {
+        setNovasFotosFiles(prev => prev.filter((_, i) => i !== index));
+        setNovasFotosPreview(prev => prev.filter((_, i) => i !== index));
+    }
+
+    async function uploadFotos(token) {
+        const urls = [];
+        for (const file of novasFotosFiles) {
+            const formData = new FormData();
+            formData.append("foto", file);
+            const response = await fetch(`${API_BASE_URL}/upload`, {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${token}` },
+                body: formData
+            });
+            if (!response.ok) throw new Error("Erro ao enviar imagem");
+            const data = await response.json();
+            urls.push(data.url);
+        }
+        return urls;
+    }
+
     async function onSubmit(e) {
         e.preventDefault();
-        const editedAnimal = { ...form };
         const token = localStorage.getItem('token');
+        setUploading(true);
 
         try {
+            let urlsNovas = [];
+            if (novasFotosFiles.length > 0) {
+                urlsNovas = await uploadFotos(token);
+            }
+
+            const todasFotos = [...fotosExistentes, ...urlsNovas];
+
+            const editedAnimal = {
+                ...form,
+                fotoUrl: todasFotos[0] || "",
+                fotos: todasFotos
+            };
+
             const response = await fetch(`${API_BASE_URL}/animal/update/${params.id}`, {
                 method: "POST",
                 headers: {
@@ -124,6 +197,8 @@ export default function EditAnimais() {
         } catch (error) {
             console.error("Erro na atualização:", error);
             window.alert("Erro ao conectar ao servidor.");
+        } finally {
+            setUploading(false);
         }
     }
 
@@ -236,6 +311,74 @@ export default function EditAnimais() {
                     </div>
                 </div>
 
+                {/* FOTOS */}
+                <div className="form-group mb-4">
+                    <label className="fw-bold d-block mb-2">Fotos do Animal (máximo 3)</label>
+                    
+                    {fotosExistentes.length > 0 && (
+                        <div className="mb-3">
+                            <small className="text-muted d-block mb-2">Fotos atuais:</small>
+                            <div className="d-flex gap-2 flex-wrap">
+                                {fotosExistentes.map((url, index) => (
+                                    <div key={`existente-${index}`} className="position-relative" style={{ width: '100px', height: '100px' }}>
+                                        <img
+                                            src={url}
+                                            alt={`Foto ${index + 1}`}
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '6px', border: '1px solid #dee2e6' }}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="btn btn-danger btn-sm position-absolute"
+                                            style={{ top: '-8px', right: '-8px', borderRadius: '50%', width: '24px', height: '24px', padding: '0', fontSize: '12px' }}
+                                            onClick={() => removerExistente(index)}
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {novasFotosPreview.length > 0 && (
+                        <div className="mb-3">
+                            <small className="text-muted d-block mb-2">Novas fotos:</small>
+                            <div className="d-flex gap-2 flex-wrap">
+                                {novasFotosPreview.map((preview, index) => (
+                                    <div key={`nova-${index}`} className="position-relative" style={{ width: '100px', height: '100px' }}>
+                                        <img
+                                            src={preview}
+                                            alt={`Nova ${index + 1}`}
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '6px', border: '1px solid #dee2e6' }}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="btn btn-danger btn-sm position-absolute"
+                                            style={{ top: '-8px', right: '-8px', borderRadius: '50%', width: '24px', height: '24px', padding: '0', fontSize: '12px' }}
+                                            onClick={() => removerNova(index)}
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {(fotosExistentes.length + novasFotosFiles.length) < 3 && (
+                        <div>
+                            <input
+                                type="file"
+                                className="form-control shadow-sm"
+                                multiple
+                                accept="image/jpeg,image/png,image/gif,image/webp"
+                                onChange={handleFileSelect}
+                            />
+                            <small className="text-muted">Formatos: JPG, PNG, GIF, WebP. Tamanho máximo: 5MB cada.</small>
+                        </div>
+                    )}
+                </div>
+
                 {/* NOVO: SELETOR DE STATUS DE ADOÇÃO ATUALIZADO */}
                 <div className="form-group mb-4">
                     <label className="fw-bold d-block mb-2">Status de Adoção</label>
@@ -296,10 +439,17 @@ export default function EditAnimais() {
                 </div>
 
                 <div className="form-group mt-4 d-flex gap-2">
-                    <button type="submit" className="btn text-white px-5 shadow-sm" style={{ backgroundColor: primaryColor, borderRadius: '6px', fontWeight: '500' }}>
-                        Salvar Alterações
+                    <button type="submit" className="btn text-white px-5 shadow-sm" style={{ backgroundColor: primaryColor, borderRadius: '6px', fontWeight: '500' }} disabled={uploading}>
+                        {uploading ? (
+                            <>
+                                <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                                Enviando fotos...
+                            </>
+                        ) : (
+                            "Salvar Alterações"
+                        )}
                     </button>
-                    <button type="button" className="btn btn-outline-secondary px-5 shadow-sm" style={{ borderRadius: '6px' }} onClick={() => navigate(-1)}>
+                    <button type="button" className="btn btn-outline-secondary px-5 shadow-sm" style={{ borderRadius: '6px' }} onClick={() => navigate(-1)} disabled={uploading}>
                         Cancelar
                     </button>
                 </div>
