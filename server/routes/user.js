@@ -49,7 +49,7 @@ userRoutes.route("/user/login").post(validarLogin, async function (req, res) {
         const token = jwt.sign(
             { userId: usuario._id, tipo: usuario.function },
             JWT_SECRET,
-            { expiresIn: "1h" }
+            { expiresIn: "7d" }
         )
 
         res.json({ mensagem: "Login bem-sucedido", token })
@@ -89,7 +89,7 @@ userRoutes.route("/user/register").post(validarCadastro, async function (req, re
         const token = jwt.sign(
             { userId: result.insertedId, tipo: "User" },
             JWT_SECRET,
-            { expiresIn: "1h" }
+            { expiresIn: "7d" }
         )
 
         return res.status(201).json({ mensagem: "Usuário cadastrado com sucesso", token })

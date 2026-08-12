@@ -1,6 +1,22 @@
 const path = require("path")
 const fs = require("fs")
+const dns = require("dns")
 require("dotenv").config({ path: path.resolve(__dirname, ".env") })
+
+const fallbackDnsServers = ["1.1.1.1", "8.8.8.8"]
+
+function ensureValidDns() {
+    const servers = dns.getServers()
+    const valid = servers.filter((s) => !s.startsWith("127.") && s !== "::1")
+    if (valid.length === 0) {
+        dns.setServers(fallbackDnsServers)
+        console.log("DNS do Node inválido (loopback). Usando DNS público: " + fallbackDnsServers.join(", "))
+    } else if (valid.length !== servers.length) {
+        dns.setServers(valid)
+    }
+}
+
+ensureValidDns()
 const express = require("express")
 const app = express()
 const cors = require("cors")

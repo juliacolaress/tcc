@@ -151,7 +151,14 @@ export default function EditAnimais() {
                 headers: { "Authorization": `Bearer ${token}` },
                 body: formData
             });
-            if (!response.ok) throw new Error("Erro ao enviar imagem");
+            if (!response.ok) {
+                let mensagem = "Erro ao enviar imagem";
+                try {
+                    const data = await response.json();
+                    if (data && data.mensagem) mensagem = data.mensagem;
+                } catch (_) {}
+                throw new Error(mensagem);
+            }
             const data = await response.json();
             urls.push(data.url);
         }
@@ -196,7 +203,7 @@ export default function EditAnimais() {
             navigate("/animais");
         } catch (error) {
             console.error("Erro na atualização:", error);
-            window.alert("Erro ao conectar ao servidor.");
+            window.alert(error.message || "Erro ao conectar ao servidor.");
         } finally {
             setUploading(false);
         }

@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import API_BASE_URL from "../api/config";
+import { normalizeFotos } from "../utils/fotos";
 
-const AdoptedRow = ({ record }) => {
+// Componente do Card do Animal Adotado
+const AdoptedCard = ({ record }) => {
+    const primaryColor = '#4a2511';
+    const fotos = normalizeFotos(record);
+    const imagem = fotos.length > 0 ? fotos[0] : null;
+
     // Formata a data de adoção para o padrão brasileiro
     const formatDate = (dateStr) => {
         if (!dateStr) return "---";
@@ -10,33 +16,45 @@ const AdoptedRow = ({ record }) => {
         return date.toLocaleDateString('pt-BR');
     };
 
+    const generoLabel = record.genero === "M" ? "Macho" : record.genero === "F" ? "Fêmea" : "---";
+
     return (
-        <tr className="align-middle">
-            <td className="fw-semibold text-dark ps-3">{record.nome}</td>
-            <td>
-                <span className="badge bg-light text-dark border px-2 py-1" style={{ borderRadius: '4px' }}>
-                    {record.especie}
-                </span>
-            </td>
-            <td className="text-muted">{record.raca || "---"}</td>
-            <td className="text-dark fw-medium">{record.adotante || "Não informado"}</td>
-            <td className="text-muted">{formatDate(record.data_adocao)}</td>
-            <td>
-                <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+        <div className="card border-0 shadow-sm h-100" style={{ borderRadius: '10px', overflow: 'hidden', backgroundColor: '#fff' }}>
+            <div style={{ height: '220px', overflow: 'hidden', backgroundColor: '#f8f9fa' }}>
+                {imagem ? (
+                    <img src={imagem} className="w-100 h-100" style={{ objectFit: 'cover' }} alt={record.nome} />
+                ) : (
+                    <div className="w-100 h-100 d-flex align-items-center justify-content-center">
+                        <i className="bi bi-paw text-muted" style={{ fontSize: '3rem', opacity: '0.3' }}></i>
+                    </div>
+                )}
+            </div>
+            <div className="card-body d-flex flex-column p-3">
+                <h5 className="fw-bold mb-1" style={{ color: primaryColor }}>{record.nome}</h5>
+                <span className="badge bg-success-subtle text-success border border-success-subtle align-self-start mb-2">
                     Adotado
                 </span>
-            </td>
-            <td>
-                {/* Redireciona para a tela exclusiva de edição/devolução do adotado */}
-                <Link 
-                    className="btn btn-sm btn-outline-primary d-inline-flex align-items-center" 
-                    to={`/adotados/editar/${record._id}`}
-                    style={{ borderRadius: '4px' }}
-                >
-                    <i className="bi bi-pencil-square me-1"></i> Gerenciar
-                </Link>
-            </td>
-        </tr>
+                <div className="d-flex flex-wrap gap-2 mb-2">
+                    <span className="badge bg-light text-dark border px-2 py-1">{record.especie || "---"}</span>
+                    <span className="badge bg-light text-dark border px-2 py-1">{record.raca || "Sem raça"}</span>
+                    <span className="badge bg-light text-dark border px-2 py-1">{generoLabel}</span>
+                    <span className="badge bg-light text-dark border px-2 py-1">Porte {record.porte || "---"}</span>
+                </div>
+                <div className="text-muted small mb-3">
+                    <div><i className="bi bi-person-heart me-1"></i> Adotante: <strong>{record.adotante || "Não informado"}</strong></div>
+                    <div><i className="bi bi-calendar-check me-1"></i> Adoção: <strong>{formatDate(record.data_adocao)}</strong></div>
+                </div>
+                <div className="mt-auto">
+                    <Link
+                        className="btn w-100 text-white d-inline-flex align-items-center justify-content-center gap-2"
+                        to={`/adotados/editar/${record._id}`}
+                        style={{ backgroundColor: primaryColor, borderRadius: '6px', fontWeight: '500' }}
+                    >
+                        <i className="bi bi-pencil-square"></i> Gerenciar
+                    </Link>
+                </div>
+            </div>
+        </div>
     );
 };
 
@@ -115,30 +133,25 @@ export default function AdotadosList() {
 
             {error && <div className="alert alert-danger">{error}</div>}
 
-            <div className="table-responsive shadow-sm" style={{ borderRadius: '8px' }}>
-                <table className="table table-hover table-striped mb-0">
-                    <thead className="text-white" style={{ backgroundColor: primaryColor }}>
-                        <tr>
-                            <th className="py-3 ps-3">Nome</th>
-                            <th className="py-3">Espécie</th>
-                            <th className="py-3">Raça</th>
-                            <th className="py-3">Adotante</th>
-                            <th className="py-3">Data Adoção</th>
-                            <th className="py-3">Status</th>
-                            <th className="py-3 pe-3" style={{ width: '150px' }}>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {loading ? (
-                            <tr><td colSpan="7" className="text-center py-5"><div className="spinner-border" style={{ color: primaryColor }}></div></td></tr>
-                        ) : filtrados.length > 0 ? (
-                            filtrados.map((animal) => <AdoptedRow record={animal} key={animal._id} />)
-                        ) : (
-                            <tr><td colSpan="7" className="text-center text-muted py-5">Nenhum pet adotado encontrado.</td></tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+            {/* Grid de Cards de Adotados */}
+            {loading ? (
+                <div className="text-center py-5">
+                    <div className="spinner-border" style={{ color: primaryColor }} role="status"></div>
+                </div>
+            ) : filtrados.length > 0 ? (
+                <div className="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                    {filtrados.map((animal) => (
+                        <div className="col" key={animal._id}>
+                            <AdoptedCard record={animal} />
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="text-center text-muted py-5">
+                    <i className="bi bi-heart text-muted d-block mb-2" style={{ fontSize: '2rem' }}></i>
+                    Nenhum pet adotado encontrado.
+                </div>
+            )}
         </div>
     );
 }

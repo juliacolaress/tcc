@@ -1,55 +1,68 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import API_BASE_URL from "../api/config";
+import { normalizeFotos } from "../utils/fotos";
 
-// Componente da Linha da Tabela (AnimalRecord) com o novo botão de Ação rápida para Adoção
-const AnimalRecord = (props) => {
+// Componente do Card do Animal
+const AnimalCard = ({ record, deleteAnimal, marcarComoAdotado }) => {
+    const primaryColor = '#4a2511';
+    const fotos = normalizeFotos(record);
+    const imagemPadrao = (record.especie || "").toLowerCase() === "gato"
+        ? "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=500"
+        : "https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=500";
+    const imagem = fotos.length > 0 ? fotos[0] : imagemPadrao;
+    const generoLabel = record.genero === "M" ? "Macho" : record.genero === "F" ? "Fêmea" : "---";
+
     return (
-        <tr className="align-middle">
-            <td className="fw-semibold text-dark ps-3">{props.record.nome}</td>
-            <td>
-                <span className="badge bg-light text-dark border px-2 py-1" style={{ borderRadius: '4px' }}>
-                    {props.record.especie}
-                </span>
-            </td>
-            <td className="text-muted">{props.record.raca || "---"}</td>
-            <td className="text-muted">{props.record.porte || "---"}</td>
-            <td>
-                {/* Botão de ação rápida que altera o status para Adotado */}
-                <button 
-                    className="btn btn-sm btn-outline-success d-inline-flex align-items-center"
-                    onClick={() => props.marcarComoAdotado(props.record._id)}
-                    title="Marcar como Adotado"
-                    style={{ borderRadius: '4px' }}
-                >
-                    <i className="bi bi-heart-fill me-1"></i> Adotar
-                </button>
-            </td>
-            <td>
-                <div className="d-flex gap-2">
-                    <Link 
-                        className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center" 
-                        to={`/edit-animal/${props.record._id}`}
-                        style={{ borderRadius: '4px' }}
-                    >
-                        <i className="bi bi-pencil me-1"></i> Editar
-                    </Link>
-                    <button 
-                        className="btn btn-sm btn-outline-danger d-inline-flex align-items-center" 
-                        onClick={() => props.deleteAnimal(props.record._id)}
-                        style={{ borderRadius: '4px' }}
-                    >
-                        <i className="bi bi-trash me-1"></i> Excluir
-                    </button>
+        <div className="card border-0 shadow-sm h-100" style={{ borderRadius: '10px', overflow: 'hidden', backgroundColor: '#fff' }}>
+            <div style={{ height: '220px', overflow: 'hidden', backgroundColor: '#f8f9fa' }}>
+                <img src={imagem} className="w-100 h-100" style={{ objectFit: 'cover' }} alt={record.nome} />
+            </div>
+            <div className="card-body d-flex flex-column p-3">
+                <h5 className="fw-bold mb-2" style={{ color: primaryColor }}>{record.nome}</h5>
+                <div className="d-flex flex-wrap gap-2 mb-3">
+                    <span className="badge bg-light text-dark border px-2 py-1">{record.especie || "---"}</span>
+                    <span className="badge bg-light text-dark border px-2 py-1">{record.raca || "Sem raça"}</span>
+                    <span className="badge bg-light text-dark border px-2 py-1">{generoLabel}</span>
+                    <span className="badge bg-light text-dark border px-2 py-1">Porte {record.porte || "---"}</span>
                 </div>
-            </td>
-        </tr>
+                <div className="mt-auto d-flex flex-column gap-2">
+                    <button
+                        className="btn text-white w-100 d-inline-flex align-items-center justify-content-center gap-2"
+                        style={{ backgroundColor: primaryColor, borderRadius: '6px', fontWeight: '500' }}
+                        onClick={() => marcarComoAdotado(record._id)}
+                        title="Marcar como Adotado"
+                    >
+                        <i className="bi bi-heart-fill"></i> Adotar
+                    </button>
+                    <div className="d-flex gap-2">
+                        <Link
+                            className="btn btn-sm btn-outline-secondary flex-fill d-inline-flex align-items-center justify-content-center"
+                            to={`/edit-animal/${record._id}`}
+                            style={{ borderRadius: '6px' }}
+                        >
+                            <i className="bi bi-pencil me-1"></i> Editar
+                        </Link>
+                        <button
+                            className="btn btn-sm btn-outline-danger flex-fill d-inline-flex align-items-center justify-content-center"
+                            onClick={() => deleteAnimal(record._id)}
+                            style={{ borderRadius: '6px' }}
+                        >
+                            <i className="bi bi-trash me-1"></i> Excluir
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 };
 
 export default function AnimalList() {
     const [animais, setAnimais] = useState([]);
     const [pesquisa, setPesquisa] = useState("");
+    const [filtroEspecie, setFiltroEspecie] = useState("Todos");
+    const [filtroGenero, setFiltroGenero] = useState("Todos");
+    const [filtroPorte, setFiltroPorte] = useState("Todos");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     
@@ -150,7 +163,7 @@ export default function AnimalList() {
         }
     }
 
-    // 4. FILTRO ROBUSTO: ESCONDE OS "ADOTADOS" E FILTRA POR TERMO DE PESQUISA
+    // 4. FILTRO ROBUSTO: ESCONDE OS "ADOTADOS" E FILTRA POR TERMO DE PESQUISA + FILTROS
     const animaisFiltrados = (animais && Array.isArray(animais)) ? animais.filter((animal) => {
         if (!animal || animal.status === "Adotado") return false; // Esconde os adotados desta view
         
@@ -159,7 +172,12 @@ export default function AnimalList() {
         const especie = (animal.especie || "").toString().toLowerCase();
         const raca = (animal.raca || "").toString().toLowerCase();
 
-        return nome.includes(termo) || especie.includes(termo) || raca.includes(termo);
+        const correspondeBusca = nome.includes(termo) || especie.includes(termo) || raca.includes(termo);
+        const correspondeEspecie = filtroEspecie === "Todos" || (animal.especie || "").toLowerCase() === filtroEspecie.toLowerCase();
+        const correspondeGenero = filtroGenero === "Todos" || (animal.genero || "") === filtroGenero;
+        const correspondePorte = filtroPorte === "Todos" || (animal.porte || "").toLowerCase() === filtroPorte.toLowerCase();
+
+        return correspondeBusca && correspondeEspecie && correspondeGenero && correspondePorte;
     }) : [];
 
     return (
@@ -212,6 +230,48 @@ export default function AnimalList() {
                         style={{ boxShadow: 'none', borderRadius: '0 6px 6px 0', border: '1px solid #ced4da' }}
                     />
                 </div>
+
+                {/* Filtros */}
+                <div className="row g-2 mt-2">
+                    <div className="col-md-4 col-sm-6">
+                        <select
+                            className="form-select py-2"
+                            value={filtroEspecie}
+                            onChange={(e) => setFiltroEspecie(e.target.value)}
+                            style={{ boxShadow: 'none', border: '1px solid #ced4da' }}
+                        >
+                            <option value="Todos">Espécie: Todos</option>
+                            <option value="Cachorro">Cachorro</option>
+                            <option value="Gato">Gato</option>
+                        </select>
+                    </div>
+                    <div className="col-md-4 col-sm-6">
+                        <select
+                            className="form-select py-2"
+                            value={filtroGenero}
+                            onChange={(e) => setFiltroGenero(e.target.value)}
+                            style={{ boxShadow: 'none', border: '1px solid #ced4da' }}
+                        >
+                            <option value="Todos">Gênero: Todos</option>
+                            <option value="M">Macho</option>
+                            <option value="F">Fêmea</option>
+                        </select>
+                    </div>
+                    <div className="col-md-4 col-sm-12">
+                        <select
+                            className="form-select py-2"
+                            value={filtroPorte}
+                            onChange={(e) => setFiltroPorte(e.target.value)}
+                            style={{ boxShadow: 'none', border: '1px solid #ced4da' }}
+                        >
+                            <option value="Todos">Porte: Todos</option>
+                            <option value="Pequeno">Pequeno</option>
+                            <option value="Médio">Médio</option>
+                            <option value="Grande">Grande</option>
+                        </select>
+                    </div>
+                </div>
+
                 {!loading && !error && (
                     <div className="mt-2 ps-1">
                         <small className="text-muted">
@@ -221,46 +281,29 @@ export default function AnimalList() {
                 )}
             </div>
 
-            {/* Tabela de Animais Ativos */}
-            <div className="table-responsive shadow-sm" style={{ borderRadius: '8px' }}>
-                <table className="table table-hover table-striped mb-0">
-                    <thead className="text-white" style={{ backgroundColor: primaryColor }}>
-                        <tr>
-                            <th className="py-3 ps-3">Nome</th>
-                            <th className="py-3">Espécie</th>
-                            <th className="py-3">Raça</th>
-                            <th className="py-3">Porte</th>
-                            <th className="py-3">Ação Rápida</th>
-                            <th className="py-3 pe-3" style={{ width: '180px' }}>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {loading ? (
-                            <tr>
-                                <td colSpan="6" className="text-center py-5">
-                                    <div className="spinner-border" style={{ color: primaryColor }} role="status"></div>
-                                </td>
-                            </tr>
-                        ) : animaisFiltrados.length > 0 ? (
-                            animaisFiltrados.map((animal) => (
-                                <AnimalRecord 
-                                    record={animal} 
-                                    deleteAnimal={deleteAnimal} 
-                                    marcarComoAdotado={marcarComoAdotado}
-                                    key={animal._id} 
-                                />
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="6" className="text-center text-muted py-5">
-                                    <i className="bi bi-heartbreak text-muted d-block mb-2" style={{ fontSize: '2rem' }}></i>
-                                    Nenhum animal abrigado no momento.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+            {/* Grid de Cards de Animais */}
+            {loading ? (
+                <div className="text-center py-5">
+                    <div className="spinner-border" style={{ color: primaryColor }} role="status"></div>
+                </div>
+            ) : animaisFiltrados.length > 0 ? (
+                <div className="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                    {animaisFiltrados.map((animal) => (
+                        <div className="col" key={animal._id}>
+                            <AnimalCard
+                                record={animal}
+                                deleteAnimal={deleteAnimal}
+                                marcarComoAdotado={marcarComoAdotado}
+                            />
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="text-center text-muted py-5">
+                    <i className="bi bi-heartbreak text-muted d-block mb-2" style={{ fontSize: '2rem' }}></i>
+                    Nenhum animal abrigado no momento.
+                </div>
+            )}
         </div>
     );
 }

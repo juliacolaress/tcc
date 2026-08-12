@@ -43,15 +43,6 @@ const fileFilter = (req, file, cb) => {
         return cb(new Error("Apenas imagens (jpeg, jpg, png, gif, webp) são permitidas."))
     }
 
-    const caminho = path.join(__dirname, "..", "uploads", file.filename)
-    if (fs.existsSync(caminho)) {
-        const buffer = fs.readFileSync(caminho)
-        if (!verificarMagicBytes(buffer)) {
-            fs.unlinkSync(caminho)
-            return cb(new Error("Arquivo corrompido ou tipo inválido."))
-        }
-    }
-
     cb(null, true)
 }
 
@@ -72,6 +63,12 @@ uploadRoutes.route("/upload").post(auth, upload.single("foto"), function (req, r
         return res.status(400).json({ mensagem: "Nenhum arquivo enviado." })
     }
 
+    const buffer = fs.readFileSync(req.file.path)
+    if (!verificarMagicBytes(buffer)) {
+        fs.unlink(req.file.path, () => {})
+        return res.status(400).json({ mensagem: "Arquivo corrompido ou tipo inválido." })
+    }
+
     const protocolo = extrairProtocolo(req)
     const url = `${protocolo}://${req.get("host")}/uploads/${req.file.filename}`
     res.status(201).json({ url, filename: req.file.filename })
@@ -80,6 +77,14 @@ uploadRoutes.route("/upload").post(auth, upload.single("foto"), function (req, r
 uploadRoutes.route("/upload/multiple").post(auth, upload.array("fotos", 3), function (req, res) {
     if (!req.files || req.files.length === 0) {
         return res.status(400).json({ mensagem: "Nenhum arquivo enviado." })
+    }
+
+    for (const file of req.files) {
+        const buffer = fs.readFileSync(file.path)
+        if (!verificarMagicBytes(buffer)) {
+            req.files.forEach(f => fs.unlink(f.path, () => {}))
+            return res.status(400).json({ mensagem: "Arquivo corrompido ou tipo inválido." })
+        }
     }
 
     const protocolo = extrairProtocolo(req)
