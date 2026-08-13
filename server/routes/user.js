@@ -141,16 +141,22 @@ userRoutes.route("/user/add").post(auth, async function (req, res) {
 userRoutes.route("/user/update/:id").post(auth, async function (req, res) {
     const db_connect = dbo.getDb()
     const myquery = { _id: new ObjectId(req.params.id) }
-    const newvalues = {
-        $set: {
-            name: req.body.name,
-            user: req.body.user,
-            email: req.body.email,
-            function: req.body.function
+
+    const fields = ["name", "user", "email", "function"]
+
+    const updateDoc = {}
+    fields.forEach(field => {
+        if (req.body[field] !== undefined) {
+            updateDoc[field] = req.body[field]
         }
+    })
+
+    if (Object.keys(updateDoc).length === 0) {
+        return res.status(400).json({ mensagem: "Nenhum dado para atualizar" })
     }
+
     try {
-        const result = await db_connect.collection("users").updateOne(myquery, newvalues)
+        const result = await db_connect.collection("users").updateOne(myquery, { $set: updateDoc })
         res.status(200).json(result)
     } catch (error) {
         res.status(409).json({ mensagem: error.message })

@@ -7,7 +7,10 @@ import { normalizeFotos } from "../utils/fotos";
 const AdoptedCard = ({ record }) => {
     const primaryColor = '#4a2511';
     const fotos = normalizeFotos(record);
-    const imagem = fotos.length > 0 ? fotos[0] : null;
+    const imagemPadrao = (record.especie || "").toLowerCase() === "gato"
+        ? "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=500"
+        : "https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=500";
+    const imagem = fotos.length > 0 ? fotos[0] : imagemPadrao;
 
     // Formata a data de adoção para o padrão brasileiro
     const formatDate = (dateStr) => {
@@ -21,13 +24,7 @@ const AdoptedCard = ({ record }) => {
     return (
         <div className="card border-0 shadow-sm h-100" style={{ borderRadius: '10px', overflow: 'hidden', backgroundColor: '#fff' }}>
             <div style={{ height: '220px', overflow: 'hidden', backgroundColor: '#f8f9fa' }}>
-                {imagem ? (
-                    <img src={imagem} className="w-100 h-100" style={{ objectFit: 'cover' }} alt={record.nome} />
-                ) : (
-                    <div className="w-100 h-100 d-flex align-items-center justify-content-center">
-                        <i className="bi bi-paw text-muted" style={{ fontSize: '3rem', opacity: '0.3' }}></i>
-                    </div>
-                )}
+                <img src={imagem} className="w-100 h-100" style={{ objectFit: 'cover' }} alt={record.nome} />
             </div>
             <div className="card-body d-flex flex-column p-3">
                 <h5 className="fw-bold mb-1" style={{ color: primaryColor }}>{record.nome}</h5>

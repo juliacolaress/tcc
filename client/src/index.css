@@ -7,18 +7,18 @@
   --color-bg-cream: #fdf8f4;
   --color-text-dark: #4a2511;
   --color-text-highlight: #4a2511;
-  --color-footer-bg: #0a0a0a;
+  --color-footer-bg: #4a2511;
 
   /* Cores de Botões */
   --color-btn-adote: #e2a36f;
-  --color-btn-doe: #f0c27b;
+  --color-btn-doe: #e2a36f;
   --color-btn-voluntario: #cf9b72;
   --color-btn-hover-adote: #d4935e;
-  --color-btn-hover-doe: #e2b36a;
+  --color-btn-hover-doe: #d4935e;
   --color-btn-hover-voluntario: #c08b61;
 
   /* Outras Cores */
-  --color-red-campaign: #dd1c1a;
+  --color-campaign-banner: #4a2511;
   --color-card-bg: #f2e8df;
 
   /* Tokens de Design */
@@ -184,7 +184,7 @@ a, button, span, select, input, textarea {
 
 /* Botão de Doação de Material */
 .btn-donate-material {
-  background-color: #a46843 !important;
+  background-color: #4a2511 !important;
   color: #ffffff !important;
   border-radius: var(--radius-pill) !important;
   font-weight: bold;
@@ -192,7 +192,135 @@ a, button, span, select, input, textarea {
   font-size: 1rem;
 }
 .btn-donate-material:hover {
-  background-color: #8b5636 !important;
+  background-color: #3a1d0e !important;
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
+}
+
+/* --- PAINEL ADMINISTRATIVO: SIDEBAR --- */
+.admin-sidebar {
+  width: 280px;
+  padding: 20px;
+  background-color: #ffffff;
+  border-right: 1px solid #eadfcf;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 1045;
+  transition: transform 0.25s ease;
+}
+
+.admin-sidebar-close {
+  background: transparent;
+  border: none;
+  color: #4a2511;
+  font-size: 1.2rem;
+  padding: 4px 8px;
+  line-height: 1;
+}
+
+.admin-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(74, 37, 17, 0.45);
+  z-index: 1040;
+}
+
+.admin-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-section-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #aa7a44;
+  margin: 18px 0 6px;
+  padding-left: 12px;
+}
+
+.admin-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #3a2a1d;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.admin-nav-link:hover {
+  background-color: #f7efe3;
+  color: #4a2511;
+}
+.admin-nav-link-active,
+.admin-nav-link-active:hover {
+  background-color: #4a2511;
+  color: #ffffff;
+}
+
+.admin-nav-icon {
+  font-size: 1.05rem;
+  color: #aa7a44;
+  width: 22px;
+  text-align: center;
+}
+.admin-nav-link-active .admin-nav-icon {
+  color: #ffffff;
+}
+
+.admin-main {
+  margin-left: 280px;
+  width: calc(100% - 280px);
+  padding: 24px;
+  min-height: 100vh;
+}
+
+.admin-topbar {
+  display: none;
+}
+
+@media (max-width: 991.98px) {
+  .admin-sidebar {
+    transform: translateX(-100%);
+    box-shadow: none;
+  }
+  .admin-sidebar-open {
+    transform: translateX(0);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.25);
+  }
+  .admin-main {
+    margin-left: 0;
+    width: 100%;
+    padding: 16px;
+  }
+  .admin-topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: #4a2511;
+    color: #ffffff;
+    padding: 10px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  .admin-topbar-btn {
+    background: rgba(255, 255, 255, 0.12);
+    border: none;
+    border-radius: 6px;
+    color: #ffffff;
+    padding: 6px 10px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .admin-topbar-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
 }

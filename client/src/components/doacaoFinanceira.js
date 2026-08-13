@@ -1,5 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import cores from '../theme';
+import API_BASE_URL from '../api/config';
+
+const CONFIG_PADRAO = {
+  razaoSocial: "Organização de Amparo Animal Patas & Lares",
+  cnpj: "00.000.000/0000-00",
+  banco: "Itaú (000)",
+  agencia: "0000",
+  contaCorrente: "00000-0",
+  chavePix: "00.000.000/0000-00",
+  qrCode: ""
+};
 
 function DoacaoFinanceira() {
   const navigate = useNavigate();
@@ -7,14 +19,56 @@ function DoacaoFinanceira() {
   // Controle do menu dropdown de Doações
   const [dropdownDoacoes, setDropdownDoacoes] = useState(false);
 
-  // Paleta de cores oficial do Patas & Lares
-  const cores = {
-    marromMenu: '#4a2511',       // Marrom clássico do topo e caixas de destaque
-    cremeFundo: '#fdf8f4',       // Fundo off-white suave da página
-    textoMarrom: '#4a2511',      // Tom marrom escuro dos títulos principais
-    textoDestaque: '#4a2511',    // Tom marrom médio para os subtítulos
-    rodapePreto: '#0a0a0a'       // Fundo escuro do rodapé
-  };
+  // Dados de doação carregados do servidor
+  const [config, setConfig] = useState(CONFIG_PADRAO);
+  const [copiado, setCopiado] = useState(false);
+
+  useEffect(() => {
+    let ativo = true;
+    fetch(`${API_BASE_URL}/configuracoes/doacao`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        if (!ativo) return;
+        setConfig({
+          razaoSocial: data.razaoSocial || CONFIG_PADRAO.razaoSocial,
+          cnpj: data.cnpj || CONFIG_PADRAO.cnpj,
+          banco: data.banco || CONFIG_PADRAO.banco,
+          agencia: data.agencia || CONFIG_PADRAO.agencia,
+          contaCorrente: data.contaCorrente || CONFIG_PADRAO.contaCorrente,
+          chavePix: data.chavePix || CONFIG_PADRAO.chavePix,
+          qrCode: data.qrCode || ""
+        });
+      })
+      .catch((error) => {
+        console.error("Erro ao carregar dados de doação:", error);
+      });
+    return () => { ativo = false; };
+  }, []);
+
+  async function copiarChavePix() {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(config.chavePix);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = config.chavePix;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2000);
+    } catch (error) {
+      console.error("Erro ao copiar chave PIX:", error);
+      window.alert(`Não foi possível copiar a chave. Copie manualmente: ${config.chavePix}`);
+    }
+  }
 
   return (
     <div style={{ fontFamily: 'Poppins, sans-serif', backgroundColor: cores.cremeFundo, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -61,6 +115,12 @@ function DoacaoFinanceira() {
               </li>
 
               <li className="nav-item"><span className="nav-link text-white" style={{ cursor: 'pointer' }}>Eventos</span></li>
+
+              <li className="nav-item">
+                <span className="nav-link text-white" style={{ cursor: 'pointer' }} onClick={() => navigate('/transparencia')}>
+                  Transparência
+                </span>
+              </li>
               
               <li className="nav-item">
                 <span className="nav-link text-white" style={{ cursor: 'pointer' }} onClick={() => navigate('/contato')}>
@@ -95,19 +155,38 @@ function DoacaoFinanceira() {
             </p>
 
             <h4 className="fw-bold mb-4" style={{ color: cores.textoDestaque }}>
-              Organização de Amparo Animal Patas & Lares
+              {config.razaoSocial}
             </h4>
 
             <div className="mb-5 text-dark lh-lg" style={{ fontSize: '1.1rem' }}>
-              <p className="mb-1"><strong>CNPJ</strong> 00.000.000/0000-00</p>
-              <p className="mb-1"><strong>Banco</strong> Itaú (000)</p>
-              <p className="mb-1"><strong>Agência</strong> 0000</p>
-              <p className="mb-1"><strong>Conta corrente</strong> 00000-0</p>
+              <p className="mb-1"><strong>CNPJ</strong> {config.cnpj}</p>
+              <p className="mb-1"><strong>Banco</strong> {config.banco}</p>
+              <p className="mb-1"><strong>Agência</strong> {config.agencia}</p>
+              <p className="mb-1"><strong>Conta corrente</strong> {config.contaCorrente}</p>
             </div>
 
             <div className="text-dark lh-lg" style={{ fontSize: '1.1rem' }}>
               <p className="mb-1"><strong>Doação via PIX</strong></p>
-              <p className="mb-1"><strong>Chave CNPJ</strong> 00.000.000/0000-00</p>
+              <div className="d-flex flex-wrap align-items-center gap-2 mb-1">
+                <p className="mb-0">
+                  <strong>Chave CNPJ</strong> {config.chavePix}
+                </p>
+                <button
+                  type="button"
+                  onClick={copiarChavePix}
+                  className="btn btn-sm d-inline-flex align-items-center gap-2 text-white"
+                  style={{
+                    backgroundColor: copiado ? '#2f8f46' : cores.marromClaro,
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontWeight: '500',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                >
+                  <i className={`bi ${copiado ? 'bi-clipboard-check' : 'bi-clipboard'}`}></i>
+                  {copiado ? 'Copiado! ✓' : 'Copiar Chave PIX'}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -121,28 +200,38 @@ function DoacaoFinanceira() {
                 Aponte seu celular para fazer sua doação via PIX QR code
               </h4>
               
-              {/* Container Branco do QR Code com o logo do Itaú simulado no centro */}
+              {/* Container Branco do QR Code */}
               <div 
                 className="bg-white p-4 rounded-4 shadow-sm position-relative d-flex align-items-center justify-content-center"
                 style={{ width: '280px', height: '280px' }}
               >
-                {/* Ícone Genérico de QR Code usando Bootstrap Icons para visualização fluida */}
-                <i className="bi bi-qr-code text-black" style={{ fontSize: '13.5rem' }}></i>
-                
-                {/* Selo Central do Banco (Ex: Itaú) */}
-                <div 
-                  className="position-absolute rounded-3 fw-bold d-flex align-items-center justify-content-center shadow-sm"
-                  style={{ 
-                    backgroundColor: '#ec7000', 
-                    color: '#fff', 
-                    width: '55px', 
-                    height: '55px', 
-                    fontSize: '0.85rem',
-                    border: '3px solid white' 
-                  }}
-                >
-                  itaú
-                </div>
+                {config.qrCode ? (
+                  <img
+                    src={config.qrCode}
+                    alt="QR Code PIX"
+                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                  />
+                ) : (
+                  <>
+                    {/* Ícone Genérico de QR Code usando Bootstrap Icons para visualização fluida */}
+                    <i className="bi bi-qr-code text-black" style={{ fontSize: '13.5rem' }}></i>
+
+                    {/* Selo Central do Banco (Ex: Itaú) */}
+                    <div 
+                      className="position-absolute rounded-3 fw-bold d-flex align-items-center justify-content-center shadow-sm"
+                      style={{ 
+                        backgroundColor: '#ec7000', 
+                        color: '#fff', 
+                        width: '55px', 
+                        height: '55px', 
+                        fontSize: '0.85rem',
+                        border: '3px solid white' 
+                      }}
+                    >
+                      {config.banco.split(" ")[0].toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -151,7 +240,7 @@ function DoacaoFinanceira() {
       </div>
 
       {/* 3. RODAPÉ OFICIAL */}
-      <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapePreto, fontSize: '0.9rem', borderTop: '4px solid #aa7a44' }}>
+      <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapeMarrom, fontSize: '0.9rem', borderTop: '4px solid #aa7a44' }}>
         <div className="container">
           <div className="row align-items-center g-3">
             
@@ -168,7 +257,7 @@ function DoacaoFinanceira() {
             </div>
 
             <div className="col-md-4 text-center text-md-start border-start-md ps-md-4" style={{ color: '#e0e0e0' }}>
-              <p className="mb-1 small">CNPJ 00.000.000/0000-00</p>
+              <p className="mb-1 small">CNPJ {config.cnpj}</p>
               <p className="mb-1 small">Sombrio/SC</p>
               <p className="mb-0 small">
                 Dúvidas e informações: <a href="mailto:pataselares@gmail.com" className="text-white text-decoration-underline">pataselares@gmail.com</a>

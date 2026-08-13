@@ -35,7 +35,11 @@ app.use(require("./routes/user"))
 app.use(require("./routes/animais"));
 app.use(require("./routes/doacao"));
 app.use(require("./routes/voluntarios"))
+app.use(require("./routes/necessidades"))
+app.use(require("./routes/eventos"))
 app.use(require("./routes/upload"))
+app.use(require("./routes/configuracoes"))
+app.use(require("./routes/relatorios"))
 
 const dbo = require("./db/conn")
 
@@ -45,6 +49,29 @@ app.get("/", function(req, res) {
 
 dbo.connectToMongoDB(function (error) {
     if (error) throw error
+
+    const db = dbo.getDb()
+
+    const configuracaoPadrao = {
+        razaoSocial: "Organização de Amparo Animal Patas & Lares",
+        cnpj: "00.000.000/0000-00",
+        banco: "Itaú (000)",
+        agencia: "0000",
+        contaCorrente: "00000-0",
+        chavePix: "00.000.000/0000-00",
+        qrCode: "",
+        atualizadoEm: new Date()
+    }
+
+    db.collection("configuracoes").updateOne(
+        {},
+        { $setOnInsert: configuracaoPadrao },
+        { upsert: true }
+    ).then(() => {
+        console.log("Configuração de doação padrão garantida no banco.")
+    }).catch((err) => {
+        console.error("Erro ao garantir configuração padrão:", err.message)
+    })
 
     app.listen(port, () => {
         console.log("Servidor rodando na porta: " + port)

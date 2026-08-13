@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import API_BASE_URL from '../api/config';
+import cores from '../theme';
 
 function DoacaoMaterial() {
   const navigate = useNavigate();
-  
+
   // Controle do menu dropdown de Doações
   const [dropdownDoacoes, setDropdownDoacoes] = useState(false);
 
@@ -11,36 +13,33 @@ function DoacaoMaterial() {
   const [exibirTutorial, setExibirTutorial] = useState(false);
   const [passoTutorial, setPassoTutorial] = useState(1);
 
-  // Paleta de cores oficial do Patas & Lares
-  const cores = {
-    marromMenu: '#4a2511',       // Marrom clássico do topo e caixas de destaque
-    cremeFundo: '#fdf8f4',       // Fundo off-white suave da página
-    textoMarrom: '#4a2511',      // Tom marrom escuro dos títulos principais
-    textoDestaque: '#4a2511',    // Tom marrom médio para os subtítulos
-    rodapePreto: '#0a0a0a',      // Fundo escuro do rodapé
-    marromTutorial: '#b38b6d'    // Tom marrom médio do container de tutorial
-  };
+  // Necessidades cadastradas no painel administrativo
+  const [necessidades, setNecessidades] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Dados fictícios estruturados baseados nas imagens para renderização limpa
-  const categorias = {
-    alimentacao: [
-      { id: 1, nome: "Ração Seca Pedigree para Cães Adultos Raças Pequenas – 10.1kg", img: "https://placehold.co/200x250?text=Pedigree+10kg" },
-      { id: 2, nome: "Ração para Gatos Whiskas Sabor Peixe – Pacote – 10kg", img: "https://placehold.co/200x250?text=Whiskas+10kg" },
-      { id: 3, nome: "Ração Úmida Whiskas Sachê Frango para Gatos Adultos – 85g", img: "https://placehold.co/200x250?text=Whiskas+Sache" },
-      { id: 4, nome: "Ração Úmida Pedigree Sachê Carne ao Molho para Cães Adultos de Raças Pequenas – 100g", img: "https://placehold.co/200x250?text=Pedigree+Sache" }
-    ],
-    higiene: [
-      { id: 5, nome: "Shampoo Sanol Dog Neutro para Cães e Gatos - 500ml", img: "https://placehold.co/200x250?text=Sanol+Dog" },
-      { id: 6, nome: "Areia Higiênica Pipicat Campestre para Gatos – 4kg", img: "https://placehold.co/200x250?text=Pipicat+4kg" },
-      { id: 7, nome: "Produtos de limpeza variados: água sanitária, desinfetante, detergente, sabão em pó, sabão em barra e panos de chão.", img: "https://placehold.co/200x250?text=Kits+Limpeza" }
-    ],
-    bemEstar: [
-      { id: 8, nome: "Casinha de plástico para oferecer abrigo seguro e confortável aos animais.", img: "https://placehold.co/200x200?text=Casinha" },
-      { id: 9, nome: "Arranhadores simples para os gatos se exercitarem e manterem as unhas saudáveis.", img: "https://placehold.co/200x200?text=Arranhador" },
-      { id: 10, nome: "Camas e colchonetes, artesanais ou comprados, para os animais descansarem.", img: "https://placehold.co/200x200?text=Cama+Pet" },
-      { id: 11, nome: "Coleiras e guias de nylon simples para passeios seguros dos animais.", img: "https://placehold.co/200x200?text=Coleiras" }
-    ]
-  };
+  const secoes = [
+    { chave: 'Ração', titulo: 'Alimentação', descricao: 'Veja os alimentos que gostaríamos de receber para garantir a nutrição dos nossos amigos de quatro patas.' },
+    { chave: 'Medicamentos', titulo: 'Medicamentos', descricao: 'Ajuda a manter nossos animais saudáveis e tratados.' },
+    { chave: 'Higiene', titulo: 'Higiene', descricao: 'Garanta um ambiente limpo e saudável para nossos animais resgatados.' },
+    { chave: 'Suprimentos', titulo: 'Bem-estar', descricao: 'Ajude a proporcionar conforto e momentos de alegria para cada pet que acolhemos.' },
+    { chave: 'Outros', titulo: 'Outros Itens', descricao: 'Qualquer outro item que possa ajudar a ONG.' }
+  ];
+
+  useEffect(() => {
+    async function carregarNecessidades() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/necessidades`);
+        if (!response.ok) throw new Error(response.statusText);
+        const data = await response.json();
+        setNecessidades(Array.isArray(data) ? data : (data.data || []));
+      } catch (error) {
+        console.error('Erro ao carregar necessidades:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    carregarNecessidades();
+  }, []);
 
   return (
     <div style={{ fontFamily: 'Poppins, sans-serif', backgroundColor: cores.cremeFundo, minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
@@ -84,6 +83,9 @@ function DoacaoMaterial() {
                 <span className="nav-link text-white" style={{ cursor: 'pointer' }}>Eventos</span>
               </li>
               <li className="nav-item">
+                <span className="nav-link text-white" style={{ cursor: 'pointer' }} onClick={() => navigate('/transparencia')}>Transparência</span>
+              </li>
+              <li className="nav-item">
                 <span className="nav-link text-white" style={{ cursor: 'pointer' }} onClick={() => navigate('/contato')}>Contato</span>
               </li>
             </ul>
@@ -113,72 +115,57 @@ function DoacaoMaterial() {
           </button>
         </div>
 
-        {/* SEÇÃO 1: ALIMENTAÇÃO */}
-        <section className="mb-5 text-start">
-          <h3 className="fw-bold" style={{ color: cores.textoDestaque }}>Alimentação</h3>
-          <p className="text-muted fs-5 mb-4">Veja os alimentos que gostaríamos de receber para garantir a nutrição dos nossos amigos de quatro patas.</p>
-          <div className="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
-            {categorias.alimentacao.map(item => (
-              <div className="col" key={item.id}>
-                <div className="card h-100 border-0 bg-transparent text-start transition-hover" style={{ transition: '0.3s' }}>
-                  <div className="d-flex justify-content-center align-items-center p-3 bg-white rounded-4 shadow-sm" style={{ minHeight: '260px' }}>
-                    <img src={item.img} alt={item.nome} className="img-fluid object-fit-contain" style={{ maxHeight: '220px' }} />
-                  </div>
-                  <div className="card-body px-1 pt-3">
-                    <p className="card-text text-dark small lh-sm fw-medium">{item.nome}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
+        {loading ? (
+          <div className="text-center py-5">
+            <div className="spinner-border" style={{ color: cores.textoMarrom }} role="status"></div>
           </div>
-        </section>
-
-        {/* SEÇÃO 2: HIGIENE */}
-        <section className="mb-5 text-start">
-          <h3 className="fw-bold" style={{ color: cores.textoDestaque }}>Higiene</h3>
-          <p className="text-muted fs-5 mb-4">Garanta um ambiente limpo e saudável para nossos animais resgatados.</p>
-          <div className="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
-            {categorias.higiene.map(item => (
-              <div className="col" key={item.id}>
-                <div className="card h-100 border-0 bg-transparent text-start">
-                  <div className="d-flex justify-content-center align-items-center p-3 bg-white rounded-4 shadow-sm" style={{ minHeight: '260px' }}>
-                    <img src={item.img} alt={item.nome} className="img-fluid object-fit-contain" style={{ maxHeight: '220px' }} />
-                  </div>
-                  <div className="card-body px-1 pt-3">
-                    <p className="card-text text-dark small lh-sm fw-medium">{item.nome}</p>
-                  </div>
+        ) : necessidades.length === 0 ? (
+          <p className="text-muted fs-5">Nenhuma necessidade de doação cadastrada no momento. Volte em breve!</p>
+        ) : (
+          secoes.map(sec => {
+            const itens = necessidades.filter(n => n.categoria === sec.chave);
+            if (itens.length === 0) return null;
+            return (
+              <section className="mb-5 text-start" key={sec.chave}>
+                <h3 className="fw-bold" style={{ color: cores.textoDestaque }}>{sec.titulo}</h3>
+                <p className="text-muted fs-5 mb-4">{sec.descricao}</p>
+                <div className="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+                  {itens.map(item => (
+                    <div className="col" key={item._id}>
+                      <div className="card h-100 border-0 bg-transparent text-start" style={{ transition: '0.3s' }}>
+                        <div className="d-flex justify-content-center align-items-center p-3 bg-white rounded-4 shadow-sm" style={{ minHeight: '260px', overflow: 'hidden' }}>
+                          {item.imagem ? (
+                            <img src={item.imagem} alt={item.titulo} className="img-fluid object-fit-contain" style={{ maxHeight: '220px' }} />
+                          ) : (
+                            <i className="bi bi-box-seam" style={{ fontSize: '3rem', color: cores.marromClaro, opacity: '0.6' }}></i>
+                          )}
+                        </div>
+                        <div className="card-body px-1 pt-3">
+                          <p className="card-text text-dark small lh-sm fw-medium mb-1">{item.titulo}</p>
+                          {item.quantidade_desejada && (
+                            <p className="mb-1 small fw-bold" style={{ color: cores.textoDestaque }}>
+                              <i className="bi bi-bag me-1"></i>{item.quantidade_desejada}
+                            </p>
+                          )}
+                          {item.descricao && (
+                            <p className="card-text text-muted small lh-sm mb-0" style={{ fontSize: '0.8rem' }}>{item.descricao}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* SEÇÃO 3: BEM-ESTAR */}
-        <section className="mb-5 text-start">
-          <h3 className="fw-bold" style={{ color: cores.textoDestaque }}>Bem-estar</h3>
-          <p className="text-muted fs-5 mb-4">Ajude a proporcionar conforto e momentos de alegria para cada pet que acolhemos.</p>
-          <div className="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
-            {categorias.bemEstar.map(item => (
-              <div className="col" key={item.id}>
-                <div className="card h-100 border-0 bg-transparent text-start">
-                  <div className="d-flex justify-content-center align-items-center p-3 bg-white rounded-4 shadow-sm" style={{ minHeight: '220px' }}>
-                    <img src={item.img} alt={item.nome} className="img-fluid object-fit-contain" style={{ maxHeight: '180px' }} />
-                  </div>
-                  <div className="card-body px-1 pt-3">
-                    <p className="card-text text-dark small lh-sm fw-medium">{item.nome}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+              </section>
+            );
+          })
+        )}
 
         {/* 3. CONTROLLER DA CAIXA FLUTUANTE DO TUTORIAL (LATERAL DIREITA) */}
         {exibirTutorial && (
           <div 
             className="position-fixed rounded-4 p-4 text-start shadow-lg d-flex flex-column gap-3"
             style={{ 
-              backgroundColor: '#ad8262', 
+              backgroundColor: cores.marromClaro, 
               width: '380px', 
               right: '30px', 
               bottom: '100px', 
@@ -191,7 +178,7 @@ function DoacaoMaterial() {
             <div className="d-flex justify-content-between align-items-center mb-2">
               <div className="d-flex align-items-center gap-2">
                 <div className="bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: '40px', height: '40px' }}>
-                  <i className="bi bi-paw-fill" style={{ color: '#ad8262' }}></i>
+                  <i className="bi bi-paw-fill" style={{ color: cores.marromClaro }}></i>
                 </div>
                 <span className="text-white fw-bold">Suporte Patas & Lares</span>
               </div>
@@ -272,18 +259,24 @@ function DoacaoMaterial() {
                 </div>
               )}
 
-              {passoTutorial >= 5 && (
+              {passoTutorial >= 5 && necessidades.length > 0 && (
                 <div className="d-flex flex-column gap-2 mb-3">
                   <div className="bg-white text-dark p-3 rounded-4 rounded-tl-0 shadow-sm">
                     <p className="mb-2 small fw-bold">Aqui estão alguns exemplos do que precisamos agora:</p>
                     <div className="d-flex gap-2 overflow-auto pb-2 mb-2" style={{ scrollbarWidth: 'none' }}>
-                      {categorias.alimentacao.slice(0, 2).concat(categorias.higiene.slice(0, 1)).map(item => (
-                        <div key={item.id} className="text-center" style={{ minWidth: '80px' }}>
-                          <img src={item.img} alt={item.nome} style={{ width: '80px', height: '100px', objectFit: 'contain', borderRadius: '8px', border: '1px solid #eee' }} />
+                      {necessidades.slice(0, 3).map(item => (
+                        <div key={item._id} className="text-center" style={{ minWidth: '80px' }}>
+                          {item.imagem ? (
+                            <img src={item.imagem} alt={item.titulo} style={{ width: '80px', height: '100px', objectFit: 'contain', borderRadius: '8px', border: '1px solid #eee' }} />
+                          ) : (
+                            <div className="d-flex align-items-center justify-content-center" style={{ width: '80px', height: '100px', borderRadius: '8px', border: '1px solid #eee', backgroundColor: '#f8f9fa' }}>
+                              <i className="bi bi-box-seam text-muted" style={{ fontSize: '1.5rem' }}></i>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
-                    <p className="mb-0 small text-muted">Rações, areia higiênica, shampoos e muito mais!</p>
+                    <p className="mb-0 small text-muted">Rações, areia higiênica, medicamentos e muito mais!</p>
                   </div>
                   {passoTutorial === 5 && (
                     <div className="d-flex justify-content-end">
@@ -328,7 +321,7 @@ function DoacaoMaterial() {
       </div>
 
       {/* 4. RODAPÉ OFICIAL */}
-      <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapePreto, fontSize: '0.9rem', borderTop: '4px solid #aa7a44' }}>
+      <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapeMarrom, fontSize: '0.9rem', borderTop: '4px solid #aa7a44' }}>
         <div className="container">
           <div className="row align-items-center g-3">
             <div className="col-md-4 d-flex align-items-center justify-content-center justify-content-md-start">

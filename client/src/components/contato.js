@@ -1,20 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import cores from '../theme';
 
 function Contato() {
   const navigate = useNavigate();
   
   // Controle do menu de Doações via clique (estável)
   const [dropdownDoacoes, setDropdownDoacoes] = useState(false);
-
-  // Paleta de cores oficial do Patas & Lares
-  const cores = {
-    marromMenu: '#4a2511',       // Marrom clássico do topo
-    cremeFundo: '#fdf8f4',       // Fundo off-white suave da página
-    textoMarrom: '#4a2511',      // Tom marrom escuro dos títulos principais
-    textoDestaque: '#4a2511',    // Tom marrom médio para os subtítulos/ícones
-    rodapePreto: '#0a0a0a'       // Fundo escuro do rodapé
-  };
 
   return (
     <div style={{ fontFamily: 'Poppins, sans-serif', backgroundColor: cores.cremeFundo, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -72,6 +64,17 @@ function Contato() {
                   onClick={() => { navigate('/eventos'); setDropdownDoacoes(false); }}
                 >
                   Eventos
+                </span>
+              </li>
+
+              {/* Link de Transparência */}
+              <li className="nav-item">
+                <span 
+                  className="nav-link text-white" 
+                  style={{ cursor: 'pointer' }} 
+                  onClick={() => { navigate('/transparencia'); setDropdownDoacoes(false); }}
+                >
+                  Transparência
                 </span>
               </li>
               
@@ -200,7 +203,7 @@ function Contato() {
       </div>
 
       {/* 3. RODAPÉ OFICIAL */}
-      <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapePreto, fontSize: '0.9rem', borderTop: '4px solid #aa7a44' }}>
+      <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapeMarrom, fontSize: '0.9rem', borderTop: '4px solid #aa7a44' }}>
         <div className="container">
           <div className="row align-items-center g-3">
             

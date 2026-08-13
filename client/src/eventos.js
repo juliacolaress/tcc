@@ -1,5 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import cores from './theme';
+import API_BASE_URL from './api/config';
+
+function formatarData(valor) {
+    if (!valor) return "";
+    const texto = valor instanceof Date ? valor.toISOString() : String(valor);
+    const partes = texto.slice(0, 10).split("-");
+    if (partes.length !== 3) return String(valor);
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
 
 function Eventos() {
   const navigate = useNavigate();
@@ -7,21 +17,25 @@ function Eventos() {
   // Controle do menu dropdown de Doações (via clique para não sumir do nada)
   const [dropdownDoacoes, setDropdownDoacoes] = useState(false);
 
-  // Paleta de cores oficial do Patas & Lares
-  const cores = {
-    marromMenu: '#4a2511',       // Marrom clássico do topo e destaques
-    cremeFundo: '#fdf8f4',       // Fundo off-white suave da página
-    textoMarrom: '#4a2511',      // Tom marrom escuro dos títulos principais
-    textoDestaque: '#a46843',    // Tom marrom médio para botões e links ativos
-    rodapePreto: '#0a0a0a'       // Fundo escuro do rodapé
-  };
+  // Eventos cadastrados no painel administrativo
+  const [eventos, setEventos] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Dados dos cartazes de eventos baseados na imagem image_c150be.png
-  const listaEventos = [
-    { id: 1, alt: "Castração Gratuita para Cães e Gatos", img: "https://placehold.co/350x450?text=Castração+Gratuita" },
-    { id: 2, alt: "Carômetro: Doguinhos Disponíveis para Adoção", img: "https://placehold.co/350x450?text=Carômetro+Adoção" },
-    { id: 3, alt: "Campanha Seja um Voluntário: Eles precisam de você", img: "https://placehold.co/350x450?text=Seja+Voluntário" }
-  ];
+  useEffect(() => {
+    async function carregarEventos() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/eventos`);
+        if (!response.ok) throw new Error(response.statusText);
+        const data = await response.json();
+        setEventos(Array.isArray(data) ? data : (data.data || []));
+      } catch (error) {
+        console.error('Erro ao carregar eventos:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    carregarEventos();
+  }, []);
 
   return (
     <div style={{ fontFamily: 'Poppins, sans-serif', backgroundColor: cores.cremeFundo, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -72,6 +86,12 @@ function Eventos() {
                   Eventos
                 </span>
               </li>
+
+              <li className="nav-item">
+                <span className="nav-link text-white" style={{ cursor: 'pointer' }} onClick={() => navigate('/transparencia')}>
+                  Transparência
+                </span>
+              </li>
               
               <li className="nav-item">
                 <span className="nav-link text-white" style={{ cursor: 'pointer' }} onClick={() => navigate('/contato')}>
@@ -96,13 +116,13 @@ function Eventos() {
         
         {/* Topo: Título e Botão Seja Voluntário */}
         <div className="d-flex justify-content-between align-items-center mb-4 mt-2">
-          <h1 className="fw-bold mb-0" style={{ color: '#b08a68', fontSize: '3rem' }}>
+          <h1 className="fw-bold mb-0" style={{ color: cores.textoMarrom, fontSize: '3rem' }}>
             Participe dos Nossos Eventos
           </h1>
           <button 
             className="btn text-white px-4 py-2 rounded-pill fw-bold" 
             style={{ backgroundColor: cores.textoDestaque, fontSize: '1rem', border: 'none' }}
-            onClick={() => navigate('/contato')}
+            onClick={() => navigate('/seja-voluntario')}
           >
             Seja Voluntário
           </button>
@@ -114,20 +134,58 @@ function Eventos() {
         </p>
 
         {/* Fileira de Cartazes dos Eventos */}
-        <div className="row row-cols-1 row-cols-md-3 g-4 mb-5 justify-content-center">
-          {listaEventos.map((evento) => (
-            <div className="col d-flex justify-content-center" key={evento.id}>
-              <div className="card border-0 bg-white rounded shadow-sm overflow-hidden p-2" style={{ maxWidth: '340px' }}>
-                <img 
-                  src={evento.img} 
-                  alt={evento.alt} 
-                  className="img-fluid rounded object-fit-cover" 
-                  style={{ width: '100%', height: 'auto', minHeight: '380px' }}
-                />
+        {loading ? (
+          <div className="text-center py-5">
+            <div className="spinner-border" style={{ color: cores.textoMarrom }} role="status"></div>
+          </div>
+        ) : eventos.length === 0 ? (
+          <div className="text-center py-5" style={{ color: cores.textoMarrom }}>
+            <i className="bi bi-calendar-x fs-1"></i>
+            <p className="mt-2 fs-5">Nenhum evento agendado no momento. Volte em breve!</p>
+          </div>
+        ) : (
+          <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5 justify-content-center">
+            {eventos.map((evento) => (
+              <div className="col d-flex justify-content-center" key={evento._id}>
+                <div className="card border-0 bg-white rounded-4 shadow-sm overflow-hidden" style={{ maxWidth: '360px', width: '100%', border: '1px solid rgba(170, 122, 68, 0.3)' }}>
+                  <div className="d-flex align-items-center justify-content-center bg-white p-3" style={{ height: '220px', overflow: 'hidden' }}>
+                    {evento.imagem ? (
+                      <img
+                        src={evento.imagem}
+                        alt={evento.titulo}
+                        className="img-fluid object-fit-contain"
+                        style={{ maxHeight: '200px' }}
+                      />
+                    ) : (
+                      <i className="bi bi-calendar-event" style={{ fontSize: '3.5rem', color: cores.marromClaro, opacity: '0.6' }}></i>
+                    )}
+                  </div>
+                  <div className="card-body p-4 text-start">
+                    <h5 className="fw-bold mb-2" style={{ color: cores.textoMarrom }}>{evento.titulo}</h5>
+                    <div className="d-flex flex-wrap gap-3 small text-muted mb-2">
+                      <span className="d-inline-flex align-items-center">
+                        <i className="bi bi-calendar3 me-1"></i> {formatarData(evento.data)}
+                      </span>
+                      {evento.horario && (
+                        <span className="d-inline-flex align-items-center">
+                          <i className="bi bi-clock me-1"></i> {evento.horario}
+                        </span>
+                      )}
+                      {evento.local && (
+                        <span className="d-inline-flex align-items-center">
+                          <i className="bi bi-geo-alt me-1"></i> {evento.local}
+                        </span>
+                      )}
+                    </div>
+                    {evento.descricao && (
+                      <p className="card-text text-muted small lh-sm mb-0" style={{ fontSize: '0.85rem' }}>{evento.descricao}</p>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Texto Informativo de Fechamento */}
         <p className="fs-5 text-dark text-start lh-base mt-4" style={{ opacity: 0.9 }}>
@@ -137,7 +195,7 @@ function Eventos() {
       </div>
 
       {/* 3. RODAPÉ OFICIAL */}
-      <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapePreto, fontSize: '0.9rem', borderTop: '4px solid #aa7a44' }}>
+      <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapeMarrom, fontSize: '0.9rem', borderTop: '4px solid #aa7a44' }}>
         <div className="container">
           <div className="row align-items-center g-3">
             

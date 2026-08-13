@@ -248,3 +248,83 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5050";
 | Frontend | 7/7 |
 | Dependências | 1/1 |
 | **Total** | **17/17** |
+
+---
+
+# Sessão 12/08/2026
+
+## 1. Conexão com MongoDB (Correção de DNS no Node)
+
+**Problema:** o servidor não conectava ao MongoDB Atlas — erro `querySrv ECONNREFUSED _mongodb._tcp.cluster0.lbynqie.mongodb.net`.
+
+**Causa raiz:** o Node (c-ares) estava usando `127.0.0.1` como servidor DNS (`dns.getServers()` → `['127.0.0.1']`), com nada escutando na porta 53. Toda consulta DNS do Node falhava; o Windows continuava funcionando porque usa os DNS da operadora (`177.72.25.70`, `177.72.27.70`). Como a URI `mongodb+srv://` exige consulta DNS SRV, a conexão ao Atlas quebrava.
+
+**Correção aplicada em `server/server.js`:**
+```javascript
+const dns = require("dns")
+
+const fallbackDnsServers = ["1.1.1.1", "8.8.8.8"]
+
+function ensureValidDns() {
+    const servers = dns.getServers()
+    const valid = servers.filter((s) => !s.startsWith("127.") && s !== "::1")
+    if (valid.length === 0) {
+        dns.setServers(fallbackDnsServers)
+    } else if (valid.length !== servers.length) {
+        dns.setServers(valid)
+    }
+}
+
+ensureValidDns()
+```
+Testado: servidor conecta ao MongoDB e responde `PING: { ok: 1 }`.
+
+## 2. Doações e Voluntários não carregavam no painel
+
+**Problema:** só os animais apareciam; doações e voluntários ficavam zerados.
+
+**Causa:** as rotas `/doacoes` e `/voluntarios` exigem autenticação (`auth`), enquanto `/animal` é pública. Com o token expirado (validade de 1h) ou antigo, as duas chamadas protegidas retornavam 401 e o front falhava em silêncio.
+
+**Correções:**
+- `server/routes/user.js` — validade do JWT alterada de `1h` para `7d` (login e registro).
+- `client/src/index.js` — interceptador global de `fetch`: em resposta 401, remove o token do `localStorage` e redireciona para `/login`.
+
+## 3. Erro de upload de imagens ("Erro ao conectar ao servidor")
+
+**Problema:** enviar formulário com imagem mostrava o alerta genérico "Erro ao conectar ao servidor".
+
+**Causa raiz:** no `fileFilter` de `server/routes/upload.js`, o código usava `file.filename` para montar um caminho e validar magic bytes. No multer o `fileFilter` roda **antes** do `diskStorage.filename`, então `file.filename` é `undefined` — no Node 24, `path.join(..., undefined)` lança `ERR_INVALID_ARG_TYPE`, fazendo **todo** upload falhar.
+
+**Correções:**
+- `server/routes/upload.js` — removido o bloco quebrado do `fileFilter`; validação de magic bytes movida para os handlers `/upload` e `/upload/multiple`, usando `req.file.path` (após o multer salvar) e apagando o arquivo se inválido.
+- `client/src/components/createAnimais.js` e `editAnimais.js` — `uploadFotos` agora exibe a `mensagem` real retornada pelo servidor, e o `catch` mostra `error.message`.
+
+Testado: PNG válido → 201 com URL; arquivo com magic bytes inválidos → 400 "Arquivo corrompido ou tipo inválido." (arquivo deletado).
+
+## 4. Filtros na página "Animais Abrigados"
+
+`client/src/components/animalList.js` — adicionados seletores de filtro (Espécie, Gênero, Porte) que atualizam a lista em tempo real junto com a barra de busca. Comparações case-insensitive (o banco tem registro `cachorro` minúsculo). Gênero usa valores `M`/`F`.
+
+## 5. Grid de Cards na página "Animais Abrigados"
+
+`client/src/components/animalList.js` — tabela substituída por grid responsivo de cards (1/2/3 colunas), cada um com foto principal no topo, nome em destaque, badges (Espécie, Raça, Gênero, Porte) e botão "Adotar". Botões Editar/Excluir mantidos abaixo. Sem foto cadastrada → área neutra com ícone de pata (sem imagem de fallback).
+
+## 6. Grid de Cards no "Histórico de Adoções"
+
+`client/src/components/adotadosList.js` — mesma conversão para cards: foto (apenas se houver cadastro, senão fica sem), nome, badge "Adotado", badges de Espécie/Raça/Gênero/Porte, adotante, data de adoção (pt-BR) e botão "Gerenciar" que leva à edição/devolução.
+
+## 7. Arquivos Modificados nesta Sessão
+
+| Arquivo | Mudança |
+|---------|---------|
+| `server/server.js` | Fallback de DNS para conectar ao MongoDB |
+| `server/routes/user.js` | JWT `expiresIn` de 1h → 7d |
+| `server/routes/upload.js` | Correção da validação de magic bytes (fileFilter → handlers) |
+| `client/src/index.js` | Interceptador de `fetch` — redireciona ao login em 401 |
+| `client/src/components/createAnimais.js` | Mensagem real do servidor no upload |
+| `client/src/components/editAnimais.js` | Mensagem real do servidor no upload |
+| `client/src/components/animalList.js` | Filtros (espécie/gênero/porte) + grid de cards sem foto de fallback |
+| `client/src/components/adotadosList.js` | Grid de cards sem foto de fallback |
+| `docs/conversa.md` | Registro desta sessão |
+
+**Observação de segurança:** o `server/.env` contém a URI real do Atlas com credenciais e já está commitado no git — recomenda-se rodar novamente o procedimento de sanitização/rotação de credenciais descrito na auditoria anterior.

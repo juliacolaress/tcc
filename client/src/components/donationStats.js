@@ -72,11 +72,11 @@ export default function DonationStats() {
                 </div>
                 <button 
                     type="button"
-                    onClick={() => navigate("/home")} 
+                    onClick={() => navigate("/dashboard")} 
                     className="btn px-4 py-2" 
                     style={{ borderRadius: '6px', color: primaryColor, borderColor: primaryColor, fontWeight: '500' }}
                 >
-                    <i className="bi bi-arrow-left me-2"></i> Voltar ao Início
+                    <i className="bi bi-arrow-left me-2"></i> Voltar ao Dashboard
                 </button>
             </div>
 

@@ -6,6 +6,7 @@ export default function Dashboard() {
   const [totalAnimais, setTotalAnimais] = useState(0);
   const [totalArrecadado, setTotalArrecadado] = useState(0);
   const [totalVoluntarios, setTotalVoluntarios] = useState(0);
+  const [totalPendentes, setTotalPendentes] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,6 +40,7 @@ export default function Dashboard() {
           const voluntariosData = await voluntariosRes.json();
           const listaVoluntarios = Array.isArray(voluntariosData) ? voluntariosData : (voluntariosData.data || []);
           setTotalVoluntarios(listaVoluntarios.length);
+          setTotalPendentes(listaVoluntarios.filter((v) => (v.status || 'Ativo') === 'Pendente').length);
         }
       } catch (error) {
         console.error('Erro de conexão com o backend:', error);
@@ -76,6 +78,41 @@ export default function Dashboard() {
       </div>
 
       <hr className="mb-4" />
+
+      {/* Card de Notificação: Solicitações de Voluntários Pendentes */}
+      <Link to="/voluntarios" state={{ abrirCaixa: true }} style={{ textDecoration: 'none', color: 'inherit' }}>
+        <div
+          className="card border-0 shadow-sm mb-4"
+          style={{
+            borderRadius: '12px',
+            backgroundColor: totalPendentes > 0 ? '#fff8e6' : '#f2f2f2',
+            borderLeft: totalPendentes > 0 ? '6px solid #f0ad4e' : '6px solid #c8c8c8',
+            cursor: 'pointer'
+          }}
+        >
+          <div className="card-body d-flex flex-wrap justify-content-between align-items-center gap-3 py-3 px-4">
+            <div className="d-flex align-items-center gap-3">
+              <div
+                className="rounded-circle d-flex align-items-center justify-content-center"
+                style={{ width: '52px', height: '52px', backgroundColor: totalPendentes > 0 ? '#ffecb3' : '#e0e0e0' }}
+              >
+                <i className={`bi ${totalPendentes > 0 ? 'bi-inbox-fill' : 'bi-inbox'} fs-3`} style={{ color: totalPendentes > 0 ? '#8a6d1d' : '#888' }}></i>
+              </div>
+              <div>
+                <span className="text-muted small text-uppercase fw-bold d-block" style={{ color: totalPendentes > 0 ? '#8a6d1d' : '#666' }}>
+                  Solicitações de Voluntários Pendentes
+                </span>
+                <h3 className="fw-bold mb-0" style={{ color: totalPendentes > 0 ? '#856404' : '#666' }}>
+                  {loading ? <span className="spinner-border spinner-border-sm" role="status"></span> : totalPendentes}
+                </h3>
+              </div>
+            </div>
+            <span className="btn px-4 py-2 text-white shadow-sm" style={{ backgroundColor: totalPendentes > 0 ? '#f0ad4e' : '#8a8a8a', borderRadius: '6px', fontWeight: '500' }}>
+              <i className="bi bi-arrow-right-circle me-2"></i> Ir para a Caixa de Entrada
+            </span>
+          </div>
+        </div>
+      </Link>
 
       {/* Grid de Cards Indicadores */}
       <div className="row g-4 mb-5">

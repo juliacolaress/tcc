@@ -11,7 +11,9 @@ export default function CreateDoacaoMaterial() {
         cidade: "",     
         estado: "",
         tipo_doacao: "",
+        categoria: "material",
         item: "",
+        quantidade: "",
         valor: 0,
         forma_entrega: ""
     });
@@ -131,10 +133,15 @@ export default function CreateDoacaoMaterial() {
                                 <option value="">Selecione...</option>
                                 <option value="Ração">Ração</option>
                                 <option value="Medicamento">Medicamento</option>
+                                <option value="Suprimentos">Suprimentos</option>
                                 <option value="Outros">Outros</option>
                             </select>
                         </div>
                         <div className="form-group col-md-6 mb-3">
+                            <label style={labelStyle}>Quantidade</label>
+                            <input type="text" className="form-control px-3 py-2" style={inputStyle} value={form.quantidade} onChange={(e) => updateForm({ quantidade: e.target.value })} placeholder="Ex: 2 sacos de 15kg / 3 caixas" />
+                        </div>
+                        <div className="form-group col-md-12 mb-3">
                             <label style={labelStyle}>Descrição do Item</label>
                             <input type="text" className="form-control px-3 py-2" style={inputStyle} value={form.item} onChange={(e) => updateForm({ item: e.target.value })} placeholder="Ex: Ração para Cão Adulto 15kg" required />
                         </div>

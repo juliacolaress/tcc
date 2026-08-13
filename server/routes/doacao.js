@@ -9,6 +9,30 @@ const validarDoacao = [
     body("nome").trim().notEmpty().withMessage("Nome é obrigatório"),
     body("email").trim().notEmpty().withMessage("Email é obrigatório").isEmail().withMessage("Email inválido"),
     body("tipo_doacao").trim().notEmpty().withMessage("Tipo de doação é obrigatório"),
+    body("categoria").optional().isIn(["financeira", "material"]).withMessage("Categoria deve ser 'financeira' ou 'material'"),
+]
+
+function normalizarCategoria(req) {
+    const categoria = (req.body.categoria || "").trim()
+    if (categoria === "financeira" || categoria === "material") return categoria
+    return (req.body.tipo_doacao || "").trim() === "Dinheiro" ? "financeira" : "material"
+}
+
+const validarValorDoacao = [
+    body("valor").custom((valor, { req }) => {
+        const tipo = (req.body.tipo_doacao || "").trim()
+        const valorNumerico = parseFloat(valor)
+
+        if (tipo === "Dinheiro" && (isNaN(valorNumerico) || valorNumerico <= 0)) {
+            throw new Error("Valor da doação deve ser maior que zero")
+        }
+
+        if (valor !== undefined && valor !== "" && !isNaN(valorNumerico) && valorNumerico < 0) {
+            throw new Error("Valor da doação não pode ser negativo")
+        }
+
+        return true
+    }),
 ]
 
 doacoesRoutes.route("/doacoes").get(auth, async function (req, res) {
@@ -33,7 +57,7 @@ doacoesRoutes.route("/doacao/:id").get(auth, async function (req, res) {
     }
 })
 
-doacoesRoutes.route("/doacao/add").post(auth, validarDoacao, async function (req, res) {
+doacoesRoutes.route("/doacao/add").post(auth, validarDoacao, validarValorDoacao, async function (req, res) {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(400).json({ mensagem: errors.array()[0].msg })
@@ -48,9 +72,13 @@ doacoesRoutes.route("/doacao/add").post(auth, validarDoacao, async function (req
         cidade: req.body.cidade,
         estado: req.body.estado,
         tipo_doacao: req.body.tipo_doacao,
+        categoria: normalizarCategoria(req),
+        forma_pagamento: req.body.forma_pagamento || "",
         item: req.body.item,
+        quantidade: req.body.quantidade || "",
         valor: parseFloat(req.body.valor) || 0,
-        forma_entrega: req.body.forma_entrega
+        forma_entrega: req.body.forma_entrega,
+        data_criacao: new Date()
     }
 
     try {
@@ -72,26 +100,38 @@ doacoesRoutes.route("/doacao/:id").delete(auth, async function (req, res) {
     }
 })
 
-doacoesRoutes.route("/doacao/update/:id").post(auth, async function (req, res) {
+doacoesRoutes.route("/doacao/update/:id").post(auth, validarValorDoacao, async function (req, res) {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ mensagem: errors.array()[0].msg })
+    }
+
     const db_connect = dbo.getDb()
     const myquery = { _id: new ObjectId(req.params.id) }
 
-    const newvalues = {
-        $set: {
-            nome: req.body.nome,
-            tipo_doacao: req.body.tipo_doacao,
-            item: req.body.item,
-            valor: parseFloat(req.body.valor) || 0,
-            email: req.body.email,
-            telefone: req.body.telefone,
-            cidade: req.body.cidade,
-            estado: req.body.estado,
-            forma_entrega: req.body.forma_entrega
-        },
+    const fields = ["nome", "tipo_doacao", "forma_pagamento", "item", "quantidade", "email", "telefone", "cidade", "estado", "forma_entrega"]
+
+    const updateDoc = {}
+    fields.forEach(field => {
+        if (req.body[field] !== undefined) {
+            updateDoc[field] = req.body[field]
+        }
+    })
+
+    if (req.body.valor !== undefined) {
+        updateDoc.valor = parseFloat(req.body.valor) || 0
+    }
+
+    if (req.body.categoria !== undefined || req.body.tipo_doacao !== undefined) {
+        updateDoc.categoria = normalizarCategoria(req)
+    }
+
+    if (Object.keys(updateDoc).length === 0) {
+        return res.status(400).json({ mensagem: "Nenhum dado para atualizar" })
     }
 
     try {
-        const result = await db_connect.collection("doacoes").updateOne(myquery, newvalues)
+        const result = await db_connect.collection("doacoes").updateOne(myquery, { $set: updateDoc })
 
         if (result.matchedCount === 0) {
             return res.status(404).json({ mensagem: "Doação não encontrada" })

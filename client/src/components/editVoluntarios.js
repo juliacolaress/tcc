@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import API_BASE_URL from "../api/config";
 
+const OPCOES_INTERESSES = ["Passeios", "Limpeza", "Eventos", "Resgates", "Outros"];
+const DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
+const TURNOS = ["Manhã", "Tarde", "Noite"];
+
 export default function EditVoluntario() {
     const [form, setForm] = useState({
         nome: "",
@@ -9,7 +13,10 @@ export default function EditVoluntario() {
         ddd: "",
         telefone: "",
         cidade: "",     
-        estado: ""
+        estado: "",
+        interesses: [],
+        disponibilidade: [],
+        observacoes: ""
     });
 
     const params = useParams();
@@ -37,7 +44,10 @@ export default function EditVoluntario() {
                 ddd: record.ddd || "",
                 telefone: record.telefone || "",
                 cidade: record.cidade || "",
-                estado: record.estado || ""
+                estado: record.estado || "",
+                interesses: Array.isArray(record.interesses) ? record.interesses : [],
+                disponibilidade: Array.isArray(record.disponibilidade) ? record.disponibilidade : [],
+                observacoes: record.observacoes || ""
             });
         }
         fetchData();
@@ -45,6 +55,21 @@ export default function EditVoluntario() {
 
     function updateForm(value) {
         setForm((prev) => ({ ...prev, ...value }));
+    }
+
+    function toggleInteresse(interesse) {
+        const atuais = form.interesses.includes(interesse)
+            ? form.interesses.filter((i) => i !== interesse)
+            : [...form.interesses, interesse];
+        updateForm({ interesses: atuais });
+    }
+
+    function toggleDisponibilidade(dia, horario) {
+        const jaExiste = form.disponibilidade.some((d) => d.dia === dia && d.horario === horario);
+        const atualizada = jaExiste
+            ? form.disponibilidade.filter((d) => !(d.dia === dia && d.horario === horario))
+            : [...form.disponibilidade, { dia, horario }];
+        updateForm({ disponibilidade: atualizada });
     }
 
     const handleTelefoneChange = (e) => {
@@ -141,6 +166,92 @@ export default function EditVoluntario() {
                                 <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option><option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option><option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option><option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option><option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option><option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option><option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option><option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
                             </select>
                         </div>
+                    </div>
+                </div>
+
+                <div className="card border-0 shadow-sm p-4 mb-4" style={{ borderRadius: '8px' }}>
+                    <h5 className="mb-4 pb-2 border-bottom text-muted text-uppercase small fw-bold" style={{ letterSpacing: '0.5px' }}>
+                        Áreas de Interesse
+                    </h5>
+                    <div className="d-flex flex-wrap gap-2">
+                        {OPCOES_INTERESSES.map((opcao) => {
+                            const ativo = form.interesses.includes(opcao);
+                            return (
+                                <label
+                                    key={opcao}
+                                    className="btn px-3 py-1"
+                                    style={{
+                                        backgroundColor: ativo ? primaryColor : '#fdf7f2',
+                                        color: ativo ? '#fff' : primaryColor,
+                                        border: ativo ? '1px solid transparent' : '1px solid #eadfcf',
+                                        borderRadius: '20px',
+                                        cursor: 'pointer',
+                                        fontWeight: '500'
+                                    }}
+                                >
+                                    <input type="checkbox" className="d-none" checked={ativo} onChange={() => toggleInteresse(opcao)} />
+                                    {opcao}
+                                </label>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                <div className="card border-0 shadow-sm p-4 mb-4" style={{ borderRadius: '8px' }}>
+                    <h5 className="mb-4 pb-2 border-bottom text-muted text-uppercase small fw-bold" style={{ letterSpacing: '0.5px' }}>
+                        Disponibilidade (dia da semana e horário)
+                    </h5>
+                    <div className="table-responsive">
+                        <table className="table table-bordered align-middle text-center mb-0" style={{ borderRadius: '8px', overflow: 'hidden' }}>
+                            <thead className="table-light">
+                                <tr>
+                                    <th className="text-start px-3" style={{ color: primaryColor, fontWeight: '600' }}>Dia</th>
+                                    {TURNOS.map((turno) => (
+                                        <th key={turno} style={{ color: primaryColor, fontWeight: '600' }}>{turno}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {DIAS_SEMANA.map((dia) => (
+                                    <tr key={dia}>
+                                        <td className="text-start fw-semibold text-muted px-3">{dia}</td>
+                                        {TURNOS.map((turno) => {
+                                            const ativo = form.disponibilidade.some((d) => d.dia === dia && d.horario === turno);
+                                            return (
+                                                <td key={turno} className="p-1">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={ativo}
+                                                        onChange={() => toggleDisponibilidade(dia, turno)}
+                                                        style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: primaryColor }}
+                                                    />
+                                                </td>
+                                            );
+                                        })}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div className="card border-0 shadow-sm p-4 mb-4" style={{ borderRadius: '8px' }}>
+                    <h5 className="mb-4 pb-2 border-bottom text-muted text-uppercase small fw-bold" style={{ letterSpacing: '0.5px' }}>
+                        Observações / Comentários
+                    </h5>
+                    <div className="form-group mb-2">
+                        <label htmlFor="observacoes" style={labelStyle}>
+                            Observações <span className="text-muted fw-normal">(opcional)</span>
+                        </label>
+                        <textarea
+                            className="form-control px-3 py-2"
+                            id="observacoes"
+                            rows="4"
+                            style={inputStyle}
+                            value={form.observacoes}
+                            onChange={(e) => updateForm({ observacoes: e.target.value })}
+                            placeholder="Ex: restrições, disponibilidade especial, observações gerais..."
+                        ></textarea>
                     </div>
                 </div>
 

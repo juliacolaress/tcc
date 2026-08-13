@@ -11,12 +11,17 @@ export default function CreateDoacao() {
         cidade: "",     
         estado: "",
         tipo_doacao: "",
+        categoria: "",
+        forma_pagamento: "",
         item: "",
+        quantidade: "",
         valor: "",
         forma_entrega: ""
     });
     
     const navigate = useNavigate();
+
+    const [valorInvalido, setValorInvalido] = useState(false);
 
     function updateForm(value) {
         setForm((prev) => ({ ...prev, ...value }));
@@ -32,6 +37,13 @@ export default function CreateDoacao() {
 
     async function onSubmit(e) {
         e.preventDefault();
+
+        const valorNumerico = parseFloat(form.valor);
+        if (form.tipo_doacao === "Dinheiro" && (isNaN(valorNumerico) || valorNumerico <= 0)) {
+            setValorInvalido(true);
+            window.alert("O valor da doação deve ser maior que zero.");
+            return;
+        }
 
         const newDoacao = { 
             ...form,
@@ -132,24 +144,52 @@ export default function CreateDoacao() {
                     <div className="row">
                         <div className="form-group col-md-6 mb-3">
                             <label htmlFor="tipo_doacao" style={labelStyle}>Tipo de Doação</label>
-                            <select className="form-select px-3 py-2" id="tipo_doacao" style={inputStyle} value={form.tipo_doacao} onChange={(e) => updateForm({ tipo_doacao: e.target.value })}>
+                            <select className="form-select px-3 py-2" id="tipo_doacao" style={inputStyle} value={form.tipo_doacao} onChange={(e) => updateForm({ tipo_doacao: e.target.value, categoria: e.target.value === "Dinheiro" ? "financeira" : "material" })}>
                                 <option value="">Selecione...</option>
                                 <option value="Dinheiro">Dinheiro</option>
                                 <option value="Ração">Ração</option>
                                 <option value="Medicamento">Medicamento</option>
+                                <option value="Suprimentos">Suprimentos</option>
                                 <option value="Outros">Outros</option>
                             </select>
                         </div>
-                        <div className="form-group col-md-6 mb-3">
-                            <label htmlFor="item" style={labelStyle}>Descrição do Item</label>
-                            <input type="text" className="form-control px-3 py-2" id="item" style={inputStyle} value={form.item} onChange={(e) => updateForm({ item: e.target.value })} placeholder="Ex: Ração para Cão Adulto 15kg" />
-                        </div>
+                        {form.tipo_doacao === "Dinheiro" ? (
+                            <div className="form-group col-md-6 mb-3">
+                                <label htmlFor="forma_pagamento" style={labelStyle}>Forma de Pagamento</label>
+                                <select className="form-select px-3 py-2" id="forma_pagamento" style={inputStyle} value={form.forma_pagamento} onChange={(e) => updateForm({ forma_pagamento: e.target.value })}>
+                                    <option value="">Selecione...</option>
+                                    <option value="Pix">Pix</option>
+                                    <option value="Cartão">Cartão</option>
+                                    <option value="Dinheiro">Dinheiro</option>
+                                    <option value="Outro">Outro</option>
+                                </select>
+                            </div>
+                        ) : (
+                            <div className="form-group col-md-6 mb-3">
+                                <label htmlFor="quantidade" style={labelStyle}>Quantidade</label>
+                                <input type="text" className="form-control px-3 py-2" id="quantidade" style={inputStyle} value={form.quantidade} onChange={(e) => updateForm({ quantidade: e.target.value })} placeholder="Ex: 2 sacos de 15kg / 3 caixas" />
+                            </div>
+                        )}
                     </div>
+
+                    {form.tipo_doacao && form.tipo_doacao !== "Dinheiro" && (
+                        <div className="row">
+                            <div className="form-group col-md-12 mb-3">
+                                <label htmlFor="item" style={labelStyle}>Descrição do Item</label>
+                                <input type="text" className="form-control px-3 py-2" id="item" style={inputStyle} value={form.item} onChange={(e) => updateForm({ item: e.target.value })} placeholder="Ex: Ração para Cão Adulto 15kg" />
+                            </div>
+                        </div>
+                    )}
 
                     <div className="row">
                         <div className="form-group col-md-6 mb-3">
                             <label htmlFor="valor" style={labelStyle}>Valor (R$)</label>
-                            <input type="number" className="form-control px-3 py-2" id="valor" style={inputStyle} value={form.valor} onChange={(e) => updateForm({ valor: e.target.value })} placeholder="0.00" step="0.01" />
+                            <input type="number" className="form-control px-3 py-2" id="valor" style={inputStyle} value={form.valor} onChange={(e) => { updateForm({ valor: e.target.value }); setValorInvalido(false); }} placeholder="0.00" step="0.01" min="0.01" />
+                            {valorInvalido && (
+                                <div className="text-danger small mt-1">
+                                    <i className="bi bi-exclamation-triangle me-1"></i> O valor da doação deve ser maior que zero.
+                                </div>
+                            )}
                         </div>
                         <div className="form-group col-md-6 mb-3">
                             <label htmlFor="forma_entrega" style={labelStyle}>Entrega / Coleta</label>

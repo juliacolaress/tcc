@@ -1,29 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from './gatoecachorro.png';
+import cores from '../theme';
 
 export default function Home() {
   const navigate = useNavigate();
 
   // Estado para controlar o dropdown de doações via clique
   const [dropdownDoacoes, setDropdownDoacoes] = useState(false);
-
-  // Identidade visual oficial do Patas & Lares
-  const cores = {
-    marromMenu: '#4a2511',       // Marrom clássico do topo
-    marromBanner: '#aa7a44',     // Tom queimado do banner principal
-    cremeFundo: '#fdf8f4',       // Fundo off-white das seções intermediárias
-    textoMarrom: '#4a2511',      // Títulos em marrom
-    cardBege: '#f2e8df',         // Fundo dos cards "Como Ajudar"
-
-    // Cores dos botões
-    btnAdote: '#e2a36f',         // Marrom pastel
-    btnDoe: '#f0c27b',           // Amarelo/Dourado pastel
-    btnVoluntario: '#cf9b72',    // Marrom médio pastel
-
-    vermelhoCampanha: '#dd1c1a', // Vermelho vivo do banner de castração
-    rodapePreto: '#0a0a0a'       // Fundo escuro do rodapé
-  };
 
   return (
     <div style={{ fontFamily: 'Poppins, sans-serif', backgroundColor: '#ffffff', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -81,6 +65,16 @@ export default function Home() {
                   onClick={() => { navigate('/eventos'); setDropdownDoacoes(false); }}
                 >
                   Eventos
+                </span>
+              </li>
+
+              <li className="nav-item">
+                <span
+                  className="nav-link text-white"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => { navigate('/transparencia'); setDropdownDoacoes(false); }}
+                >
+                  Transparência
                 </span>
               </li>
 
@@ -173,7 +167,7 @@ export default function Home() {
             <div className="col-md-4">
               <div className="card h-100 border-0 p-4" style={{ backgroundColor: cores.cardBege }}>
                 <div className="card-body d-flex flex-column align-items-center">
-                  <i className="bi bi-heart-fill fs-1 mb-2" style={{ color: '#d99862' }}></i>
+                  <i className="bi bi-heart-fill fs-1 mb-2" style={{ color: cores.marromPastel }}></i>
                   <h4 className="card-title fw-bold mb-3" style={{ color: cores.textoMarrom }}>Doe</h4>
                   <p className="card-text text-muted small px-2 mb-4">
                     Contribua para cuidados, resgates e tratamentos.
@@ -201,7 +195,7 @@ export default function Home() {
                   <button 
                     className="btn mt-auto text-white px-4 py-2 shadow-sm" 
                     style={{ backgroundColor: cores.btnVoluntario, border: 'none', borderRadius: '8px', fontWeight: '500' }}
-                    onClick={() => navigate('/contato')}
+                    onClick={() => navigate('/seja-voluntario')}
                   >
                     Inscreva-se
                   </button>
@@ -215,13 +209,13 @@ export default function Home() {
           <div className="mt-5 px-2">
             <h3 className="fw-bold mb-4 text-start" style={{ color: cores.textoMarrom, maxWidth: '1000px', margin: '0 auto 1.5rem auto' }}>Campanhas</h3>
 
-            <div className="card border-0 text-white p-4 shadow-sm mx-auto" style={{ backgroundColor: cores.vermelhoCampanha, borderRadius: '24px', maxWidth: '1000px' }}>
+            <div className="card border-0 text-white p-4 shadow-sm mx-auto" style={{ backgroundColor: cores.marromCampanha, borderRadius: '24px', maxWidth: '1000px' }}>
               <div className="card-body d-flex flex-column flex-md-row align-items-center justify-content-between px-md-5 py-3">
 
                 <div className="d-flex align-items-center mb-3 mb-md-0">
-                  <div className="bg-white rounded-circle d-flex align-items-center justify-content-center position-relative shadow" style={{ width: '85px', height: '85px', color: cores.vermelhoCampanha }}>
+                  <div className="bg-white rounded-circle d-flex align-items-center justify-content-center position-relative shadow" style={{ width: '85px', height: '85px', color: cores.marromCampanha }}>
                     <i className="bi bi-paw-fill fs-1"></i>
-                    <i className="bi bi-plus-lg position-absolute fw-bold fs-5 bg-white rounded-circle px-1" style={{ bottom: '2px', right: '2px', border: `3px solid ${cores.vermelhoCampanha}` }}></i>
+                    <i className="bi bi-plus-lg position-absolute fw-bold fs-5 bg-white rounded-circle px-1" style={{ bottom: '2px', right: '2px', border: `3px solid ${cores.marromCampanha}` }}></i>
                   </div>
                 </div>
 
@@ -270,7 +264,7 @@ export default function Home() {
       </div>
 
       {/* 6. RODAPÉ OFICIAL */}
-      <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapePreto, fontSize: '0.9rem', borderTop: '4px solid #aa7a44' }}>
+      <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapeMarrom, fontSize: '0.9rem', borderTop: '4px solid #aa7a44' }}>
         <div className="container">
           <div className="row align-items-center g-3">
 

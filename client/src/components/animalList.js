@@ -6,6 +6,8 @@ import { normalizeFotos } from "../utils/fotos";
 // Componente do Card do Animal
 const AnimalCard = ({ record, deleteAnimal, marcarComoAdotado }) => {
     const primaryColor = '#4a2511';
+    const brownColor = '#aa7a44';
+    const badgeStyle = { backgroundColor: '#fdf7f2', color: primaryColor, border: '1px solid #eadfcf' };
     const fotos = normalizeFotos(record);
     const imagemPadrao = (record.especie || "").toLowerCase() === "gato"
         ? "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=500"
@@ -14,22 +16,22 @@ const AnimalCard = ({ record, deleteAnimal, marcarComoAdotado }) => {
     const generoLabel = record.genero === "M" ? "Macho" : record.genero === "F" ? "Fêmea" : "---";
 
     return (
-        <div className="card border-0 shadow-sm h-100" style={{ borderRadius: '10px', overflow: 'hidden', backgroundColor: '#fff' }}>
+        <div className="card shadow-sm h-100" style={{ borderRadius: '10px', overflow: 'hidden', backgroundColor: '#fff', border: '1px solid #eadfcf' }}>
             <div style={{ height: '220px', overflow: 'hidden', backgroundColor: '#f8f9fa' }}>
                 <img src={imagem} className="w-100 h-100" style={{ objectFit: 'cover' }} alt={record.nome} />
             </div>
             <div className="card-body d-flex flex-column p-3">
                 <h5 className="fw-bold mb-2" style={{ color: primaryColor }}>{record.nome}</h5>
                 <div className="d-flex flex-wrap gap-2 mb-3">
-                    <span className="badge bg-light text-dark border px-2 py-1">{record.especie || "---"}</span>
-                    <span className="badge bg-light text-dark border px-2 py-1">{record.raca || "Sem raça"}</span>
-                    <span className="badge bg-light text-dark border px-2 py-1">{generoLabel}</span>
-                    <span className="badge bg-light text-dark border px-2 py-1">Porte {record.porte || "---"}</span>
+                    <span className="badge px-2 py-1" style={badgeStyle}>{record.especie || "---"}</span>
+                    <span className="badge px-2 py-1" style={badgeStyle}>{record.raca || "Sem raça"}</span>
+                    <span className="badge px-2 py-1" style={badgeStyle}>{generoLabel}</span>
+                    <span className="badge px-2 py-1" style={badgeStyle}>Porte {record.porte || "---"}</span>
                 </div>
                 <div className="mt-auto d-flex flex-column gap-2">
                     <button
                         className="btn text-white w-100 d-inline-flex align-items-center justify-content-center gap-2"
-                        style={{ backgroundColor: primaryColor, borderRadius: '6px', fontWeight: '500' }}
+                        style={{ backgroundColor: brownColor, borderRadius: '6px', fontWeight: '500' }}
                         onClick={() => marcarComoAdotado(record._id)}
                         title="Marcar como Adotado"
                     >

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API_BASE_URL from "./api/config";
 import { normalizeFotos } from "./utils/fotos";
+import cores from "./theme";
 
 // Componente do Card do Animal
 const AnimalCard = ({ animal }) => {
@@ -60,7 +61,7 @@ const AnimalCard = ({ animal }) => {
                 <div className="text-end mt-3">
                     <button 
                         className="btn px-4 py-2 text-white" 
-                        style={{ backgroundColor: '#e2a36f', borderRadius: '20px', fontSize: '0.9rem', fontWeight: '500' }}
+                        style={{ backgroundColor: cores.marromPastel, borderRadius: '20px', fontSize: '0.9rem', fontWeight: '500' }}
                         onClick={() => window.alert(`Ficamos felizes com seu interesse no ${animal.nome}! Entre em contato conosco na aba 'Contato' para iniciar o processo de adoção responsável.`)}
                     >
                         Adote agora
@@ -86,15 +87,6 @@ export default function AnimaisAdocao() {
 
     // Mantemos apenas o controle do menu de Doações, o de adoção foi removido
     const [dropdownDoacoes, setDropdownDoacoes] = useState(false);
-
-    // Paleta de cores oficial do Patas & Lares
-    const cores = {
-        marromMenu: '#4a2511',       
-        cremeFundo: '#fdf8f4',       
-        textoMarrom: '#4a2511',      
-        rodapePreto: '#0a0a0a',
-        marromBanner: '#aa7a44'
-    };
 
     // 1. BUSCA OS ANIMAIS (Sem token, rota pública)
     useEffect(() => {
@@ -182,6 +174,16 @@ export default function AnimaisAdocao() {
                             </li>
 
                             <li className="nav-item"><span className="nav-link text-white" style={{ cursor: 'pointer' }}>Eventos</span></li>
+
+                            <li className="nav-item">
+                                <span
+                                    className="nav-link text-white"
+                                    style={{ cursor: 'pointer' }}
+                                    onClick={() => navigate('/transparencia')}
+                                >
+                                    Transparência
+                                </span>
+                            </li>
                             
                             <li className="nav-item">
                                 <span
@@ -206,10 +208,10 @@ export default function AnimaisAdocao() {
             </nav>
 
             {/* Conteúdo da Página */}
-            <div style={{ backgroundColor: cores.marromBanner, flexGrow: 1, paddingBottom: '3rem' }}>
+            <div style={{ backgroundColor: cores.branco, flexGrow: 1, paddingBottom: '3rem' }}>
                 <div className="container pt-5">
                     
-                    <h1 className="text-white fw-bold mb-4 text-center">Nossos Amigos para Adoção</h1>
+                    <h1 className="fw-bold mb-4 text-center" style={{ color: cores.textoMarrom }}>Nossos Amigos para Adoção</h1>
 
                     {/* Seção de Filtros */}
                     <form onSubmit={handleFiltrar} className="row g-3 justify-content-center align-items-center mb-5">
@@ -244,8 +246,8 @@ export default function AnimaisAdocao() {
 
                     {/* Grid de Cards */}
                     {loading ? (
-                        <div className="text-center py-5 text-white">
-                            <div className="spinner-border text-white" role="status"></div>
+                        <div className="text-center py-5">
+                            <div className="spinner-border" style={{ color: cores.textoMarrom }} role="status"></div>
                         </div>
                     ) : animaisExibidos.length > 0 ? (
                         <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 px-3">
@@ -256,7 +258,7 @@ export default function AnimaisAdocao() {
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center text-white py-5">
+                        <div className="text-center py-5" style={{ color: cores.textoMarrom }}>
                             <i className="bi bi-emoji-frown fs-1"></i>
                             <p className="mt-2 fs-5">Nenhum animal disponível com esses filtros no momento.</p>
                         </div>
@@ -265,7 +267,7 @@ export default function AnimaisAdocao() {
             </div>
 
             {/* 3. RODAPÉ OFICIAL */}
-            <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapePreto, fontSize: '0.9rem', borderTop: '4px solid #aa7a44' }}>
+            <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapeMarrom, fontSize: '0.9rem', borderTop: '4px solid #aa7a44' }}>
                 <div className="container">
                     <div className="row align-items-center g-3">
 

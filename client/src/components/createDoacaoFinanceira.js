@@ -11,12 +11,16 @@ export default function CreateDoacaoFinanceira() {
         cidade: "",     
         estado: "",
         tipo_doacao: "Dinheiro",
+        categoria: "financeira",
+        forma_pagamento: "",
         item: "Doação Financeira",
         valor: "",
         forma_entrega: "N/A"
     });
     
     const navigate = useNavigate();
+
+    const [valorInvalido, setValorInvalido] = useState(false);
 
     function updateForm(value) {
         setForm((prev) => {
@@ -34,6 +38,13 @@ export default function CreateDoacaoFinanceira() {
 
     async function onSubmit(e) {
         e.preventDefault();
+
+        const valorNumerico = parseFloat(form.valor);
+        if (isNaN(valorNumerico) || valorNumerico <= 0) {
+            setValorInvalido(true);
+            window.alert("O valor da doação deve ser maior que zero.");
+            return;
+        }
 
         const newDoacao = { 
             ...form,
@@ -131,9 +142,24 @@ export default function CreateDoacaoFinanceira() {
                     </h5>
 
                     <div className="row">
-                        <div className="form-group col-md-12 mb-3">
+                        <div className="form-group col-md-6 mb-3">
+                            <label style={labelStyle}>Forma de Pagamento</label>
+                            <select className="form-select px-3 py-2" style={inputStyle} value={form.forma_pagamento} onChange={(e) => updateForm({ forma_pagamento: e.target.value })} required>
+                                <option value="">Selecione...</option>
+                                <option value="Pix">Pix</option>
+                                <option value="Cartão">Cartão</option>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Outro">Outro</option>
+                            </select>
+                        </div>
+                        <div className="form-group col-md-6 mb-3">
                             <label style={labelStyle}>Valor da Doação (R$)</label>
-                            <input type="number" className="form-control px-3 py-2" style={inputStyle} value={form.valor} onChange={(e) => updateForm({ valor: e.target.value })} placeholder="0.00" step="0.01" required />
+                            <input type="number" className="form-control px-3 py-2" style={inputStyle} value={form.valor} onChange={(e) => { updateForm({ valor: e.target.value }); setValorInvalido(false); }} placeholder="0.00" step="0.01" min="0.01" required />
+                            {valorInvalido && (
+                                <div className="text-danger small mt-1">
+                                    <i className="bi bi-exclamation-triangle me-1"></i> O valor da doação deve ser maior que zero.
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
