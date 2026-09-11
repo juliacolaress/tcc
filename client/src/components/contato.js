@@ -15,7 +15,6 @@ function Contato() {
       <nav className="navbar navbar-expand-lg navbar-dark p-3" style={{ backgroundColor: cores.marromMenu }}>
         <div className="container d-flex justify-content-between align-items-center">
           <span className="navbar-brand fw-bold d-flex align-items-center fs-4" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
-            <i className="bi bi-paw-fill me-2" style={{ transform: 'rotate(-15deg)' }}></i>
             Patas & Lares
           </span>
 
@@ -187,7 +186,7 @@ function Contato() {
           {/* Coluna 5: Informações adicionais */}
           <div className="col-md-8">
             <h4 className="fw-bold d-flex align-items-center mb-3" style={{ color: cores.textoDestaque }}>
-              <i className="bi bi-paw fs-4 me-2"></i> Informações adicionais
+              Informações adicionais
             </h4>
             <div className="ps-4 text-dark lh-lg" style={{ fontSize: '0.98rem' }}>
               <ul className="list-unstyled mb-0">

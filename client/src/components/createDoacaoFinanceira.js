@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API_BASE_URL from "../api/config";
+import BackButton from "./BackButton";
 
 export default function CreateDoacaoFinanceira() {
     const [form, setForm] = useState({
@@ -81,21 +82,12 @@ export default function CreateDoacaoFinanceira() {
 
     return (
         <div className="container-fluid py-2">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h3 style={{ color: primaryColor, fontWeight: 'bold' }}>
-                        <i className="bi bi-cash-coin me-2"></i> Cadastrar Doação Financeira
-                    </h3>
-                    <p className="text-muted mb-0">Registre uma nova contribuição monetária para a ONG</p>
-                </div>
-                <button 
-                    type="button"
-                    onClick={() => navigate(-1)} 
-                    className="btn px-4 py-2" 
-                    style={{ borderRadius: '6px', color: primaryColor, borderColor: primaryColor, fontWeight: '500' }}
-                >
-                    <i className="bi bi-arrow-left me-2"></i> Voltar
-                </button>
+            <BackButton destinoPadrao="/dashboard" />
+            <div className="mt-3 mb-4">
+                <h3 style={{ color: primaryColor, fontWeight: 'bold' }}>
+                    <i className="bi bi-cash-coin me-2"></i> Cadastrar Doação Financeira
+                </h3>
+                <p className="text-muted mb-0">Registre uma nova contribuição monetária para a ONG</p>
             </div>
 
             <form onSubmit={onSubmit}>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import API_BASE_URL from "../api/config";
+import BackButton from "./BackButton";
 
 export default function Login({ onLogin }) {
   const [email, setEmail] = useState('');
@@ -48,10 +49,14 @@ export default function Login({ onLogin }) {
     <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
       <div className="card shadow-sm border-0 p-4" style={{ width: '100%', maxWidth: '400px', borderRadius: '12px' }}>
         <div className="card-body">
+          {/* Botão Voltar */}
+          <div className="mb-3">
+            <BackButton destinoPadrao="/" />
+          </div>
+
           {/* Logo / Título */}
           <div className="text-center mb-4">
             <h2 className="fw-bold mb-1" style={{ color: primaryColor }}>
-              <i className="bi bi-paw-fill me-2" style={{ transform: 'rotate(-15deg)', display: 'inline-block' }}></i>
               Patas & Lares
             </h2>
             <p className="text-muted small">Acesso Restrito Administrativo</p>

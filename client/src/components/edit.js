@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import API_BASE_URL from "../api/config";
+import BackButton from "./BackButton";
 
 export default function Edit() {
     const [form, setForm] = useState({
@@ -77,19 +78,14 @@ export default function Edit() {
 
     return (
         <div className="container mt-4">
-            {/* Cabeçalho espelhado do Create */}
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h3 style={{ color: primaryColor, fontWeight: 'bold' }}>
-                    <i className="bi bi-pencil-square me-2"></i> Alteração de dados do Usuário
-                </h3>
-                <button 
-                    type="button"
-                    onClick={() => navigate(-1)} 
-                    className="btn px-4 py-2" 
-                    style={{ borderRadius: '6px', color: primaryColor, borderColor: primaryColor, fontWeight: '500' }}
-                >
-                    <i className="bi bi-arrow-left me-2"></i> Voltar
-                </button>
+            {/* Cabeçalho */}
+            <div className="mb-4">
+                <BackButton destinoPadrao="/dashboard" />
+                <div className="mt-3">
+                    <h3 style={{ color: primaryColor, fontWeight: 'bold' }}>
+                        <i className="bi bi-pencil-square me-2"></i> Alteração de dados do Usuário
+                    </h3>
+                </div>
             </div>
             <hr />
 

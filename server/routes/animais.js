@@ -3,7 +3,8 @@ const animalRoutes = express.Router()
 const dbo = require("../db/conn")
 const ObjectId = require("mongodb").ObjectId
 const { body, validationResult } = require("express-validator")
-const { auth } = require("../middleware/auth")
+const { authorize } = require("../middleware/auth")
+const { validarObjectId } = require("../middleware/objectId")
 const fs = require("fs")
 const path = require("path")
 
@@ -38,11 +39,12 @@ animalRoutes.route("/animal").get(async function (req, res) {
         const result = await db_connect.collection("animais").find({}).toArray()
         res.status(200).json(result)
     } catch (error) {
-        res.status(500).json({ mensagem: error.message })
+        console.error("Erro ao listar animais:", error)
+        res.status(500).json({ mensagem: "Erro no servidor" })
     }
 })
 
-animalRoutes.route("/animal/:id").get(async function (req, res) {
+animalRoutes.route("/animal/:id").get(validarObjectId, async function (req, res) {
     const db_connect = dbo.getDb()
     const myquery = { _id: new ObjectId(req.params.id) }
     try {
@@ -50,11 +52,13 @@ animalRoutes.route("/animal/:id").get(async function (req, res) {
         if (!result) return res.status(404).json({ mensagem: "Animal não encontrado" })
         res.status(200).json(result)
     } catch (error) {
-        res.status(500).json({ mensagem: error.message })
+        console.error("Erro ao buscar animal:", error)
+        res.status(500).json({ mensagem: "Erro no servidor" })
     }
 })
 
-animalRoutes.route("/animal/add").post(auth, validarAnimal, async function (req, res) {
+// A partir daqui, todas as rotas exigem perfil de administrador
+animalRoutes.route("/animal/add").post(authorize(["Admin", "admin"]), validarAnimal, async function (req, res) {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(400).json({ mensagem: errors.array()[0].msg })
@@ -88,11 +92,12 @@ animalRoutes.route("/animal/add").post(auth, validarAnimal, async function (req,
         const result = await db_connect.collection("animais").insertOne(myobj)
         res.status(201).json(result)
     } catch (error) {
-        res.status(409).json({ mensagem: error.message })
+        console.error("Erro ao criar animal:", error)
+        res.status(409).json({ mensagem: "Erro ao criar animal" })
     }
 })
 
-animalRoutes.route("/animal/update/:id").post(auth, async function (req, res) {
+animalRoutes.route("/animal/update/:id").post(authorize(["Admin", "admin"]), validarObjectId, async function (req, res) {
     const db_connect = dbo.getDb()
     const myquery = { _id: new ObjectId(req.params.id) }
 
@@ -132,11 +137,12 @@ animalRoutes.route("/animal/update/:id").post(auth, async function (req, res) {
 
         res.status(200).json(result)
     } catch (error) {
-        res.status(500).json({ mensagem: "Erro ao atualizar animal: " + error.message })
+        console.error("Erro ao atualizar animal:", error)
+        res.status(500).json({ mensagem: "Erro ao atualizar animal" })
     }
 })
 
-animalRoutes.route("/animal/:id").delete(auth, async function (req, res) {
+animalRoutes.route("/animal/:id").delete(authorize(["Admin", "admin"]), validarObjectId, async function (req, res) {
     const db_connect = dbo.getDb()
     const myquery = { _id: new ObjectId(req.params.id) }
     try {

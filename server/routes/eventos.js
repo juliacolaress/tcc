@@ -3,7 +3,8 @@ const eventoRoutes = express.Router()
 const dbo = require("../db/conn")
 const ObjectId = require("mongodb").ObjectId
 const { body, validationResult } = require("express-validator")
-const { auth } = require("../middleware/auth")
+const { auth, authorize } = require("../middleware/auth")
+const { validarObjectId } = require("../middleware/objectId")
 const fs = require("fs")
 const path = require("path")
 
@@ -52,24 +53,25 @@ eventoRoutes.route("/eventos").get(async function (req, res) {
             .toArray()
         res.status(200).json(result)
     } catch (error) {
-        res.status(500).json({ mensagem: error.message })
+        console.error("Erro ao listar eventos públicos:", error)
+        res.status(500).json({ mensagem: "Erro no servidor" })
     }
 })
 
 // GET admin — todos os eventos (para o painel administrativo)
-eventoRoutes.route("/eventos/admin").get(auth, async function (req, res) {
+eventoRoutes.route("/eventos/admin").get(auth, authorize(["Admin", "admin"]), async function (req, res) {
     const db_connect = dbo.getDb()
     try {
         const result = await db_connect.collection("eventos").find({}).sort({ data: -1 }).toArray()
         res.status(200).json(result)
     } catch (error) {
         console.error("Erro ao listar eventos:", error)
-        res.status(500).json({ mensagem: error.message })
+        res.status(500).json({ mensagem: "Erro no servidor" })
     }
 })
 
 // GET pública — evento único
-eventoRoutes.route("/eventos/:id").get(async function (req, res) {
+eventoRoutes.route("/eventos/:id").get(validarObjectId, async function (req, res) {
     const db_connect = dbo.getDb()
     const myquery = { _id: new ObjectId(req.params.id) }
     try {
@@ -78,12 +80,12 @@ eventoRoutes.route("/eventos/:id").get(async function (req, res) {
         res.status(200).json(result)
     } catch (error) {
         console.error("Erro ao buscar evento:", error)
-        res.status(500).json({ mensagem: error.message })
+        res.status(500).json({ mensagem: "Erro no servidor" })
     }
 })
 
-// POST — criar evento (admin)
-eventoRoutes.route("/eventos").post(auth, validarEvento, async function (req, res) {
+// Rotas administrativas exigem perfil de administrador
+eventoRoutes.route("/eventos").post(authorize(["Admin", "admin"]), validarEvento, async function (req, res) {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(400).json({ mensagem: errors.array()[0].msg })
@@ -94,6 +96,7 @@ eventoRoutes.route("/eventos").post(auth, validarEvento, async function (req, re
     const myobj = {
         titulo: req.body.titulo,
         descricao: (req.body.descricao || "").trim(),
+        objetivos: (req.body.objetivos || "").trim(),
         data: normalizarData(req.body.data),
         horario: (req.body.horario || "").trim(),
         local: (req.body.local || "").trim(),
@@ -107,16 +110,16 @@ eventoRoutes.route("/eventos").post(auth, validarEvento, async function (req, re
         res.status(201).json(result)
     } catch (error) {
         console.error("Erro ao cadastrar evento:", error)
-        res.status(500).json({ mensagem: "Erro ao cadastrar evento: " + error.message })
+        res.status(500).json({ mensagem: "Erro ao cadastrar evento" })
     }
 })
 
 // PUT — atualizar evento (admin)
-eventoRoutes.route("/eventos/:id").put(auth, async function (req, res) {
+eventoRoutes.route("/eventos/:id").put(authorize(["Admin", "admin"]), validarObjectId, async function (req, res) {
     const db_connect = dbo.getDb()
     const myquery = { _id: new ObjectId(req.params.id) }
 
-    const fields = ["titulo", "descricao", "data", "horario", "local", "imagem", "status"]
+    const fields = ["titulo", "descricao", "objetivos", "data", "horario", "local", "imagem", "status"]
 
     const updateDoc = {}
     fields.forEach(field => {
@@ -127,6 +130,9 @@ eventoRoutes.route("/eventos/:id").put(auth, async function (req, res) {
 
     if (updateDoc.data !== undefined) {
         updateDoc.data = normalizarData(updateDoc.data)
+    }
+    if (updateDoc.objetivos !== undefined) {
+        updateDoc.objetivos = String(updateDoc.objetivos).trim()
     }
 
     if (!updateDoc.titulo || !updateDoc.data || !updateDoc.status) {
@@ -148,12 +154,12 @@ eventoRoutes.route("/eventos/:id").put(auth, async function (req, res) {
         res.status(200).json(result)
     } catch (error) {
         console.error("Erro ao atualizar evento:", error)
-        res.status(500).json({ mensagem: "Erro ao atualizar evento: " + error.message })
+        res.status(500).json({ mensagem: "Erro ao atualizar evento" })
     }
 })
 
 // DELETE — remover evento (admin)
-eventoRoutes.route("/eventos/:id").delete(auth, async function (req, res) {
+eventoRoutes.route("/eventos/:id").delete(authorize(["Admin", "admin"]), validarObjectId, async function (req, res) {
     const db_connect = dbo.getDb()
     const myquery = { _id: new ObjectId(req.params.id) }
     try {

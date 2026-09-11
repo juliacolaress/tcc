@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import API_BASE_URL from "../api/config";
+import { resolverUrl, aoErrarImagem } from "../utils/fotos";
 
 const STATUS_STYLES = {
     "Agendado": { classe: "bg-success-subtle text-success border border-success-subtle" },
@@ -116,9 +117,10 @@ export default function EventosList() {
                                         <td style={{ paddingLeft: '1.5rem' }}>
                                             {item.imagem ? (
                                                 <img
-                                                    src={item.imagem}
+                                                    src={resolverUrl(item.imagem)}
                                                     alt={item.titulo}
                                                     style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #eadfcf' }}
+                                                    onError={aoErrarImagem}
                                                 />
                                             ) : (
                                                 <div className="d-flex align-items-center justify-content-center" style={{ width: '60px', height: '60px', borderRadius: '6px', backgroundColor: '#fdf7f2' }}>

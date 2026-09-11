@@ -1,5 +1,9 @@
 {
-  "dependencies": {
-    "bootstrap-icons": "^1.13.1"
+  "name": "tcc",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "server": "npm start --prefix server",
+    "client": "npm start --prefix client"
   }
 }

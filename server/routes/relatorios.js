@@ -3,7 +3,8 @@ const relatoriosRoutes = express.Router()
 const dbo = require("../db/conn")
 const ObjectId = require("mongodb").ObjectId
 const { body, validationResult } = require("express-validator")
-const { auth } = require("../middleware/auth")
+const { authorize } = require("../middleware/auth")
+const { validarObjectId } = require("../middleware/objectId")
 const multer = require("multer")
 const path = require("path")
 const crypto = require("crypto")
@@ -52,6 +53,13 @@ const validarRelatorio = [
     body("mesReferencia").trim().notEmpty().withMessage("Mês/ano de referência é obrigatório").matches(/^\d{4}-\d{2}$/).withMessage("Mês/ano deve estar no formato AAAA-MM"),
 ]
 
+// Valida se o arquivo é um PDF de verdade pelos primeiros bytes ("%PDF-")
+function ehPdfValido(buffer) {
+    if (!buffer || buffer.length < 5) return false
+    const cabecalho = buffer.subarray(0, 5).toString("latin1")
+    return cabecalho === "%PDF-"
+}
+
 // GET pública — lista de relatórios (mais recentes primeiro)
 relatoriosRoutes.route("/relatorios").get(async function (req, res) {
     const db_connect = dbo.getDb()
@@ -59,12 +67,13 @@ relatoriosRoutes.route("/relatorios").get(async function (req, res) {
         const result = await db_connect.collection("relatorios").find({}).sort({ mesReferencia: -1, criadoEm: -1 }).toArray()
         res.status(200).json(result)
     } catch (error) {
-        res.status(500).json({ mensagem: error.message })
+        console.error("Erro ao listar relatórios:", error)
+        res.status(500).json({ mensagem: "Erro no servidor" })
     }
 })
 
 // GET pública — relatório único
-relatoriosRoutes.route("/relatorios/:id").get(async function (req, res) {
+relatoriosRoutes.route("/relatorios/:id").get(validarObjectId, async function (req, res) {
     const db_connect = dbo.getDb()
     const myquery = { _id: new ObjectId(req.params.id) }
     try {
@@ -72,12 +81,13 @@ relatoriosRoutes.route("/relatorios/:id").get(async function (req, res) {
         if (!result) return res.status(404).json({ mensagem: "Relatório não encontrado" })
         res.status(200).json(result)
     } catch (error) {
-        res.status(500).json({ mensagem: error.message })
+        console.error("Erro ao buscar relatório:", error)
+        res.status(500).json({ mensagem: "Erro no servidor" })
     }
 })
 
-// POST — criar relatório (admin)
-relatoriosRoutes.route("/relatorios").post(auth, validarRelatorio, async function (req, res) {
+// Rotas administrativas exigem perfil de administrador
+relatoriosRoutes.route("/relatorios").post(authorize(["Admin", "admin"]), validarRelatorio, async function (req, res) {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(400).json({ mensagem: errors.array()[0].msg })
@@ -99,12 +109,13 @@ relatoriosRoutes.route("/relatorios").post(auth, validarRelatorio, async functio
         const result = await db_connect.collection("relatorios").insertOne(myobj)
         res.status(201).json(result)
     } catch (error) {
-        res.status(500).json({ mensagem: error.message })
+        console.error("Erro ao criar relatório:", error)
+        res.status(500).json({ mensagem: "Erro ao criar relatório" })
     }
 })
 
 // PUT — atualizar relatório (admin)
-relatoriosRoutes.route("/relatorios/:id").put(auth, async function (req, res) {
+relatoriosRoutes.route("/relatorios/:id").put(authorize(["Admin", "admin"]), validarObjectId, async function (req, res) {
     const db_connect = dbo.getDb()
     const myquery = { _id: new ObjectId(req.params.id) }
 
@@ -140,12 +151,13 @@ relatoriosRoutes.route("/relatorios/:id").put(auth, async function (req, res) {
 
         res.status(200).json({ mensagem: "Relatório atualizado com sucesso" })
     } catch (error) {
-        res.status(500).json({ mensagem: "Erro ao atualizar relatório: " + error.message })
+        console.error("Erro ao atualizar relatório:", error)
+        res.status(500).json({ mensagem: "Erro ao atualizar relatório" })
     }
 })
 
 // DELETE — remover relatório (admin)
-relatoriosRoutes.route("/relatorios/:id").delete(auth, async function (req, res) {
+relatoriosRoutes.route("/relatorios/:id").delete(authorize(["Admin", "admin"]), validarObjectId, async function (req, res) {
     const db_connect = dbo.getDb()
     const myquery = { _id: new ObjectId(req.params.id) }
     try {
@@ -164,9 +176,16 @@ relatoriosRoutes.route("/relatorios/:id").delete(auth, async function (req, res)
 })
 
 // POST — upload do balancete em PDF (admin)
-relatoriosRoutes.route("/relatorios/upload-balancete").post(auth, uploadPdf.single("arquivo"), async function (req, res) {
+relatoriosRoutes.route("/relatorios/upload-balancete").post(authorize(["Admin", "admin"]), uploadPdf.single("arquivo"), async function (req, res) {
     if (!req.file) {
         return res.status(400).json({ mensagem: "Nenhum arquivo enviado." })
+    }
+
+    // Valida conteúdo real do arquivo (magic bytes), não apenas o mimetype
+    const buffer = fs.readFileSync(req.file.path)
+    if (!ehPdfValido(buffer)) {
+        fs.unlink(req.file.path, () => {})
+        return res.status(400).json({ mensagem: "Arquivo inválido. Envie um PDF válido." })
     }
 
     const protocolo = extrairProtocolo(req)

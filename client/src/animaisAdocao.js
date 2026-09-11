@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API_BASE_URL from "./api/config";
-import { normalizeFotos } from "./utils/fotos";
+import { normalizeFotos, aoErrarImagem } from "./utils/fotos";
 import cores from "./theme";
 
 // Componente do Card do Animal
@@ -25,6 +25,7 @@ const AnimalCard = ({ animal }) => {
                     className="card-img-top w-100 h-100" 
                     style={{ objectFit: 'cover' }} 
                     alt={animal.nome}
+                    onError={aoErrarImagem}
                 />
                 
                 {/* Carousel com thumbnails */}
@@ -36,6 +37,7 @@ const AnimalCard = ({ animal }) => {
                                 src={url}
                                 alt={`Thumbnail ${index + 1}`}
                                 onClick={() => setImagemAtual(index)}
+                                onError={aoErrarImagem}
                                 style={{
                                     width: '40px',
                                     height: '40px',
@@ -113,6 +115,14 @@ export default function AnimaisAdocao() {
         setFiltrosAplicados({ especie, sexo, porte });
     };
 
+    // 2.1 FUNÇÃO DO BOTÃO LIMPAR FILTROS
+    const handleLimparFiltros = () => {
+        setEspecie("");
+        setSexo("");
+        setPorte("");
+        setFiltrosAplicados({ especie: "", sexo: "", porte: "" });
+    };
+
     // 3. REGRA DE FILTRAGEM (Garante status "Disponível" e bate com os selects)
     const animaisExibidos = animais.filter((animal) => {
         if (!animal || animal.status !== "Disponível") return false;
@@ -131,7 +141,6 @@ export default function AnimaisAdocao() {
             <nav className="navbar navbar-expand-lg navbar-dark p-3" style={{ backgroundColor: cores.marromMenu }}>
                 <div className="container d-flex justify-content-between align-items-center">
                     <span className="navbar-brand fw-bold d-flex align-items-center fs-4" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
-                        <i className="bi bi-paw-fill me-2" style={{ transform: 'rotate(-15deg)' }}></i>
                         Patas & Lares
                     </span>
 
@@ -237,9 +246,12 @@ export default function AnimaisAdocao() {
                                 <option value="Grande">Grande</option>
                             </select>
                         </div>
-                        <div className="col-6 col-md-2 text-start">
-                            <button type="submit" className="btn px-4 py-2 fw-bold text-white shadow-sm" style={{ backgroundColor: '#4a2511', borderRadius: '20px' }}>
+                        <div className="col-12 col-md-3 text-start d-flex gap-2">
+                            <button type="submit" className="btn px-4 py-2 fw-bold text-white shadow-sm flex-fill" style={{ backgroundColor: '#4a2511', borderRadius: '20px' }}>
                                 Filtrar
+                            </button>
+                            <button type="button" className="btn px-4 py-2 fw-bold shadow-sm flex-fill" style={{ backgroundColor: '#e9ecef', color: '#4a2511', borderRadius: '20px', border: '1px solid #d0d0d0' }} onClick={handleLimparFiltros}>
+                                Limpar Filtros
                             </button>
                         </div>
                     </form>

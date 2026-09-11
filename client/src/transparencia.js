@@ -54,7 +54,6 @@ function Transparencia() {
       <nav className="navbar navbar-expand-lg navbar-dark p-3" style={{ backgroundColor: cores.marromMenu }}>
         <div className="container d-flex justify-content-between align-items-center">
           <span className="navbar-brand fw-bold d-flex align-items-center fs-4" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
-            <i className="bi bi-paw-fill me-2" style={{ transform: 'rotate(-15deg)' }}></i>
             Patas & Lares
           </span>
 

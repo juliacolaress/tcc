@@ -1,13 +1,106 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from './gatoecachorro.png';
 import cores from '../theme';
+import API_BASE_URL from '../api/config';
+import { resolverUrl, aoErrarImagem } from '../utils/fotos';
+
+function formatarData(valor) {
+    if (!valor) return "";
+    const texto = valor instanceof Date ? valor.toISOString() : String(valor);
+    const partes = texto.slice(0, 10).split("-");
+    if (partes.length !== 3) return String(valor);
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
+const CAMPANHA_PADRAO = {
+    titulo: "Juntos pela Castração e Bem-Estar Animal",
+    descricao: "Campanha permanente da Patas & Lares para promover a castração de cães e gatos e combater o abandono. Cada animal castrado evita dezenas de novos filhotes sem lar e reduz o sofrimento de animais vulneráveis na nossa comunidade.",
+    objetivos: "Reduzir a superpopulação de animais abandonados, promover a saúde e o bem-estar dos pets, conscientizar a comunidade sobre posse responsável e ampliar o acesso das famílias à castração gratuita ou de baixo custo.",
+    comoParticipar: "Você pode participar se voluntariando, doando ou agendando a castração do seu pet. Fale com a nossa equipe pela página de contato ou inscreva-se como voluntário!",
+    data: "",
+    horario: "",
+    local: "",
+    imagem: ""
+};
+
+function CampanhaCard({ campanha, onClick }) {
+    return (
+        <div
+            className="card border-0 text-white p-4 shadow-sm mx-auto"
+            style={{ backgroundColor: cores.marromCampanha, borderRadius: '24px', maxWidth: '1000px', cursor: 'pointer' }}
+            onClick={onClick}
+            role="button"
+            aria-label={`Ver detalhes: ${campanha.titulo}`}
+        >
+            <div className="card-body d-flex flex-column flex-md-row align-items-center justify-content-between px-md-5 py-3">
+                <div className="d-flex align-items-center mb-3 mb-md-0">
+                    {campanha.imagem ? (
+                        <img
+                            src={resolverUrl(campanha.imagem)}
+                            alt={campanha.titulo}
+                            className="rounded-4 shadow bg-white"
+                            style={{ width: '85px', height: '85px', objectFit: 'cover' }}
+                            onError={aoErrarImagem}
+                        />
+                    ) : (
+                        <div className="bg-white rounded-circle d-flex align-items-center justify-content-center position-relative shadow" style={{ width: '85px', height: '85px', color: cores.marromCampanha }}>
+                            <i className="bi bi-plus-lg position-absolute fw-bold fs-5 bg-white rounded-circle px-1" style={{ bottom: '2px', right: '2px', border: `3px solid ${cores.marromCampanha}` }}></i>
+                        </div>
+                    )}
+                </div>
+
+                <div className="text-center text-md-start flex-grow-1 mx-md-4">
+                    <h2 className="fw-bold mb-0 display-6" style={{ letterSpacing: '0.5px' }}>
+                        {campanha.titulo}
+                    </h2>
+                    {(campanha.data || campanha.local) && (
+                        <span className="small opacity-75 fw-light d-block mt-2">
+                            <i className="bi bi-calendar3 me-1"></i>
+                            {campanha.data ? formatarData(campanha.data) : "Em breve"}
+                            {campanha.local ? ` • ${campanha.local}` : ""}
+                            {campanha.horario ? ` • ${campanha.horario}` : ""}
+                        </span>
+                    )}
+                </div>
+
+                <div className="d-none d-md-block opacity-90 fs-1">
+                    <i className="bi bi-envelope-heart-fill" style={{ fontSize: '4.5rem' }}></i>
+                </div>
+            </div>
+        </div>
+    );
+}
 
 export default function Home() {
   const navigate = useNavigate();
 
   // Estado para controlar o dropdown de doações via clique
   const [dropdownDoacoes, setDropdownDoacoes] = useState(false);
+
+  // Estado das campanhas (eventos ativos vindos do banco)
+  const [eventosCampanhas, setEventosCampanhas] = useState([]);
+  const [loadingCampanhas, setLoadingCampanhas] = useState(true);
+  const [campanhaDetalhe, setCampanhaDetalhe] = useState(null);
+
+  useEffect(() => {
+    let ativo = true;
+    async function carregarCampanhas() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/eventos`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const dados = await response.json();
+        if (ativo) setEventosCampanhas(Array.isArray(dados) ? dados : []);
+      } catch (error) {
+        console.error("Erro ao carregar campanhas:", error);
+        if (ativo) setEventosCampanhas([]);
+      } finally {
+        if (ativo) setLoadingCampanhas(false);
+      }
+    }
+    carregarCampanhas();
+    return () => { ativo = false; };
+  }, []);
 
   return (
     <div style={{ fontFamily: 'Poppins, sans-serif', backgroundColor: '#ffffff', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -16,7 +109,6 @@ export default function Home() {
       <nav className="navbar navbar-expand-lg navbar-dark p-3" style={{ backgroundColor: cores.marromMenu }}>
         <div className="container d-flex justify-content-between align-items-center">
           <span className="navbar-brand fw-bold d-flex align-items-center fs-4" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
-            <i className="bi bi-paw-fill me-2" style={{ transform: 'rotate(-15deg)' }}></i>
             Patas & Lares
           </span>
 
@@ -117,7 +209,7 @@ export default function Home() {
                 src={Logo}
                 alt="Gato e Cachorro"
                 className="img-fluid"
-                style={{ maxHeight: '260px', objectFit: 'contain' }}
+                style={{ maxHeight: '420px', width: '100%', objectFit: 'contain' }}
               />
             </div>
           </div>
@@ -147,7 +239,7 @@ export default function Home() {
             <div className="col-md-4">
               <div className="card h-100 border-0 p-4" style={{ backgroundColor: cores.cardBege }}>
                 <div className="card-body d-flex flex-column align-items-center">
-                  <i className="bi bi-paw-fill fs-1 mb-2" style={{ color: cores.textoMarrom }}></i>
+                  <i className="bi bi-emoji-heart-eyes-fill fs-1 mb-2" style={{ color: cores.textoMarrom }}></i>
                   <h4 className="card-title fw-bold mb-3" style={{ color: cores.textoMarrom }}>Adote</h4>
                   <p className="card-text text-muted small px-2 mb-4">
                     Dê um lar cheio de amor para um amigo de quatro patas.
@@ -205,32 +297,25 @@ export default function Home() {
 
           </div>
 
-          {/* Banner Vermelho: Campanhas */}
+          {/* Banner de Campanhas */}
           <div className="mt-5 px-2">
             <h3 className="fw-bold mb-4 text-start" style={{ color: cores.textoMarrom, maxWidth: '1000px', margin: '0 auto 1.5rem auto' }}>Campanhas</h3>
 
-            <div className="card border-0 text-white p-4 shadow-sm mx-auto" style={{ backgroundColor: cores.marromCampanha, borderRadius: '24px', maxWidth: '1000px' }}>
-              <div className="card-body d-flex flex-column flex-md-row align-items-center justify-content-between px-md-5 py-3">
-
-                <div className="d-flex align-items-center mb-3 mb-md-0">
-                  <div className="bg-white rounded-circle d-flex align-items-center justify-content-center position-relative shadow" style={{ width: '85px', height: '85px', color: cores.marromCampanha }}>
-                    <i className="bi bi-paw-fill fs-1"></i>
-                    <i className="bi bi-plus-lg position-absolute fw-bold fs-5 bg-white rounded-circle px-1" style={{ bottom: '2px', right: '2px', border: `3px solid ${cores.marromCampanha}` }}></i>
-                  </div>
-                </div>
-
-                <div className="text-center text-md-start flex-grow-1 mx-md-4">
-                  <h2 className="fw-bold mb-0 display-6" style={{ letterSpacing: '0.5px' }}>
-                    Juntos pela Castração e Bem-Estar Animal
-                  </h2>
-                </div>
-
-                <div className="d-none d-md-block opacity-90 fs-1">
-                  <i className="bi bi-envelope-heart-fill" style={{ fontSize: '4.5rem' }}></i>
-                </div>
-
+            {loadingCampanhas ? (
+              <div className="text-center py-4">
+                <div className="spinner-border" style={{ color: cores.marromCampanha }} role="status"></div>
               </div>
-            </div>
+            ) : (
+              <div className="d-flex flex-column gap-4 align-items-center">
+                {eventosCampanhas.length > 0 ? (
+                  eventosCampanhas.map((campanha) => (
+                    <CampanhaCard key={campanha._id || campanha.titulo} campanha={campanha} onClick={() => setCampanhaDetalhe(campanha)} />
+                  ))
+                ) : (
+                  <CampanhaCard campanha={CAMPANHA_PADRAO} onClick={() => setCampanhaDetalhe(CAMPANHA_PADRAO)} />
+                )}
+              </div>
+            )}
           </div>
 
         </div>
@@ -280,7 +365,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="col-md-4 text-center text-md-start border-start-md ps-md-4" style={{ color: '#e0e0e0' }}>
+            <div className="col-md-4 text-center" style={{ color: '#e0e0e0' }}>
               <p className="mb-1 small">CNPJ 00.000.000/0000-00</p>
               <p className="mb-1 small">Sombrio/SC</p>
               <p className="mb-0 small">
@@ -295,6 +380,92 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Modal: Detalhes da Campanha */}
+      {campanhaDetalhe && (
+        <div
+          className="modal show d-block"
+          tabIndex="-1"
+          role="dialog"
+          style={{ backgroundColor: 'rgba(74,37,17,0.55)', zIndex: 1050 }}
+          onClick={() => setCampanhaDetalhe(null)}
+        >
+          <div className="modal-dialog modal-dialog-centered modal-lg" role="document" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content border-0 shadow" style={{ borderRadius: '16px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+              <div className="modal-header border-0" style={{ backgroundColor: cores.textoMarrom, borderTopLeftRadius: '16px', borderTopRightRadius: '16px' }}>
+                <h5 className="modal-title fw-bold text-white">
+                  <i className="bi bi-megaphone me-2"></i> Detalhes da Campanha
+                </h5>
+                <button type="button" className="btn-close btn-close-white" onClick={() => setCampanhaDetalhe(null)}></button>
+              </div>
+
+              <div className="modal-body" style={{ overflowY: 'auto', padding: '1.5rem' }}>
+                {campanhaDetalhe.imagem && (
+                  <div className="text-center mb-3">
+                    <img
+                      src={resolverUrl(campanhaDetalhe.imagem)}
+                      alt={campanhaDetalhe.titulo}
+                      className="rounded-4 shadow-sm"
+                      style={{ maxHeight: '260px', maxWidth: '100%', objectFit: 'contain', backgroundColor: '#fdf7f2' }}
+                      onError={aoErrarImagem}
+                    />
+                  </div>
+                )}
+
+                <h4 className="fw-bold mb-2" style={{ color: cores.textoMarrom }}>{campanhaDetalhe.titulo}</h4>
+
+                <div className="d-flex flex-wrap gap-3 small text-muted mb-3">
+                  {campanhaDetalhe.data && (
+                    <span><i className="bi bi-calendar3 me-1"></i>{formatarData(campanhaDetalhe.data)}</span>
+                  )}
+                  {campanhaDetalhe.horario && (
+                    <span><i className="bi bi-clock me-1"></i>{campanhaDetalhe.horario}</span>
+                  )}
+                  {campanhaDetalhe.local && (
+                    <span><i className="bi bi-geo-alt me-1"></i>{campanhaDetalhe.local}</span>
+                  )}
+                </div>
+
+                <h6 className="fw-bold mb-1" style={{ color: cores.textoMarrom }}>
+                  <i className="bi bi-info-circle me-2"></i>Contexto
+                </h6>
+                <p className="text-muted lh-base" style={{ whiteSpace: 'pre-wrap' }}>
+                  {campanhaDetalhe.descricao || "Conheça os detalhes desta campanha e ajude a transformar vidas."}
+                </p>
+
+                <h6 className="fw-bold mb-1" style={{ color: cores.textoMarrom }}>
+                  <i className="bi bi-bullseye me-2"></i>Objetivos
+                </h6>
+                <p className="text-muted lh-base m-0" style={{ whiteSpace: 'pre-wrap' }}>
+                  {campanhaDetalhe.objetivos || "Promover o bem-estar animal, o combate ao abandono e a conscientização da comunidade sobre posse responsável."}
+                </p>
+              </div>
+
+              <div className="modal-footer border-0">
+                <button type="button" className="btn btn-outline-secondary px-4" style={{ borderRadius: '6px' }} onClick={() => setCampanhaDetalhe(null)}>
+                  Fechar
+                </button>
+                <button
+                  type="button"
+                  className="btn text-white px-4"
+                  style={{ backgroundColor: cores.btnVoluntario, borderRadius: '6px', fontWeight: '500' }}
+                  onClick={() => { setCampanhaDetalhe(null); navigate('/seja-voluntario'); }}
+                >
+                  <i className="bi bi-person-plus me-1"></i> Seja Voluntário
+                </button>
+                <button
+                  type="button"
+                  className="btn text-white px-4"
+                  style={{ backgroundColor: cores.textoMarrom, borderRadius: '6px', fontWeight: '500' }}
+                  onClick={() => { setCampanhaDetalhe(null); navigate('/eventos'); }}
+                >
+                  <i className="bi bi-calendar-event me-1"></i> Ver Eventos
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

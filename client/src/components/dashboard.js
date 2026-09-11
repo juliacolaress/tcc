@@ -132,7 +132,6 @@ export default function Dashboard() {
                     </h2>
                   </div>
                   <div style={{ backgroundColor: '#fdf7f2', borderRadius: '50%', padding: '15px' }}>
-                    <i className="bi bi-paw-fill fs-3" style={{ color: primaryColor }}></i>
                   </div>
                 </div>
               </div>

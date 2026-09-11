@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import API_BASE_URL from "../api/config";
+import { resolverUrl, aoErrarImagem } from "../utils/fotos";
+import BackButton from "./BackButton";
 
 export default function ConfiguracoesDoacao() {
     const [form, setForm] = useState({
@@ -17,7 +18,6 @@ export default function ConfiguracoesDoacao() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
-    const navigate = useNavigate();
     const primaryColor = '#4a2511';
     const labelStyle = { color: primaryColor, fontWeight: '600', marginBottom: '6px' };
     const inputStyle = { borderRadius: '6px', border: '1px solid #ced4da' };
@@ -149,21 +149,12 @@ export default function ConfiguracoesDoacao() {
 
     return (
         <div className="container-fluid py-2">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h3 style={{ color: primaryColor, fontWeight: 'bold' }}>
-                        <i className="bi bi-bank me-2"></i> Configurações de Doação
-                    </h3>
-                    <p className="text-muted mb-0">Dados bancários e chave PIX exibidos na página pública de doação</p>
-                </div>
-                <button
-                    type="button"
-                    onClick={() => navigate("/dashboard")}
-                    className="btn btn-outline-secondary px-4 py-2"
-                    style={{ borderRadius: '6px' }}
-                >
-                    <i className="bi bi-arrow-left me-2"></i> Voltar
-                </button>
+            <BackButton destinoPadrao="/dashboard" />
+            <div className="mt-3 mb-4">
+                <h3 style={{ color: primaryColor, fontWeight: 'bold' }}>
+                    <i className="bi bi-bank me-2"></i> Configurações de Doação
+                </h3>
+                <p className="text-muted mb-0">Dados bancários e chave PIX exibidos na página pública de doação</p>
             </div>
 
             <form onSubmit={onSubmit}>
@@ -221,9 +212,10 @@ export default function ConfiguracoesDoacao() {
                     {(qrPreview || form.qrCode) && (
                         <div className="mb-3 d-flex align-items-center gap-3">
                             <img
-                                src={qrPreview || form.qrCode}
+                                src={qrPreview || resolverUrl(form.qrCode)}
                                 alt="QR Code PIX"
                                 style={{ width: '160px', height: '160px', objectFit: 'contain', borderRadius: '8px', border: '1px solid #eadfcf', backgroundColor: '#fff', padding: '6px' }}
+                                onError={aoErrarImagem}
                             />
                             {qrPreview && <span className="text-muted small">Prévia da nova imagem (ainda não salva).</span>}
                             {!qrPreview && form.qrCode && <span className="text-muted small">QR Code atualmente salvo.</span>}

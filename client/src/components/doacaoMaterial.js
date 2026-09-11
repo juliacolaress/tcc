@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API_BASE_URL from '../api/config';
+import { resolverUrl, aoErrarImagem } from '../utils/fotos';
 import cores from '../theme';
 
 function DoacaoMaterial() {
@@ -48,7 +49,6 @@ function DoacaoMaterial() {
       <nav className="navbar navbar-expand-lg navbar-dark p-3" style={{ backgroundColor: cores.marromMenu }}>
         <div className="container d-flex justify-content-between align-items-center">
           <span className="navbar-brand fw-bold d-flex align-items-center fs-4" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
-            <i className="bi bi-paw-fill me-2" style={{ transform: 'rotate(-15deg)' }}></i>
             Patas & Lares
           </span>
 
@@ -134,9 +134,9 @@ function DoacaoMaterial() {
                     <div className="col" key={item._id}>
                       <div className="card h-100 border-0 bg-transparent text-start" style={{ transition: '0.3s' }}>
                         <div className="d-flex justify-content-center align-items-center p-3 bg-white rounded-4 shadow-sm" style={{ minHeight: '260px', overflow: 'hidden' }}>
-                          {item.imagem ? (
-                            <img src={item.imagem} alt={item.titulo} className="img-fluid object-fit-contain" style={{ maxHeight: '220px' }} />
-                          ) : (
+{item.imagem ? (
+                                <img src={resolverUrl(item.imagem)} alt={item.titulo} className="img-fluid object-fit-contain" style={{ maxHeight: '220px' }} onError={aoErrarImagem} />
+                            ) : (
                             <i className="bi bi-box-seam" style={{ fontSize: '3rem', color: cores.marromClaro, opacity: '0.6' }}></i>
                           )}
                         </div>
@@ -178,7 +178,6 @@ function DoacaoMaterial() {
             <div className="d-flex justify-content-between align-items-center mb-2">
               <div className="d-flex align-items-center gap-2">
                 <div className="bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: '40px', height: '40px' }}>
-                  <i className="bi bi-paw-fill" style={{ color: cores.marromClaro }}></i>
                 </div>
                 <span className="text-white fw-bold">Suporte Patas & Lares</span>
               </div>
@@ -266,9 +265,9 @@ function DoacaoMaterial() {
                     <div className="d-flex gap-2 overflow-auto pb-2 mb-2" style={{ scrollbarWidth: 'none' }}>
                       {necessidades.slice(0, 3).map(item => (
                         <div key={item._id} className="text-center" style={{ minWidth: '80px' }}>
-                          {item.imagem ? (
-                            <img src={item.imagem} alt={item.titulo} style={{ width: '80px', height: '100px', objectFit: 'contain', borderRadius: '8px', border: '1px solid #eee' }} />
-                          ) : (
+{item.imagem ? (
+                                <img src={resolverUrl(item.imagem)} alt={item.titulo} style={{ width: '80px', height: '100px', objectFit: 'contain', borderRadius: '8px', border: '1px solid #eee' }} onError={aoErrarImagem} />
+                            ) : (
                             <div className="d-flex align-items-center justify-content-center" style={{ width: '80px', height: '100px', borderRadius: '8px', border: '1px solid #eee', backgroundColor: '#f8f9fa' }}>
                               <i className="bi bi-box-seam text-muted" style={{ fontSize: '1.5rem' }}></i>
                             </div>

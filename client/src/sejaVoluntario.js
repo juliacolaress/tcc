@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import cores from './theme';
 import API_BASE_URL from './api/config';
+import BackButton from './components/BackButton';
 
 const OPCOES_INTERESSES = ["Passeios", "Limpeza", "Eventos", "Resgates", "Outros"];
 const DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
@@ -94,7 +95,6 @@ function SejaVoluntario() {
       <nav className="navbar navbar-expand-lg navbar-dark p-3" style={{ backgroundColor: cores.marromMenu }}>
         <div className="container d-flex justify-content-between align-items-center">
           <span className="navbar-brand fw-bold d-flex align-items-center fs-4" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
-            <i className="bi bi-paw-fill me-2" style={{ transform: 'rotate(-15deg)' }}></i>
             Patas & Lares
           </span>
 
@@ -161,7 +161,8 @@ function SejaVoluntario() {
 
       {/* 2. CORPO DA PÁGINA */}
       <div className="container py-5 flex-grow-1" onClick={() => setDropdownDoacoes(false)}>
-        <div className="text-center mb-5">
+        <BackButton destinoPadrao="/" />
+        <div className="text-center mt-4 mb-5">
           <h1 className="fw-bold mb-3" style={{ color: cores.textoMarrom, fontSize: '3rem' }}>
             Seja um Voluntário
           </h1>

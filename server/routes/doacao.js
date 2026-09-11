@@ -3,7 +3,8 @@ const doacoesRoutes = express.Router()
 const dbo = require("../db/conn")
 const ObjectId = require("mongodb").ObjectId
 const { body, validationResult } = require("express-validator")
-const { auth } = require("../middleware/auth")
+const { authorize } = require("../middleware/auth")
+const { validarObjectId } = require("../middleware/objectId")
 
 const validarDoacao = [
     body("nome").trim().notEmpty().withMessage("Nome é obrigatório"),
@@ -35,17 +36,19 @@ const validarValorDoacao = [
     }),
 ]
 
-doacoesRoutes.route("/doacoes").get(auth, async function (req, res) {
+// Todas as rotas de doações exigem perfil de administrador
+doacoesRoutes.route("/doacoes").get(authorize(["Admin", "admin"]), async function (req, res) {
     const db_connect = dbo.getDb()
     try {
         const result = await db_connect.collection("doacoes").find({}).toArray()
         res.status(200).json(result)
     } catch (error) {
-        res.status(500).json({ mensagem: error.message })
+        console.error("Erro ao listar doações:", error)
+        res.status(500).json({ mensagem: "Erro no servidor" })
     }
 })
 
-doacoesRoutes.route("/doacao/:id").get(auth, async function (req, res) {
+doacoesRoutes.route("/doacao/:id").get(authorize(["Admin", "admin"]), validarObjectId, async function (req, res) {
     const db_connect = dbo.getDb()
     const myquery = { _id: new ObjectId(req.params.id) }
     try {
@@ -53,11 +56,12 @@ doacoesRoutes.route("/doacao/:id").get(auth, async function (req, res) {
         if (!result) return res.status(404).json({ mensagem: "Doação não encontrada" })
         res.status(200).json(result)
     } catch (error) {
-        res.status(500).json({ mensagem: error.message })
+        console.error("Erro ao buscar doação:", error)
+        res.status(500).json({ mensagem: "Erro no servidor" })
     }
 })
 
-doacoesRoutes.route("/doacao/add").post(auth, validarDoacao, validarValorDoacao, async function (req, res) {
+doacoesRoutes.route("/doacao/add").post(authorize(["Admin", "admin"]), validarDoacao, validarValorDoacao, async function (req, res) {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(400).json({ mensagem: errors.array()[0].msg })
@@ -85,11 +89,12 @@ doacoesRoutes.route("/doacao/add").post(auth, validarDoacao, validarValorDoacao,
         const result = await db_connect.collection("doacoes").insertOne(myobj)
         res.status(201).json(result)
     } catch (error) {
-        res.status(409).json({ mensagem: error.message })
+        console.error("Erro ao criar doação:", error)
+        res.status(409).json({ mensagem: "Erro ao criar doação" })
     }
 })
 
-doacoesRoutes.route("/doacao/:id").delete(auth, async function (req, res) {
+doacoesRoutes.route("/doacao/:id").delete(authorize(["Admin", "admin"]), validarObjectId, async function (req, res) {
     const db_connect = dbo.getDb()
     const myquery = { _id: new ObjectId(req.params.id) }
     try {
@@ -100,7 +105,7 @@ doacoesRoutes.route("/doacao/:id").delete(auth, async function (req, res) {
     }
 })
 
-doacoesRoutes.route("/doacao/update/:id").post(auth, validarValorDoacao, async function (req, res) {
+doacoesRoutes.route("/doacao/update/:id").post(authorize(["Admin", "admin"]), validarObjectId, validarValorDoacao, async function (req, res) {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(400).json({ mensagem: errors.array()[0].msg })
@@ -140,7 +145,7 @@ doacoesRoutes.route("/doacao/update/:id").post(auth, validarValorDoacao, async f
         res.status(200).json(result)
     } catch (error) {
         console.error("Erro no update:", error)
-        res.status(500).json({ mensagem: error.message })
+        res.status(500).json({ mensagem: "Erro no servidor" })
     }
 })
 

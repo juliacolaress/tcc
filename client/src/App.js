@@ -45,6 +45,28 @@ import Register from './components/Register';
 import Eventos from './eventos';
 import SejaVoluntario from './sejaVoluntario';
 
+// Decodifica o payload do JWT para saber o papel do usuário (sem validar assinatura,
+// que é responsabilidade do servidor). Retorna null se o token for inválido/expirado.
+function getUsuarioAutenticado(token) {
+  if (!token) return null;
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) return null;
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const json = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    const dados = JSON.parse(json);
+    if (dados.exp && Date.now() >= dados.exp * 1000) return null;
+    return dados;
+  } catch (e) {
+    return null;
+  }
+}
+
 // Layout do Painel Administrativo (Menu Lateral Fixo)
 function NavItem({ to, icon, label }) {
   const location = useLocation();
@@ -89,7 +111,6 @@ function DashboardLayout({ setToken }) {
         <div className="d-flex justify-content-between align-items-start">
           <div>
             <h4 className="mb-1" style={{ color: '#4a2511', fontWeight: 'bold' }}>
-              <i className="bi bi-paw-fill me-2" style={{ transform: 'rotate(-15deg)', display: 'inline-block' }}></i>
               Patas & Lares
             </h4>
             <p className="text-muted small mb-0">Painel Administrativo</p>
@@ -109,7 +130,7 @@ function DashboardLayout({ setToken }) {
           <NavItem to="/dashboard" icon="bi-speedometer2" label="Dashboard" />
 
           <div className="admin-section-title">Gestão</div>
-          <NavItem to="/animais" icon="bi-paw-fill" label="Animais" />
+          <NavItem to="/animais" icon="bi-heart-fill" label="Animais" />
           <NavItem to="/voluntarios" icon="bi-people" label="Voluntários" />
           <NavItem to="/eventos-admin" icon="bi-calendar-event" label="Eventos" />
           <NavItem to="/adotados" icon="bi-heart-fill" label="Histórico de Adotados" />
@@ -145,7 +166,6 @@ function DashboardLayout({ setToken }) {
             <i className="bi bi-list fs-4"></i>
           </button>
           <span className="fw-bold">
-            <i className="bi bi-paw-fill me-2" style={{ transform: 'rotate(-15deg)', display: 'inline-block' }}></i>
             Patas & Lares
           </span>
         </div>
@@ -157,6 +177,9 @@ function DashboardLayout({ setToken }) {
 
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('token'));
+
+  const usuario = getUsuarioAutenticado(token);
+  const isAdmin = usuario?.tipo === "Admin";
 
   const handleLogin = (newToken) => {
     localStorage.setItem('token', newToken);
@@ -175,12 +198,12 @@ export default function App() {
       <Route path="/eventos" element={<Eventos />} />
       <Route path="/seja-voluntario" element={<SejaVoluntario />} />
       
-      {/* Se o administrador já estiver logado e tentar entrar no login, ele vai direto para o painel */}
-      <Route path="/login" element={token ? <Navigate to="/dashboard" replace /> : <Login onLogin={handleLogin} />} />
+      {/* Somente o administrador logado vai direto ao painel; demais usuários veem o login */}
+      <Route path="/login" element={isAdmin ? <Navigate to="/dashboard" replace /> : <Login onLogin={handleLogin} />} />
       <Route path="/register" element={<Register />} />
 
       {/* 2. ROTAS PROTEGIDAS (Apenas para o Administrador logado) */}
-      <Route element={token ? <DashboardLayout setToken={setToken} /> : <Navigate to="/login" replace />}>
+      <Route element={isAdmin ? <DashboardLayout setToken={setToken} /> : <Navigate to="/login" replace />}>
         
         {/* A PAGINA INICIAL DO ADM É O DASHBOARD */}
         <Route path="/dashboard" element={<Dashboard />} />

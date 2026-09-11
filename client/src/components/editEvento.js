@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import API_BASE_URL from "../api/config";
+import BackButton from "./BackButton";
 
 const STATUS_EVENTO = ["Agendado", "Concluído", "Cancelado"];
 
@@ -14,6 +15,7 @@ export default function EditEvento() {
     const [form, setForm] = useState({
         titulo: "",
         descricao: "",
+        objetivos: "",
         data: "",
         horario: "",
         local: "",
@@ -45,6 +47,7 @@ export default function EditEvento() {
                 setForm({
                     titulo: record.titulo || "",
                     descricao: record.descricao || "",
+                    objetivos: record.objetivos || "",
                     data: formatarDataInput(record.data),
                     horario: record.horario || "",
                     local: record.local || "",
@@ -146,21 +149,12 @@ export default function EditEvento() {
 
     return (
         <div className="container-fluid py-2">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h3 style={{ color: primaryColor, fontWeight: 'bold' }}>
-                        <i className="bi bi-calendar-event me-2"></i> Editar Evento
-                    </h3>
-                    <p className="text-muted mb-0">Atualize os dados do evento</p>
-                </div>
-                <button
-                    type="button"
-                    onClick={() => navigate("/eventos-admin")}
-                    className="btn btn-outline-secondary px-4 py-2"
-                    style={{ borderRadius: '6px' }}
-                >
-                    <i className="bi bi-arrow-left me-2"></i> Voltar
-                </button>
+            <BackButton destinoPadrao="/dashboard" />
+            <div className="mt-3 mb-4">
+                <h3 style={{ color: primaryColor, fontWeight: 'bold' }}>
+                    <i className="bi bi-calendar-event me-2"></i> Editar Evento
+                </h3>
+                <p className="text-muted mb-0">Atualize os dados do evento</p>
             </div>
 
             <form onSubmit={onSubmit}>
@@ -209,6 +203,13 @@ export default function EditEvento() {
                         <div className="form-group col-md-12 mb-3">
                             <label htmlFor="descricao" style={labelStyle}>Descrição</label>
                             <textarea className="form-control px-3 py-2" id="descricao" rows="3" style={inputStyle} value={form.descricao} onChange={(e) => updateForm({ descricao: e.target.value })} placeholder="Detalhes sobre o evento (programação, observações...)" />
+                        </div>
+                    </div>
+
+                    <div className="row">
+                        <div className="form-group col-md-12 mb-3">
+                            <label htmlFor="objetivos" style={labelStyle}>Objetivos da Campanha (opcional)</label>
+                            <textarea className="form-control px-3 py-2" id="objetivos" rows="3" style={inputStyle} value={form.objetivos} onChange={(e) => updateForm({ objetivos: e.target.value })} placeholder="Ex.: reduzir a superpopulação de animais abandonados, promover bem-estar e posse responsável..." />
                         </div>
                     </div>
                 </div>

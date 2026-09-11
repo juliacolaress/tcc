@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import API_BASE_URL from "../api/config";
-import { normalizeFotos } from "../utils/fotos";
+import { normalizeFotos, aoErrarImagem } from "../utils/fotos";
 
 // Componente do Card do Animal Adotado
 const AdoptedCard = ({ record }) => {
@@ -24,7 +24,7 @@ const AdoptedCard = ({ record }) => {
     return (
         <div className="card border-0 shadow-sm h-100" style={{ borderRadius: '10px', overflow: 'hidden', backgroundColor: '#fff' }}>
             <div style={{ height: '220px', overflow: 'hidden', backgroundColor: '#f8f9fa' }}>
-                <img src={imagem} className="w-100 h-100" style={{ objectFit: 'cover' }} alt={record.nome} />
+                <img src={imagem} className="w-100 h-100" style={{ objectFit: 'cover' }} alt={record.nome} onError={aoErrarImagem} />
             </div>
             <div className="card-body d-flex flex-column p-3">
                 <h5 className="fw-bold mb-1" style={{ color: primaryColor }}>{record.nome}</h5>

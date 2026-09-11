@@ -20,6 +20,8 @@ ensureValidDns()
 const express = require("express")
 const app = express()
 const cors = require("cors")
+const helmet = require("helmet")
+const rateLimit = require("express-rate-limit")
 
 const uploadsDir = path.join(__dirname, "uploads")
 if (!fs.existsSync(uploadsDir)) {
@@ -27,9 +29,34 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 const port = process.env.PORT || 5050
+const clientOrigins = (process.env.CLIENT_ORIGIN || "http://localhost:3000")
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean)
 
-app.use(cors())
-app.use(express.json())
+const corsOptions = {
+    origin: function (origin, callback) {
+        // Permite requisições sem origem (curl, Postman, mesma máquina em dev)
+        if (!origin || clientOrigins.includes(origin)) {
+            return callback(null, true)
+        }
+        return callback(new Error("Origem não permitida pelo CORS"))
+    },
+    credentials: true,
+}
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 300,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { mensagem: "Muitas requisições. Tente novamente em alguns minutos." },
+})
+
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }))
+app.use(cors(corsOptions))
+app.use(express.json({ limit: "1mb" }))
+app.use(limiter)
 app.use("/uploads", express.static(path.join(__dirname, "uploads")))
 app.use(require("./routes/user")) 
 app.use(require("./routes/animais"));

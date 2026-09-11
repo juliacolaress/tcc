@@ -1,7 +1,7 @@
 const express = require("express")
 const configuracoesRoutes = express.Router()
 const dbo = require("../db/conn")
-const { auth } = require("../middleware/auth")
+const { auth, authorize } = require("../middleware/auth")
 const fs = require("fs")
 const path = require("path")
 
@@ -53,12 +53,13 @@ configuracoesRoutes.route("/configuracoes/doacao").get(async function (req, res)
 
         res.status(200).json(config)
     } catch (error) {
-        res.status(500).json({ mensagem: error.message })
+        console.error("Erro ao buscar dados de doação:", error)
+        res.status(500).json({ mensagem: "Erro no servidor" })
     }
 })
 
 // PUT — atualizar dados de doação (admin)
-configuracoesRoutes.route("/configuracoes/doacao").put(auth, async function (req, res) {
+configuracoesRoutes.route("/configuracoes/doacao").put(auth, authorize(["Admin", "admin"]), async function (req, res) {
     const db_connect = dbo.getDb()
 
     if (!req.body || typeof req.body !== "object") {
@@ -89,7 +90,8 @@ configuracoesRoutes.route("/configuracoes/doacao").put(auth, async function (req
         const resultado = await colecao.findOne({})
         res.status(200).json(resultado)
     } catch (error) {
-        res.status(500).json({ mensagem: "Erro ao atualizar dados de doação: " + error.message })
+        console.error("Erro ao atualizar dados de doação:", error)
+        res.status(500).json({ mensagem: "Erro ao atualizar dados de doação" })
     }
 })
 

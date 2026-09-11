@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import cores from '../theme';
 import API_BASE_URL from '../api/config';
+import { resolverUrl, aoErrarImagem } from '../utils/fotos';
 
 const CONFIG_PADRAO = {
   razaoSocial: "Organização de Amparo Animal Patas & Lares",
@@ -77,7 +78,6 @@ function DoacaoFinanceira() {
       <nav className="navbar navbar-expand-lg navbar-dark p-3" style={{ backgroundColor: cores.marromMenu }}>
         <div className="container d-flex justify-content-between align-items-center">
           <span className="navbar-brand fw-bold d-flex align-items-center fs-4" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
-            <i className="bi bi-paw-fill me-2" style={{ transform: 'rotate(-15deg)' }}></i>
             Patas & Lares
           </span>
 
@@ -207,9 +207,10 @@ function DoacaoFinanceira() {
               >
                 {config.qrCode ? (
                   <img
-                    src={config.qrCode}
+                    src={resolverUrl(config.qrCode)}
                     alt="QR Code PIX"
                     style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                    onError={aoErrarImagem}
                   />
                 ) : (
                   <>

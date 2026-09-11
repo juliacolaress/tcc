@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import cores from './theme';
 import API_BASE_URL from './api/config';
+import { resolverUrl, aoErrarImagem } from './utils/fotos';
 
 function formatarData(valor) {
     if (!valor) return "";
@@ -44,7 +45,6 @@ function Eventos() {
       <nav className="navbar navbar-expand-lg navbar-dark p-3" style={{ backgroundColor: cores.marromMenu }}>
         <div className="container d-flex justify-content-between align-items-center">
           <span className="navbar-brand fw-bold d-flex align-items-center fs-4" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
-            <i className="bi bi-paw-fill me-2" style={{ transform: 'rotate(-15deg)' }}></i>
             Patas & Lares
           </span>
 
@@ -151,10 +151,11 @@ function Eventos() {
                   <div className="d-flex align-items-center justify-content-center bg-white p-3" style={{ height: '220px', overflow: 'hidden' }}>
                     {evento.imagem ? (
                       <img
-                        src={evento.imagem}
+                        src={resolverUrl(evento.imagem)}
                         alt={evento.titulo}
                         className="img-fluid object-fit-contain"
                         style={{ maxHeight: '200px' }}
+                        onError={aoErrarImagem}
                       />
                     ) : (
                       <i className="bi bi-calendar-event" style={{ fontSize: '3.5rem', color: cores.marromClaro, opacity: '0.6' }}></i>
@@ -179,6 +180,11 @@ function Eventos() {
                     </div>
                     {evento.descricao && (
                       <p className="card-text text-muted small lh-sm mb-0" style={{ fontSize: '0.85rem' }}>{evento.descricao}</p>
+                    )}
+                    {evento.objetivos && (
+                      <p className="card-text text-muted small lh-sm mt-2 mb-0" style={{ fontSize: '0.85rem' }}>
+                        <strong style={{ color: cores.textoMarrom }}>Objetivos:</strong> {evento.objetivos}
+                      </p>
                     )}
                   </div>
                 </div>

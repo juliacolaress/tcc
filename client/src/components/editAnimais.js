@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import API_BASE_URL from "../api/config";
+import { resolverUrl, aoErrarImagem } from "../utils/fotos";
+import BackButton from "./BackButton";
 
 const RACAS_POR_ESPECIE = {
     Cachorro: [
@@ -97,10 +99,10 @@ export default function EditAnimais() {
                 status: typeof record.status === "boolean" ? (record.status ? "Disponível" : "Adotado") : (record.status || "Disponível")
             });
 
-            const fotos = [
-                ...(record.fotos || []),
-                record.fotoUrl
-            ].filter(Boolean);
+            const fotos = [];
+            [record.fotoUrl, ...(record.fotos || [])].filter(Boolean).forEach(u => {
+                if (!fotos.includes(u)) fotos.push(u);
+            });
             setFotosExistentes(fotos);
         }
         fetchData();
@@ -176,7 +178,7 @@ export default function EditAnimais() {
                 urlsNovas = await uploadFotos(token);
             }
 
-            const todasFotos = [...fotosExistentes, ...urlsNovas];
+            const todasFotos = [...urlsNovas, ...fotosExistentes];
 
             const editedAnimal = {
                 ...form,
@@ -214,9 +216,13 @@ export default function EditAnimais() {
 
     return (
         <div className="container mt-4">
-            <h3 className="mb-4" style={{ color: primaryColor, fontWeight: 'bold' }}>
-                <i className="bi bi-paw-fill me-2"></i> Editar Animal
-            </h3>
+            <BackButton destinoPadrao="/dashboard" />
+            <div className="mt-3 mb-4">
+                <h3 className="mb-0" style={{ color: primaryColor, fontWeight: 'bold' }}>
+                    Editar Animal
+                </h3>
+                <p className="text-muted mb-0">Atualize os dados e as fotos do animal abrigado</p>
+            </div>
             <hr />
             <form onSubmit={onSubmit}>
                 {/* NOME */}
@@ -329,9 +335,10 @@ export default function EditAnimais() {
                                 {fotosExistentes.map((url, index) => (
                                     <div key={`existente-${index}`} className="position-relative" style={{ width: '100px', height: '100px' }}>
                                         <img
-                                            src={url}
+                                            src={resolverUrl(url)}
                                             alt={`Foto ${index + 1}`}
                                             style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '6px', border: '1px solid #dee2e6' }}
+                                            onError={aoErrarImagem}
                                         />
                                         <button
                                             type="button"

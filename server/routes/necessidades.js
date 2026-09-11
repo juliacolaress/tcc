@@ -3,7 +3,8 @@ const necessidadesRoutes = express.Router()
 const dbo = require("../db/conn")
 const ObjectId = require("mongodb").ObjectId
 const { body, validationResult } = require("express-validator")
-const { auth } = require("../middleware/auth")
+const { authorize } = require("../middleware/auth")
+const { validarObjectId } = require("../middleware/objectId")
 const fs = require("fs")
 const path = require("path")
 
@@ -31,12 +32,13 @@ necessidadesRoutes.route("/necessidades").get(async function (req, res) {
         const result = await db_connect.collection("necessidades").find({}).sort({ data_criacao: -1 }).toArray()
         res.status(200).json(result)
     } catch (error) {
-        res.status(500).json({ mensagem: error.message })
+        console.error("Erro ao listar necessidades:", error)
+        res.status(500).json({ mensagem: "Erro no servidor" })
     }
 })
 
 // GET pública — item único
-necessidadesRoutes.route("/necessidades/:id").get(async function (req, res) {
+necessidadesRoutes.route("/necessidades/:id").get(validarObjectId, async function (req, res) {
     const db_connect = dbo.getDb()
     const myquery = { _id: new ObjectId(req.params.id) }
     try {
@@ -44,12 +46,13 @@ necessidadesRoutes.route("/necessidades/:id").get(async function (req, res) {
         if (!result) return res.status(404).json({ mensagem: "Necessidade não encontrada" })
         res.status(200).json(result)
     } catch (error) {
-        res.status(500).json({ mensagem: error.message })
+        console.error("Erro ao buscar necessidade:", error)
+        res.status(500).json({ mensagem: "Erro no servidor" })
     }
 })
 
-// POST — criar necessidade (admin)
-necessidadesRoutes.route("/necessidades").post(auth, validarNecessidade, async function (req, res) {
+// A partir daqui, todas as rotas exigem perfil de administrador
+necessidadesRoutes.route("/necessidades").post(authorize(["Admin", "admin"]), validarNecessidade, async function (req, res) {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(400).json({ mensagem: errors.array()[0].msg })
@@ -70,12 +73,13 @@ necessidadesRoutes.route("/necessidades").post(auth, validarNecessidade, async f
         const result = await db_connect.collection("necessidades").insertOne(myobj)
         res.status(201).json(result)
     } catch (error) {
-        res.status(409).json({ mensagem: error.message })
+        console.error("Erro ao criar necessidade:", error)
+        res.status(409).json({ mensagem: "Erro ao criar necessidade" })
     }
 })
 
 // PUT — atualizar necessidade (admin)
-necessidadesRoutes.route("/necessidades/:id").put(auth, async function (req, res) {
+necessidadesRoutes.route("/necessidades/:id").put(authorize(["Admin", "admin"]), validarObjectId, async function (req, res) {
     const db_connect = dbo.getDb()
     const myquery = { _id: new ObjectId(req.params.id) }
 
@@ -106,12 +110,13 @@ necessidadesRoutes.route("/necessidades/:id").put(auth, async function (req, res
 
         res.status(200).json(result)
     } catch (error) {
-        res.status(500).json({ mensagem: "Erro ao atualizar necessidade: " + error.message })
+        console.error("Erro ao atualizar necessidade:", error)
+        res.status(500).json({ mensagem: "Erro ao atualizar necessidade" })
     }
 })
 
 // DELETE — remover necessidade (admin)
-necessidadesRoutes.route("/necessidades/:id").delete(auth, async function (req, res) {
+necessidadesRoutes.route("/necessidades/:id").delete(authorize(["Admin", "admin"]), validarObjectId, async function (req, res) {
     const db_connect = dbo.getDb()
     const myquery = { _id: new ObjectId(req.params.id) }
     try {

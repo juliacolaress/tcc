@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import API_BASE_URL from "../api/config";
-import { normalizeFotos } from "../utils/fotos";
+import { normalizeFotos, aoErrarImagem } from "../utils/fotos";
 
 // Componente do Card do Animal
 const AnimalCard = ({ record, deleteAnimal, marcarComoAdotado }) => {
@@ -9,16 +9,39 @@ const AnimalCard = ({ record, deleteAnimal, marcarComoAdotado }) => {
     const brownColor = '#aa7a44';
     const badgeStyle = { backgroundColor: '#fdf7f2', color: primaryColor, border: '1px solid #eadfcf' };
     const fotos = normalizeFotos(record);
+    const [imagemAtual, setImagemAtual] = useState(0);
     const imagemPadrao = (record.especie || "").toLowerCase() === "gato"
         ? "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=500"
         : "https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=500";
-    const imagem = fotos.length > 0 ? fotos[0] : imagemPadrao;
+    const imagem = fotos.length > 0 ? fotos[imagemAtual] : imagemPadrao;
     const generoLabel = record.genero === "M" ? "Macho" : record.genero === "F" ? "Fêmea" : "---";
 
     return (
         <div className="card shadow-sm h-100" style={{ borderRadius: '10px', overflow: 'hidden', backgroundColor: '#fff', border: '1px solid #eadfcf' }}>
-            <div style={{ height: '220px', overflow: 'hidden', backgroundColor: '#f8f9fa' }}>
-                <img src={imagem} className="w-100 h-100" style={{ objectFit: 'cover' }} alt={record.nome} />
+            <div style={{ height: '220px', overflow: 'hidden', backgroundColor: '#f8f9fa', position: 'relative' }}>
+                <img src={imagem} className="w-100 h-100" style={{ objectFit: 'cover' }} alt={record.nome} onError={aoErrarImagem} />
+                {fotos.length > 1 && (
+                    <div className="position-absolute bottom-0 start-0 end-0 d-flex justify-content-center gap-1 pb-2" style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.5))' }}>
+                        {fotos.map((url, index) => (
+                            <img
+                                key={index}
+                                src={url}
+                                alt={`Thumbnail ${index + 1}`}
+                                onClick={() => setImagemAtual(index)}
+                                onError={aoErrarImagem}
+                                style={{
+                                    width: '40px',
+                                    height: '40px',
+                                    objectFit: 'cover',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    border: index === imagemAtual ? '2px solid white' : '2px solid transparent',
+                                    opacity: index === imagemAtual ? 1 : 0.7
+                                }}
+                            />
+                        ))}
+                    </div>
+                )}
             </div>
             <div className="card-body d-flex flex-column p-3">
                 <h5 className="fw-bold mb-2" style={{ color: primaryColor }}>{record.nome}</h5>
@@ -188,7 +211,7 @@ export default function AnimalList() {
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h3 style={{ color: primaryColor, fontWeight: 'bold' }}>
-                        <i className="bi bi-paw-fill me-2"></i> Animais Abrigados
+                        Animais Abrigados
                     </h3>
                 </div>
                 <div className="d-flex gap-2">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import API_BASE_URL from "../api/config";
+import BackButton from "./BackButton";
 
 export default function AdotadosEdit() {
     const [form, setForm] = useState({ 
@@ -84,12 +85,10 @@ export default function AdotadosEdit() {
 
     return (
         <div className="container mt-4" style={{ maxWidth: '700px' }}>
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h3 style={{ color: primaryColor, fontWeight: 'bold' }}>Gerenciar Adotado: {form.nome}</h3>
-                    <p className="text-muted mb-0">{form.especie} • {form.raca || "Sem raça definida"}</p>
-                </div>
-                <button className="btn btn-outline-secondary" onClick={() => navigate("/adotados")}>Voltar</button>
+            <BackButton destinoPadrao="/dashboard" />
+            <div className="mt-3 mb-4">
+                <h3 style={{ color: primaryColor, fontWeight: 'bold' }}>Gerenciar Adotado: {form.nome}</h3>
+                <p className="text-muted mb-0">{form.especie} • {form.raca || "Sem raça definida"}</p>
             </div>
 
             <form onSubmit={onSubmit} className="card border-0 shadow-sm p-4" style={{ borderRadius: '8px' }}>

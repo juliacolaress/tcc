@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import API_BASE_URL from "../api/config";
+import BackButton from "./BackButton";
 
 export default function Register() {
     const [nome, setNome] = useState('');
@@ -23,7 +24,7 @@ export default function Register() {
             const data = await response.json();
 
             if (!response.ok) {
-                return setMensagem(data.message || 'Erro ao registrar');
+                return setMensagem(data.mensagem || 'Erro ao registrar');
             }
 
             setMensagem('Usuário registrado com sucesso!');
@@ -37,6 +38,9 @@ export default function Register() {
 
     return (
         <div className="container w-50">
+            <div className="mt-4 mb-3">
+                <BackButton destinoPadrao="/" />
+            </div>
             <form id="login-form" className="form" onSubmit={handleRegister}>
                 <h3 className="text-center">Registro</h3>
 
