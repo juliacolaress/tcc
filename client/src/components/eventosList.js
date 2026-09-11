@@ -22,7 +22,7 @@ export default function EventosList() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const primaryColor = '#4a2511';
+    const primaryColor = '#3D2314';
 
     useEffect(() => {
         async function getEventos() {
@@ -123,7 +123,7 @@ export default function EventosList() {
                                                     onError={aoErrarImagem}
                                                 />
                                             ) : (
-                                                <div className="d-flex align-items-center justify-content-center" style={{ width: '60px', height: '60px', borderRadius: '6px', backgroundColor: '#fdf7f2' }}>
+                                                <div className="d-flex align-items-center justify-content-center" style={{ width: '60px', height: '60px', borderRadius: '6px', backgroundColor: '#FAF6F0' }}>
                                                     <i className="bi bi-calendar-event text-muted" style={{ fontSize: '1.4rem', opacity: '0.5' }}></i>
                                                 </div>
                                             )}

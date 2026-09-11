@@ -16,7 +16,7 @@ export default function AdotadosEdit() {
     const [loading, setLoading] = useState(true);
     const { id } = useParams();
     const navigate = useNavigate();
-    const primaryColor = '#4a2511';
+    const primaryColor = '#3D2314';
 
     useEffect(() => {
         async function fetchAnimal() {

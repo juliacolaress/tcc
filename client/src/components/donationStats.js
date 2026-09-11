@@ -9,7 +9,7 @@ export default function DonationStats() {
         material: { dia: 0, semana: 0, mes: 0, total: 0 }
     });
     const [loading, setLoading] = useState(true);
-    const primaryColor = '#4a2511';
+    const primaryColor = '#3D2314';
 
     useEffect(() => {
         async function fetchStats() {
@@ -85,7 +85,7 @@ export default function DonationStats() {
                 <div className="col-md-6">
                     <div className="card border-0 shadow-sm p-4 h-100" style={{ borderRadius: '15px' }}>
                         <div className="text-center mb-4">
-                            <div className="d-inline-block mb-3" style={{ backgroundColor: '#fdf7f2', borderRadius: '50%', padding: '25px' }}>
+                            <div className="d-inline-block mb-3" style={{ backgroundColor: '#FAF6F0', borderRadius: '50%', padding: '25px' }}>
                                 <i className="bi bi-cash-coin" style={{ fontSize: '3rem', color: primaryColor }}></i>
                             </div>
                             <h4 className="fw-bold" style={{ color: primaryColor }}>Doações Financeiras</h4>
@@ -105,7 +105,7 @@ export default function DonationStats() {
                 <div className="col-md-6">
                     <div className="card border-0 shadow-sm p-4 h-100" style={{ borderRadius: '15px' }}>
                         <div className="text-center mb-4">
-                            <div className="d-inline-block mb-3" style={{ backgroundColor: '#fdf7f2', borderRadius: '50%', padding: '25px' }}>
+                            <div className="d-inline-block mb-3" style={{ backgroundColor: '#FAF6F0', borderRadius: '50%', padding: '25px' }}>
                                 <i className="bi bi-box-seam" style={{ fontSize: '3rem', color: primaryColor }}></i>
                             </div>
                             <h4 className="fw-bold" style={{ color: primaryColor }}>Doações Materiais</h4>

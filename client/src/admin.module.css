@@ -1,0 +1,140 @@
+/* Estilos escopados do Painel Administrativo (CSS Module).
+   Garante isolamento: nada aqui vaza para rotas/páginas fora do painel. */
+
+.adminIndicatorCard {
+  transition: var(--transition-smooth) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-sm);
+  background-color: var(--color-card-bg);
+}
+.adminIndicatorCard:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+.adminSidebar {
+  width: 280px;
+  padding: 20px;
+  background-color: #ffffff;
+  border-right: 1px solid #eadfcf;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 1045;
+  transition: transform 0.25s ease;
+}
+
+.adminSidebarClose {
+  background: transparent;
+  border: none;
+  color: var(--color-marrom-escuro);
+  font-size: 1.2rem;
+  padding: 4px 8px;
+  line-height: 1;
+}
+
+.adminBackdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(61, 35, 20, 0.45);
+  z-index: 1040;
+}
+
+.adminNav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.adminSectionTitle {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-marrom-medio);
+  margin: 18px 0 6px;
+  padding-left: 12px;
+}
+
+.adminNavLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #3a2a1d;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.adminNavLink:hover {
+  background-color: #f7efe3;
+  color: var(--color-marrom-escuro);
+}
+.adminNavLinkActive,
+.adminNavLinkActive:hover {
+  background-color: var(--color-marrom-escuro);
+  color: #ffffff;
+}
+
+.adminNavIcon {
+  font-size: 1.05rem;
+  color: var(--color-marrom-medio);
+  width: 22px;
+  text-align: center;
+}
+.adminNavLinkActive .adminNavIcon {
+  color: #ffffff;
+}
+
+.adminMain {
+  margin-left: 280px;
+  width: calc(100% - 280px);
+  padding: 24px;
+  min-height: 100vh;
+}
+
+.adminTopbar {
+  display: none;
+}
+
+@media (max-width: 991.98px) {
+  .adminSidebar {
+    transform: translateX(-100%);
+    box-shadow: none;
+  }
+  .adminSidebarOpen {
+    transform: translateX(0);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.25);
+  }
+  .adminMain {
+    margin-left: 0;
+    width: 100%;
+    padding: 16px;
+  }
+  .adminTopbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: var(--color-marrom-escuro);
+    color: #ffffff;
+    padding: 10px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  .adminTopbarBtn {
+    background: rgba(255, 255, 255, 0.12);
+    border: none;
+    border-radius: 6px;
+    color: #ffffff;
+    padding: 6px 10px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .adminTopbarBtn:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}

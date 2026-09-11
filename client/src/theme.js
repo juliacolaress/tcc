@@ -1,18 +1,20 @@
 const cores = {
-    marromMenu: '#4a2511',      // Navbar / cabeçalho (marrom escuro)
-    marromBanner: '#4a2511',    // Banners e heróis principais (marrom escuro)
-    marromCampanha: '#4a2511',  // Banner de campanhas (marrom escuro)
-    marromClaro: '#aa7a44',     // Detalhes, bordas e destaques secundários (marrom claro)
-    marromPastel: '#e2a36f',    // Botões e acentos suaves (marrom claro)
-    btnAdote: '#e2a36f',        // Botão "Adote" (marrom pastel)
-    btnDoe: '#e2a36f',          // Botão "Doe" (marrom pastel)
-    btnVoluntario: '#cf9b72',   // Botão "Seja Voluntário" (marrom médio pastel)
-    cardBege: '#f2e8df',        // Fundo de cards (neutro claro)
-    cremeFundo: '#fdf8f4',      // Fundo neutro claro
-    branco: '#ffffff',          // Fundo principal
-    textoMarrom: '#4a2511',     // Títulos e textos de destaque (marrom escuro)
-    textoDestaque: '#4a2511',   // Subtítulos e destaques (marrom escuro)
-    rodapeMarrom: '#4a2511'     // Rodapé (marrom escuro)
+    marromMenu: '#3D2314',           // Navbar / cabeçalho (marrom escuro)
+    marromBanner: '#3D2314',         // Banners e heróis principais (marrom escuro)
+    marromCampanha: '#3D2314',       // Banner de campanhas (marrom escuro)
+    marromClaro: '#A67C52',          // Detalhes, bordas e destaques secundários (marrom médio)
+    marromPastel: '#A67C52',         // Acentos suaves e detalhes (marrom médio)
+    btnAdote: '#3D2314',             // Botão "Adote" (marrom escuro - padrão primário)
+    btnDoe: '#3D2314',              // Botão "Doe" (marrom escuro - padrão primário)
+    btnVoluntario: '#3D2314',       // Botão "Seja Voluntário" (marrom escuro - padrão primário)
+    cardBege: '#FFFFFF',            // Fundo de cards (branco puro)
+    cremeFundo: '#FAF6F0',          // Fundo de página (bege claro)
+    branco: '#ffffff',              // Fundo principal
+    textoMarrom: '#3D2314',         // Títulos e textos de destaque (marrom escuro)
+    textoDestaque: '#3D2314',       // Subtítulos e destaques (marrom escuro)
+    rodapeMarrom: '#3D2314',        // Rodapé (marrom escuro)
+    textoSecundario: '#555555',     // Textos secundários / muted
+    marromMedio: '#A67C52'          // Alias explícito para marrom médio
 };
 
 export default cores;

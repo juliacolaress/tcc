@@ -5,7 +5,7 @@ import { normalizeFotos, aoErrarImagem } from "../utils/fotos";
 
 // Componente do Card do Animal Adotado
 const AdoptedCard = ({ record }) => {
-    const primaryColor = '#4a2511';
+    const primaryColor = '#3D2314';
     const fotos = normalizeFotos(record);
     const imagemPadrao = (record.especie || "").toLowerCase() === "gato"
         ? "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=500"
@@ -62,7 +62,7 @@ export default function AdotadosList() {
     const [error, setError] = useState(null);
     
     const navigate = useNavigate();
-    const primaryColor = '#4a2511';
+    const primaryColor = '#3D2314';
 
     useEffect(() => {
         async function getAdotados() {

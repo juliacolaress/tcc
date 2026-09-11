@@ -33,6 +33,18 @@ const validarAnimal = [
     body("status").trim().notEmpty().withMessage("Status é obrigatório"),
 ]
 
+const validarAdocaoPublica = [
+    body("nome").trim().notEmpty().withMessage("Nome é obrigatório"),
+    body("email").trim().notEmpty().isEmail().withMessage("E-mail inválido"),
+    body("data_nascimento").trim().notEmpty().withMessage("Data de nascimento é obrigatória"),
+    body("telefone").trim().notEmpty().withMessage("Telefone é obrigatório"),
+    body("cpf").trim().notEmpty().withMessage("CPF é obrigatório"),
+    body("rua").trim().notEmpty().withMessage("Rua é obrigatória"),
+    body("numero").trim().notEmpty().withMessage("Número é obrigatório"),
+    body("bairro").trim().notEmpty().withMessage("Bairro é obrigatório"),
+    body("cidade").trim().notEmpty().withMessage("Cidade é obrigatória"),
+]
+
 animalRoutes.route("/animal").get(async function (req, res) {
     const db_connect = dbo.getDb()
     try {
@@ -54,6 +66,51 @@ animalRoutes.route("/animal/:id").get(validarObjectId, async function (req, res)
     } catch (error) {
         console.error("Erro ao buscar animal:", error)
         res.status(500).json({ mensagem: "Erro no servidor" })
+    }
+})
+
+// Rota pública: registra o Questionário de Adoção e marca o animal como Adotado
+animalRoutes.route("/animal/:id/adotar").post(validarObjectId, validarAdocaoPublica, async function (req, res) {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ mensagem: errors.array()[0].msg })
+    }
+
+    const db_connect = dbo.getDb()
+    const myquery = { _id: new ObjectId(req.params.id) }
+
+    try {
+        const animal = await db_connect.collection("animais").findOne(myquery)
+        if (!animal) {
+            return res.status(404).json({ mensagem: "Animal não encontrado" })
+        }
+        if (animal.status === "Adotado") {
+            return res.status(409).json({ mensagem: "Este animal já foi adotado." })
+        }
+
+        const newvalues = {
+            $set: {
+                status: "Adotado",
+                adotante: req.body.nome,
+                data_adocao: new Date().toISOString().split("T")[0],
+                adotante_cpf: req.body.cpf,
+                adotante_email: req.body.email,
+                adotante_nascimento: req.body.data_nascimento,
+                adotante_telefone: req.body.telefone,
+                adotante_endereco: {
+                    rua: req.body.rua,
+                    numero: req.body.numero,
+                    bairro: req.body.bairro,
+                    cidade: req.body.cidade
+                }
+            }
+        }
+
+        await db_connect.collection("animais").updateOne(myquery, newvalues)
+        res.status(200).json({ mensagem: "Adoção registrada com sucesso!" })
+    } catch (error) {
+        console.error("Erro ao registrar adoção:", error)
+        res.status(500).json({ mensagem: "Erro ao registrar adoção" })
     }
 })
 

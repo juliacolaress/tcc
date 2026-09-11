@@ -10,7 +10,7 @@ const TURNOS = ["Manhã", "Tarde", "Noite"];
 
 function SejaVoluntario() {
   const navigate = useNavigate();
-  const [dropdownDoacoes, setDropdownDoacoes] = useState(false);
+  const [, setDropdownDoacoes] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState("");
 
@@ -112,21 +112,14 @@ function SejaVoluntario() {
                 </span>
               </li>
 
-              <li className="nav-item position-relative">
+              <li className="nav-item">
                 <span
                   className="nav-link text-white"
                   style={{ cursor: 'pointer' }}
-                  onClick={() => setDropdownDoacoes(!dropdownDoacoes)}
+                  onClick={() => { navigate('/solicitar-doacao'); setDropdownDoacoes(false); }}
                 >
-                  Doações <i className="bi bi-chevron-down small ms-1"></i>
+                  Doações
                 </span>
-                {dropdownDoacoes && (
-                  <ul className="position-absolute list-unstyled p-2 rounded shadow"
-                      style={{ backgroundColor: cores.marromMenu, width: '150px', zIndex: 1000, left: 0, marginTop: '5px' }}>
-                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }} onClick={() => { navigate('/doacao-financeira'); setDropdownDoacoes(false); }}>Financeira</span></li>
-                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }} onClick={() => { navigate('/doacao-material'); setDropdownDoacoes(false); }}>Material</span></li>
-                  </ul>
-                )}
               </li>
 
               <li className="nav-item">
@@ -221,7 +214,7 @@ function SejaVoluntario() {
                     key={opcao}
                     className="btn px-3 py-1"
                     style={{
-                      backgroundColor: ativo ? cores.textoMarrom : '#fdf7f2',
+                      backgroundColor: ativo ? cores.textoMarrom : '#FAF6F0',
                       color: ativo ? '#fff' : cores.textoMarrom,
                       border: ativo ? '1px solid transparent' : '1px solid #eadfcf',
                       borderRadius: '20px',
@@ -314,17 +307,17 @@ function SejaVoluntario() {
       </div>
 
       {/* 3. RODAPÉ OFICIAL */}
-      <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapeMarrom, fontSize: '0.9rem', borderTop: '4px solid #aa7a44' }}>
+      <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapeMarrom, fontSize: '0.9rem', borderTop: '4px solid #A67C52' }}>
         <div className="container">
           <div className="row align-items-center g-3">
             <div className="col-md-4 d-flex align-items-center justify-content-center justify-content-md-start">
               <div className="d-flex align-items-center">
-                <div className="p-2 me-2 rounded text-center" style={{ backgroundColor: '#aa7a44', color: '#000000', width: '50px', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="p-2 me-2 rounded text-center" style={{ backgroundColor: '#A67C52', color: '#000000', width: '50px', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <i className="bi bi-house-heart-fill fs-3"></i>
                 </div>
                 <div className="text-start lh-1">
                   <span className="fw-bold d-block fs-5 mb-1">Patas</span>
-                  <span className="fw-bold d-block fs-5" style={{ color: '#aa7a44' }}>& Lares</span>
+                  <span className="fw-bold d-block fs-5" style={{ color: '#A67C52' }}>& Lares</span>
                 </div>
               </div>
             </div>

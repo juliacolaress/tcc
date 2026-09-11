@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import API_BASE_URL from '../api/config';
 import { resolverUrl, aoErrarImagem } from '../utils/fotos';
 import cores from '../theme';
+import estilos from './componentes.module.css';
 
 function DoacaoMaterial() {
   const navigate = useNavigate();
 
   // Controle do menu dropdown de Doações
-  const [dropdownDoacoes, setDropdownDoacoes] = useState(false);
+  
 
   // Controle do Chat/Tutorial Passo a Passo da lateral direita
   const [exibirTutorial, setExibirTutorial] = useState(false);
@@ -61,22 +62,11 @@ function DoacaoMaterial() {
                 <span className="nav-link text-white" style={{ cursor: 'pointer' }} onClick={() => navigate('/animais-adocao')}>Animais para Adoção</span>
               </li>
 
-              {/* Dropdown: Doações */}
-              <li 
-                className="nav-item position-relative" 
-                style={{ cursor: 'pointer' }}
-                onMouseLeave={() => setDropdownDoacoes(false)}
-              >
-                <span className="nav-link text-white px-3 py-1 rounded-pill" style={{ backgroundColor: 'rgba(255,255,255,0.15)', fontWeight: '500' }} onClick={() => setDropdownDoacoes(!dropdownDoacoes)}>
-                  Doações <i className="bi bi-chevron-down small ms-1"></i>
+              {/* Item único: Doações */}
+              <li className="nav-item">
+                <span className="nav-link text-white px-3 py-1 rounded-pill" style={{ backgroundColor: 'rgba(255,255,255,0.15)', fontWeight: '500', cursor: 'pointer' }} onClick={() => navigate('/solicitar-doacao')}>
+                  Doações
                 </span>
-                {dropdownDoacoes && (
-                  <ul className="position-absolute list-unstyled p-2 rounded shadow mt-2" 
-                      style={{ backgroundColor: cores.marromMenu, width: '150px', zIndex: 1000, left: 0 }}>
-                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }} onClick={() => navigate('/doacao-financeira')}>Financeira</span></li>
-                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }} onClick={() => navigate('/doacao-material')}>Material</span></li>
-                  </ul>
-                )}
               </li>
 
               <li className="nav-item">
@@ -108,8 +98,8 @@ function DoacaoMaterial() {
         <div className="d-flex justify-content-between align-items-center mb-5 mt-2">
           <h1 className="fw-bold mb-0" style={{ color: cores.textoMarrom, fontSize: '3rem' }}>Doação de Material</h1>
           <button 
-            className="btn btn-donate-material px-4 py-2 shadow-sm" 
-            onClick={() => { setExibirTutorial(true); setPassoTutorial(1); }}
+            className={`btn ${estilos.btnDonateMaterial} px-4 py-2 shadow-sm`} 
+            onClick={() => navigate('/doar/formulario?tipo=material')}
           >
             Quero Doar
           </button>
@@ -301,7 +291,7 @@ function DoacaoMaterial() {
 
         {/* Botão de Balão de Mensagem Fixo no Canto Inferior Direito */}
         <div 
-          className="position-fixed d-flex align-items-center justify-content-center shadow-lg floating-chat-trigger" 
+          className={`position-fixed d-flex align-items-center justify-content-center shadow-lg ${estilos.floatingChatTrigger}`} 
           style={{ 
             bottom: '30px', 
             right: '30px', 
@@ -320,17 +310,17 @@ function DoacaoMaterial() {
       </div>
 
       {/* 4. RODAPÉ OFICIAL */}
-      <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapeMarrom, fontSize: '0.9rem', borderTop: '4px solid #aa7a44' }}>
+      <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapeMarrom, fontSize: '0.9rem', borderTop: '4px solid #A67C52' }}>
         <div className="container">
           <div className="row align-items-center g-3">
             <div className="col-md-4 d-flex align-items-center justify-content-center justify-content-md-start">
               <div className="d-flex align-items-center">
-                <div className="p-2 me-2 rounded text-center" style={{ backgroundColor: '#aa7a44', color: '#000000', width: '50px', height: '50px', display: 'flex', alignItems: 'center', justify: 'center' }}>
+                <div className="p-2 me-2 rounded text-center" style={{ backgroundColor: '#A67C52', color: '#000000', width: '50px', height: '50px', display: 'flex', alignItems: 'center', justify: 'center' }}>
                   <i className="bi bi-house-heart-fill fs-3"></i>
                 </div>
                 <div className="text-start lh-1">
                   <span className="fw-bold d-block fs-5 mb-1">Patas</span>
-                  <span className="fw-bold d-block fs-5" style={{ color: '#aa7a44' }}>& Lares</span>
+                  <span className="fw-bold d-block fs-5" style={{ color: '#A67C52' }}>& Lares</span>
                 </div>
               </div>
             </div>

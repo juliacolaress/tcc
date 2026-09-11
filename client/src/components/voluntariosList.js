@@ -7,14 +7,14 @@ const statusCor = (status) => {
         'Pendente': { bg: '#fff3cd', color: '#856404', border: '#ffe69c' },
         'Aprovado': { bg: '#d4edda', color: '#155724', border: '#c3e6cb' },
         'Rejeitado': { bg: '#f8d7da', color: '#721c24', border: '#f5c6cb' },
-        'Ativo': { bg: '#fdf7f2', color: '#4a2511', border: '#eadfcf' }
+        'Ativo': { bg: '#FAF6F0', color: '#3D2314', border: '#eadfcf' }
     };
     return mapa[status] || mapa['Ativo'];
 };
 
 const VoluntarioRecord = (props) => {
-    const primaryColor = '#4a2511';
-    const badgeStyle = { backgroundColor: '#fdf7f2', color: primaryColor, border: '1px solid #eadfcf' };
+    const primaryColor = '#3D2314';
+    const badgeStyle = { backgroundColor: '#FAF6F0', color: primaryColor, border: '1px solid #eadfcf' };
 
     const interesses = Array.isArray(props.record.interesses) ? props.record.interesses : [];
     const disponibilidade = Array.isArray(props.record.disponibilidade) ? props.record.disponibilidade : [];
@@ -200,8 +200,8 @@ export default function VoluntarioList() {
         return correspondeBusca && correspondeDia && correspondeHorario;
     });
 
-    const primaryColor = '#4a2511';
-    const badgeStyle = { backgroundColor: '#fdf7f2', color: primaryColor, border: '1px solid #eadfcf' };
+    const primaryColor = '#3D2314';
+    const badgeStyle = { backgroundColor: '#FAF6F0', color: primaryColor, border: '1px solid #eadfcf' };
     const pendentes = voluntarios.filter((v) => (v.status || 'Ativo') === 'Pendente');
 
     return (
@@ -425,7 +425,7 @@ export default function VoluntarioList() {
                                                     </div>
                                                     <div className="mt-3">
                                                         <small className="text-muted text-uppercase fw-bold d-block mb-1" style={{ fontSize: '0.7rem', letterSpacing: '0.5px' }}>Observações</small>
-                                                        <div className="bg-light p-3 rounded" style={{ borderLeft: '4px solid #e2a36f', whiteSpace: 'pre-wrap' }}>
+                                                        <div className="bg-light p-3 rounded" style={{ borderLeft: '4px solid #A67C52', whiteSpace: 'pre-wrap' }}>
                                                             {v.observacoes && v.observacoes.trim() ? v.observacoes : <span className="text-muted">Nenhuma observação enviada.</span>}
                                                         </div>
                                                     </div>

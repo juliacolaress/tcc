@@ -38,7 +38,7 @@ const Record = (props) => {
 
 export default function UserList() {
     const [users, setUsers] = useState([]);
-    const primaryColor = '#4a2511';
+    const primaryColor = '#3D2314';
 
     // CORREÇÃO AQUI: Array vazio [] garante que a busca aconteça só 1 vez ao abrir a tela
     useEffect(() => {

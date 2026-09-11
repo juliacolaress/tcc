@@ -33,7 +33,7 @@ export default function RelatoriosList() {
     const [pdfFile, setPdfFile] = useState(null);
     const [enviandoPdf, setEnviandoPdf] = useState(false);
 
-    const primaryColor = '#4a2511';
+    const primaryColor = '#3D2314';
     const labelStyle = { color: primaryColor, fontWeight: '600', marginBottom: '6px' };
     const inputStyle = { borderRadius: '6px', border: '1px solid #ced4da' };
 
@@ -208,7 +208,7 @@ export default function RelatoriosList() {
 
             <div className="row g-4 mb-4">
                 <div className="col-md-6">
-                    <div className="card border-0 shadow-sm p-4 h-100" style={{ borderRadius: '8px', backgroundColor: '#fdf7f2' }}>
+                    <div className="card border-0 shadow-sm p-4 h-100" style={{ borderRadius: '8px', backgroundColor: '#FAF6F0' }}>
                         <div className="d-flex align-items-center gap-3">
                             <div style={{ backgroundColor: '#fff', borderRadius: '50%', padding: '15px', border: '1px solid #eadfcf' }}>
                                 <i className="bi bi-arrow-down-circle fs-3 text-success"></i>
@@ -223,7 +223,7 @@ export default function RelatoriosList() {
                     </div>
                 </div>
                 <div className="col-md-6">
-                    <div className="card border-0 shadow-sm p-4 h-100" style={{ borderRadius: '8px', backgroundColor: '#fdf7f2' }}>
+                    <div className="card border-0 shadow-sm p-4 h-100" style={{ borderRadius: '8px', backgroundColor: '#FAF6F0' }}>
                         <div className="d-flex align-items-center gap-3">
                             <div style={{ backgroundColor: '#fff', borderRadius: '50%', padding: '15px', border: '1px solid #eadfcf' }}>
                                 <i className="bi bi-arrow-up-circle fs-3 text-danger"></i>
@@ -322,10 +322,10 @@ export default function RelatoriosList() {
             </div>
 
             {modalAberto && (
-                <div className="modal d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(74,37,17,0.5)' }} onClick={() => !salvando && setModalAberto(false)}>
+                <div className="modal d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(61,35,20,0.5)' }} onClick={() => !salvando && setModalAberto(false)}>
                     <div className="modal-dialog modal-lg modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-content border-0 shadow" style={{ borderRadius: '12px' }}>
-                            <div className="modal-header border-0" style={{ backgroundColor: '#fdf7f2', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>
+                            <div className="modal-header border-0" style={{ backgroundColor: '#FAF6F0', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>
                                 <h5 className="modal-title fw-bold" style={{ color: primaryColor }}>
                                     <i className={`bi ${editando ? "bi-pencil-square" : "bi-file-earmark-plus"} me-2`}></i>
                                     {editando ? "Editar Relatório" : "Novo Relatório"}

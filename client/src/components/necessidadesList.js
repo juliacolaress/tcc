@@ -8,8 +8,8 @@ export default function NecessidadesList() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const primaryColor = '#4a2511';
-    const badgeStyle = { backgroundColor: '#fdf7f2', color: primaryColor, border: '1px solid #eadfcf' };
+    const primaryColor = '#3D2314';
+    const badgeStyle = { backgroundColor: '#FAF6F0', color: primaryColor, border: '1px solid #eadfcf' };
 
     useEffect(() => {
         async function getNecessidades() {
@@ -109,7 +109,7 @@ export default function NecessidadesList() {
                                                     onError={aoErrarImagem}
                                                 />
                                             ) : (
-                                                <div className="d-flex align-items-center justify-content-center" style={{ width: '60px', height: '60px', borderRadius: '6px', backgroundColor: '#fdf7f2' }}>
+                                                <div className="d-flex align-items-center justify-content-center" style={{ width: '60px', height: '60px', borderRadius: '6px', backgroundColor: '#FAF6F0' }}>
                                                     <i className="bi bi-box text-muted" style={{ fontSize: '1.4rem', opacity: '0.5' }}></i>
                                                 </div>
                                             )}

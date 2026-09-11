@@ -76,7 +76,7 @@ export default function Home() {
   const navigate = useNavigate();
 
   // Estado para controlar o dropdown de doações via clique
-  const [dropdownDoacoes, setDropdownDoacoes] = useState(false);
+  const [, setDropdownDoacoes] = useState(false);
 
   // Estado das campanhas (eventos ativos vindos do banco)
   const [eventosCampanhas, setEventosCampanhas] = useState([]);
@@ -131,22 +131,15 @@ export default function Home() {
                 </span>
               </li>
 
-              {/* Dropdown: Doações (Corrigido para clique constante e seguro) */}
-              <li className="nav-item position-relative">
+              {/* Item único: Doações (formulário unificado) */}
+              <li className="nav-item">
                 <span 
                   className="nav-link text-white" 
                   style={{ cursor: 'pointer' }}
-                  onClick={() => setDropdownDoacoes(!dropdownDoacoes)}
+                  onClick={() => { navigate('/solicitar-doacao'); setDropdownDoacoes(false); }}
                 >
-                  Doações <i className="bi bi-chevron-down small ms-1"></i>
+                  Doações
                 </span>
-                {dropdownDoacoes && (
-                  <ul className="position-absolute list-unstyled p-2 rounded shadow"
-                      style={{ backgroundColor: cores.marromMenu, width: '150px', zIndex: 1000, left: 0, marginTop: '5px' }}>
-                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }} onClick={() => { navigate('/doacao-financeira'); setDropdownDoacoes(false); }}>Financeira</span></li>
-                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }} onClick={() => { navigate('/doacao-material'); setDropdownDoacoes(false); }}>Material</span></li>
-                  </ul>
-                )}
               </li>
 
               {/* ABA DE EVENTOS CORRIGIDA (Redirecionando perfeitamente) */}
@@ -267,7 +260,7 @@ export default function Home() {
                   <button 
                     className="btn mt-auto text-white px-4 py-2 shadow-sm" 
                     style={{ backgroundColor: cores.btnDoe, border: 'none', borderRadius: '8px', fontWeight: '500' }}
-                    onClick={() => navigate('/doacao-financeira')}
+                    onClick={() => navigate('/solicitar-doacao')}
                   >
                     Doe Agora
                   </button>
@@ -349,18 +342,18 @@ export default function Home() {
       </div>
 
       {/* 6. RODAPÉ OFICIAL */}
-      <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapeMarrom, fontSize: '0.9rem', borderTop: '4px solid #aa7a44' }}>
+      <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapeMarrom, fontSize: '0.9rem', borderTop: '4px solid #A67C52' }}>
         <div className="container">
           <div className="row align-items-center g-3">
 
             <div className="col-md-4 d-flex align-items-center justify-content-center justify-content-md-start">
               <div className="d-flex align-items-center">
-                <div className="p-2 me-2 rounded text-center" style={{ backgroundColor: '#aa7a44', color: '#000000', width: '50px', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="p-2 me-2 rounded text-center" style={{ backgroundColor: '#A67C52', color: '#000000', width: '50px', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <i className="bi bi-house-heart-fill fs-3"></i>
                 </div>
                 <div className="text-start lh-1">
                   <span className="fw-bold d-block fs-5 mb-1">Patas</span>
-                  <span className="fw-bold d-block fs-5" style={{ color: '#aa7a44' }}>& Lares</span>
+                  <span className="fw-bold d-block fs-5" style={{ color: '#A67C52' }}>& Lares</span>
                 </div>
               </div>
             </div>
@@ -387,7 +380,7 @@ export default function Home() {
           className="modal show d-block"
           tabIndex="-1"
           role="dialog"
-          style={{ backgroundColor: 'rgba(74,37,17,0.55)', zIndex: 1050 }}
+          style={{ backgroundColor: 'rgba(61,35,20,0.55)', zIndex: 1050 }}
           onClick={() => setCampanhaDetalhe(null)}
         >
           <div className="modal-dialog modal-dialog-centered modal-lg" role="document" onClick={(e) => e.stopPropagation()}>
@@ -406,7 +399,7 @@ export default function Home() {
                       src={resolverUrl(campanhaDetalhe.imagem)}
                       alt={campanhaDetalhe.titulo}
                       className="rounded-4 shadow-sm"
-                      style={{ maxHeight: '260px', maxWidth: '100%', objectFit: 'contain', backgroundColor: '#fdf7f2' }}
+                      style={{ maxHeight: '260px', maxWidth: '100%', objectFit: 'contain', backgroundColor: '#FAF6F0' }}
                       onError={aoErrarImagem}
                     />
                   </div>

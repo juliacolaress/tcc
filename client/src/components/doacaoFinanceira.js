@@ -18,7 +18,7 @@ function DoacaoFinanceira() {
   const navigate = useNavigate();
   
   // Controle do menu dropdown de Doações
-  const [dropdownDoacoes, setDropdownDoacoes] = useState(false);
+  
 
   // Dados de doação carregados do servidor
   const [config, setConfig] = useState(CONFIG_PADRAO);
@@ -96,22 +96,11 @@ function DoacaoFinanceira() {
                 </span>
               </li>
 
-              {/* Dropdown: Doações (Ativo) */}
-              <li 
-                className="nav-item position-relative" 
-                style={{ cursor: 'pointer' }}
-                onMouseLeave={() => setDropdownDoacoes(false)}
-              >
-                <span className="nav-link text-white px-3 py-1 rounded-pill" style={{ backgroundColor: 'rgba(255,255,255,0.15)', fontWeight: '500' }} onClick={() => setDropdownDoacoes(!dropdownDoacoes)}>
-                  Doações <i className="bi bi-chevron-down small ms-1"></i>
+              {/* Item único: Doações (ativo) */}
+              <li className="nav-item">
+                <span className="nav-link text-white px-3 py-1 rounded-pill" style={{ backgroundColor: 'rgba(255,255,255,0.15)', fontWeight: '500', cursor: 'pointer' }} onClick={() => navigate('/solicitar-doacao')}>
+                  Doações
                 </span>
-                {dropdownDoacoes && (
-                  <ul className="position-absolute list-unstyled p-2 rounded shadow mt-2" 
-                      style={{ backgroundColor: cores.marromMenu, width: '150px', zIndex: 1000, left: 0 }}>
-                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }} onClick={() => navigate('/doacao-financeira')}>Financeira</span></li>
-                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }} onClick={() => navigate('/doacao-material')}>Material</span></li>
-                  </ul>
-                )}
               </li>
 
               <li className="nav-item"><span className="nav-link text-white" style={{ cursor: 'pointer' }}>Eventos</span></li>
@@ -142,14 +131,23 @@ function DoacaoFinanceira() {
 
       {/* 2. CORPO DA PÁGINA DE DOAÇÃO */}
       <div className="container py-5 flex-grow-1">
+        <div className="d-flex justify-content-between align-items-start flex-wrap gap-3 mt-2 mb-4">
+          <h1 className="fw-bold mb-0" style={{ color: cores.textoMarrom, fontSize: '3.2rem' }}>
+            Doação financeira
+          </h1>
+          <button
+            className="btn text-white px-4 py-2 rounded-pill fw-bold shadow-sm"
+            style={{ backgroundColor: cores.marromClaro, fontSize: '1rem', border: 'none' }}
+            onClick={() => navigate('/doar/formulario?tipo=financeira')}
+          >
+            <i className="bi bi-heart-fill me-2"></i> Quero Doar
+          </button>
+        </div>
+
         <div className="row g-5 align-items-start mt-2">
           
           {/* Coluna Esquerda: Informações de Texto */}
           <div className="col-md-6 text-start">
-            <h1 className="fw-bold mb-4" style={{ color: cores.textoMarrom, fontSize: '3.2rem' }}>
-              Doação financeira
-            </h1>
-            
             <p className="fs-5 text-dark mb-5 lh-base" style={{ opacity: 0.9 }}>
               Você pode realizar sua doação diretamente na conta da Patas & Lares utilizando os dados bancários ou via PIX QR Code.
             </p>
@@ -241,18 +239,18 @@ function DoacaoFinanceira() {
       </div>
 
       {/* 3. RODAPÉ OFICIAL */}
-      <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapeMarrom, fontSize: '0.9rem', borderTop: '4px solid #aa7a44' }}>
+      <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapeMarrom, fontSize: '0.9rem', borderTop: '4px solid #A67C52' }}>
         <div className="container">
           <div className="row align-items-center g-3">
             
             <div className="col-md-4 d-flex align-items-center justify-content-center justify-content-md-start">
               <div className="d-flex align-items-center">
-                <div className="p-2 me-2 rounded text-center" style={{ backgroundColor: '#aa7a44', color: '#000000', width: '50px', height: '50px', display: 'flex', alignItems: 'center', justify: 'center' }}>
+                <div className="p-2 me-2 rounded text-center" style={{ backgroundColor: '#A67C52', color: '#000000', width: '50px', height: '50px', display: 'flex', alignItems: 'center', justify: 'center' }}>
                   <i className="bi bi-house-heart-fill fs-3"></i>
                 </div>
                 <div className="text-start lh-1">
                   <span className="fw-bold d-block fs-5 mb-1">Patas</span>
-                  <span className="fw-bold d-block fs-5" style={{ color: '#aa7a44' }}>& Lares</span>
+                  <span className="fw-bold d-block fs-5" style={{ color: '#A67C52' }}>& Lares</span>
                 </div>
               </div>
             </div>

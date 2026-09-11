@@ -5,9 +5,9 @@ import { normalizeFotos, aoErrarImagem } from "../utils/fotos";
 
 // Componente do Card do Animal
 const AnimalCard = ({ record, deleteAnimal, marcarComoAdotado }) => {
-    const primaryColor = '#4a2511';
-    const brownColor = '#aa7a44';
-    const badgeStyle = { backgroundColor: '#fdf7f2', color: primaryColor, border: '1px solid #eadfcf' };
+    const primaryColor = '#3D2314';
+    const brownColor = '#A67C52';
+    const badgeStyle = { backgroundColor: '#FAF6F0', color: primaryColor, border: '1px solid #eadfcf' };
     const fotos = normalizeFotos(record);
     const [imagemAtual, setImagemAtual] = useState(0);
     const imagemPadrao = (record.especie || "").toLowerCase() === "gato"
@@ -91,7 +91,7 @@ export default function AnimalList() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     
-    const primaryColor = '#4a2511';
+    const primaryColor = '#3D2314';
 
     // 1. BUSCA TODOS OS ANIMAIS DO BANCO
     useEffect(() => {

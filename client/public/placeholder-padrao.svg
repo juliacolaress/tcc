@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
-  <rect width="500" height="500" fill="#f7efe6"/>
-  <g fill="#aa7a44" opacity="0.85">
+  <rect width="500" height="500" fill="#faf6f0"/>
+  <g fill="#a67c52" opacity="0.85">
     <ellipse cx="250" cy="310" rx="46" ry="52"/>
     <ellipse cx="250" cy="200" rx="34" ry="32"/>
     <ellipse cx="178" cy="258" rx="30" ry="36"/>
@@ -8,5 +8,5 @@
     <ellipse cx="152" cy="338" rx="25" ry="30"/>
     <ellipse cx="348" cy="338" rx="25" ry="30"/>
   </g>
-  <text x="250" y="440" text-anchor="middle" font-family="Poppins, sans-serif" font-size="28" fill="#4a2511" font-weight="600">Patas &amp; Lares</text>
+  <text x="250" y="440" text-anchor="middle" font-family="Poppins, sans-serif" font-size="28" fill="#3D2314" font-weight="600">Patas &amp; Lares</text>
 </svg>

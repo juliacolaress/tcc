@@ -61,7 +61,7 @@ export default function EditAnimais() {
 
     const params = useParams();
     const navigate = useNavigate();
-    const primaryColor = '#4a2511';
+    const primaryColor = '#3D2314';
 
     useEffect(() => {
         async function fetchData() {

@@ -43,7 +43,7 @@ export default function Login({ onLogin }) {
     }
   };
 
-  const primaryColor = '#4a2511';
+  const primaryColor = '#3D2314';
 
   return (
     <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>

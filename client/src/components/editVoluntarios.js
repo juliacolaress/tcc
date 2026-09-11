@@ -107,8 +107,8 @@ export default function EditVoluntario() {
         }
     }
 
-    const primaryColor = '#4a2511';
-    const labelStyle = { color: '#4a2511', fontWeight: '600', marginBottom: '6px' };
+    const primaryColor = '#3D2314';
+    const labelStyle = { color: '#3D2314', fontWeight: '600', marginBottom: '6px' };
     const inputStyle = { borderRadius: '6px', border: '1px solid #ced4da' };
 
     return (
@@ -173,7 +173,7 @@ export default function EditVoluntario() {
                                     key={opcao}
                                     className="btn px-3 py-1"
                                     style={{
-                                        backgroundColor: ativo ? primaryColor : '#fdf7f2',
+                                        backgroundColor: ativo ? primaryColor : '#FAF6F0',
                                         color: ativo ? '#fff' : primaryColor,
                                         border: ativo ? '1px solid transparent' : '1px solid #eadfcf',
                                         borderRadius: '20px',

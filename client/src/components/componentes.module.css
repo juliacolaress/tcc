@@ -1,0 +1,21 @@
+/* Estilos escopados de widgets compartilhados (CSS Module).
+   Usados apenas pelas páginas que importam este módulo. */
+
+.floatingChatTrigger:hover {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-lg);
+}
+
+.btnDonateMaterial {
+  background-color: var(--color-marrom-escuro) !important;
+  color: #ffffff !important;
+  border-radius: var(--radius-pill) !important;
+  font-weight: bold;
+  border: none;
+  font-size: 1rem;
+}
+.btnDonateMaterial:hover {
+  background-color: var(--color-btn-hover-doe) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}

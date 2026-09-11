@@ -5,7 +5,7 @@ import { normalizeFotos, aoErrarImagem } from "./utils/fotos";
 import cores from "./theme";
 
 // Componente do Card do Animal
-const AnimalCard = ({ animal }) => {
+const AnimalCard = ({ animal, onAdotar }) => {
     const [imagemAtual, setImagemAtual] = useState(0);
     const fotos = normalizeFotos(animal);
     
@@ -63,8 +63,8 @@ const AnimalCard = ({ animal }) => {
                 <div className="text-end mt-3">
                     <button 
                         className="btn px-4 py-2 text-white" 
-                        style={{ backgroundColor: cores.marromPastel, borderRadius: '20px', fontSize: '0.9rem', fontWeight: '500' }}
-                        onClick={() => window.alert(`Ficamos felizes com seu interesse no ${animal.nome}! Entre em contato conosco na aba 'Contato' para iniciar o processo de adoção responsável.`)}
+                        style={{ backgroundColor: cores.textoMarrom, borderRadius: '20px', fontSize: '0.9rem', fontWeight: '500', border: 'none' }}
+                        onClick={onAdotar}
                     >
                         Adote agora
                     </button>
@@ -88,7 +88,7 @@ export default function AnimaisAdocao() {
     const [filtrosAplicados, setFiltrosAplicados] = useState({ especie: "", sexo: "", porte: "" });
 
     // Mantemos apenas o controle do menu de Doações, o de adoção foi removido
-    const [dropdownDoacoes, setDropdownDoacoes] = useState(false);
+    
 
     // 1. BUSCA OS ANIMAIS (Sem token, rota pública)
     useEffect(() => {
@@ -164,22 +164,11 @@ export default function AnimaisAdocao() {
                                 </span>
                             </li>
 
-                            {/* Dropdown 2: Doações */}
-                            <li 
-                                className="nav-item position-relative" 
-                                style={{ cursor: 'pointer' }}
-                                onMouseLeave={() => setDropdownDoacoes(false)}
-                            >
-                                <span className="nav-link text-white" onClick={() => setDropdownDoacoes(!dropdownDoacoes)}>
-                                    Doações <i className="bi bi-chevron-down small ms-1"></i>
+                            {/* Item único: Doações */}
+                            <li className="nav-item">
+                                <span className="nav-link text-white" style={{ cursor: 'pointer' }} onClick={() => navigate('/solicitar-doacao')}>
+                                    Doações
                                 </span>
-                                {dropdownDoacoes && (
-                                    <ul className="position-absolute list-unstyled p-2 rounded shadow mt-2" 
-                                        style={{ backgroundColor: cores.marromMenu, width: '150px', zIndex: 1000, left: 0 }}>
-                                        <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }} onClick={() => navigate('/doacao-financeira')}>Financeira</span></li>
-                                        <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }} onClick={() => navigate('/doacao-material')}>Material</span></li>
-                                    </ul>
-                                )}
                             </li>
 
                             <li className="nav-item"><span className="nav-link text-white" style={{ cursor: 'pointer' }}>Eventos</span></li>
@@ -247,10 +236,10 @@ export default function AnimaisAdocao() {
                             </select>
                         </div>
                         <div className="col-12 col-md-3 text-start d-flex gap-2">
-                            <button type="submit" className="btn px-4 py-2 fw-bold text-white shadow-sm flex-fill" style={{ backgroundColor: '#4a2511', borderRadius: '20px' }}>
+                            <button type="submit" className="btn px-4 py-2 fw-bold text-white shadow-sm flex-fill" style={{ backgroundColor: '#3D2314', borderRadius: '20px' }}>
                                 Filtrar
                             </button>
-                            <button type="button" className="btn px-4 py-2 fw-bold shadow-sm flex-fill" style={{ backgroundColor: '#e9ecef', color: '#4a2511', borderRadius: '20px', border: '1px solid #d0d0d0' }} onClick={handleLimparFiltros}>
+                            <button type="button" className="btn px-4 py-2 fw-bold shadow-sm flex-fill" style={{ backgroundColor: '#e9ecef', color: '#3D2314', borderRadius: '20px', border: '1px solid #d0d0d0' }} onClick={handleLimparFiltros}>
                                 Limpar Filtros
                             </button>
                         </div>
@@ -265,7 +254,7 @@ export default function AnimaisAdocao() {
                         <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 px-3">
                             {animaisExibidos.map((animal) => (
                                 <div className="col" key={animal._id}>
-                                    <AnimalCard animal={animal} />
+                                    <AnimalCard animal={animal} onAdotar={() => navigate(`/adocao/formulario?id=${animal._id}`)} />
                                 </div>
                             ))}
                         </div>
@@ -279,18 +268,18 @@ export default function AnimaisAdocao() {
             </div>
 
             {/* 3. RODAPÉ OFICIAL */}
-            <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapeMarrom, fontSize: '0.9rem', borderTop: '4px solid #aa7a44' }}>
+            <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapeMarrom, fontSize: '0.9rem', borderTop: '4px solid #A67C52' }}>
                 <div className="container">
                     <div className="row align-items-center g-3">
 
                         <div className="col-md-4 d-flex align-items-center justify-content-center justify-content-md-start">
                             <div className="d-flex align-items-center">
-                                <div className="p-2 me-2 rounded text-center" style={{ backgroundColor: '#aa7a44', color: '#000000', width: '50px', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div className="p-2 me-2 rounded text-center" style={{ backgroundColor: '#A67C52', color: '#000000', width: '50px', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <i className="bi bi-house-heart-fill fs-3"></i>
                                 </div>
                                 <div className="text-start lh-1">
                                     <span className="fw-bold d-block fs-5 mb-1">Patas</span>
-                                    <span className="fw-bold d-block fs-5" style={{ color: '#aa7a44' }}>& Lares</span>
+                                    <span className="fw-bold d-block fs-5" style={{ color: '#A67C52' }}>& Lares</span>
                                 </div>
                             </div>
                         </div>

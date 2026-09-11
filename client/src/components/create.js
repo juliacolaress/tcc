@@ -48,7 +48,7 @@ export default function Create() {
         navigate("/usuarios");
     }
 
-    const primaryColor = '#4a2511';
+    const primaryColor = '#3D2314';
 
     return (
         <div className="container mt-4">

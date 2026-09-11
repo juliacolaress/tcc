@@ -16,7 +16,7 @@ function Eventos() {
   const navigate = useNavigate();
   
   // Controle do menu dropdown de Doações (via clique para não sumir do nada)
-  const [dropdownDoacoes, setDropdownDoacoes] = useState(false);
+  const [, setDropdownDoacoes] = useState(false);
 
   // Eventos cadastrados no painel administrativo
   const [eventos, setEventos] = useState([]);
@@ -62,22 +62,15 @@ function Eventos() {
                 </span>
               </li>
 
-              {/* Dropdown corrigido: Abre e fecha no Clique para estabilidade */}
-              <li className="nav-item position-relative">
+              {/* Item único: Doações (formulário unificado) */}
+              <li className="nav-item">
                 <span 
                   className="nav-link text-white" 
                   style={{ cursor: 'pointer' }} 
-                  onClick={() => setDropdownDoacoes(!dropdownDoacoes)}
+                  onClick={() => { navigate('/solicitar-doacao'); setDropdownDoacoes(false); }}
                 >
-                  Doações <i className="bi bi-chevron-down small ms-1"></i>
+                  Doações
                 </span>
-                {dropdownDoacoes && (
-                  <ul className="position-absolute list-unstyled p-2 rounded shadow" 
-                      style={{ backgroundColor: cores.marromMenu, width: '150px', zIndex: 1000, left: 0, marginTop: '5px' }}>
-                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }} onClick={() => { navigate('/doacao-financeira'); setDropdownDoacoes(false); }}>Financeira</span></li>
-                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }} onClick={() => { navigate('/doacao-material'); setDropdownDoacoes(false); }}>Material</span></li>
-                  </ul>
-                )}
               </li>
 
               {/* Item Eventos Ativo com a pílula de destaque */}
@@ -147,7 +140,7 @@ function Eventos() {
           <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5 justify-content-center">
             {eventos.map((evento) => (
               <div className="col d-flex justify-content-center" key={evento._id}>
-                <div className="card border-0 bg-white rounded-4 shadow-sm overflow-hidden" style={{ maxWidth: '360px', width: '100%', border: '1px solid rgba(170, 122, 68, 0.3)' }}>
+                <div className="card border-0 bg-white rounded-4 shadow-sm overflow-hidden" style={{ maxWidth: '360px', width: '100%', border: '1px solid rgba(166, 124, 82, 0.3)' }}>
                   <div className="d-flex align-items-center justify-content-center bg-white p-3" style={{ height: '220px', overflow: 'hidden' }}>
                     {evento.imagem ? (
                       <img
@@ -201,18 +194,18 @@ function Eventos() {
       </div>
 
       {/* 3. RODAPÉ OFICIAL */}
-      <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapeMarrom, fontSize: '0.9rem', borderTop: '4px solid #aa7a44' }}>
+      <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapeMarrom, fontSize: '0.9rem', borderTop: '4px solid #A67C52' }}>
         <div className="container">
           <div className="row align-items-center g-3">
             
             <div className="col-md-4 d-flex align-items-center justify-content-center justify-content-md-start">
               <div className="d-flex align-items-center">
-                <div className="p-2 me-2 rounded text-center" style={{ backgroundColor: '#aa7a44', color: '#000000', width: '50px', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="p-2 me-2 rounded text-center" style={{ backgroundColor: '#A67C52', color: '#000000', width: '50px', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <i className="bi bi-house-heart-fill fs-3"></i>
                 </div>
                 <div className="text-start lh-1">
                   <span className="fw-bold d-block fs-5 mb-1">Patas</span>
-                  <span className="fw-bold d-block fs-5" style={{ color: '#aa7a44' }}>& Lares</span>
+                  <span className="fw-bold d-block fs-5" style={{ color: '#A67C52' }}>& Lares</span>
                 </div>
               </div>
             </div>

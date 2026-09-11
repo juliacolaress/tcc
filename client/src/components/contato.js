@@ -6,7 +6,7 @@ function Contato() {
   const navigate = useNavigate();
   
   // Controle do menu de Doações via clique (estável)
-  const [dropdownDoacoes, setDropdownDoacoes] = useState(false);
+  const [, setDropdownDoacoes] = useState(false);
 
   return (
     <div style={{ fontFamily: 'Poppins, sans-serif', backgroundColor: cores.cremeFundo, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -37,22 +37,15 @@ function Contato() {
                 </span>
               </li>
 
-              {/* Dropdown: Doações (Corrigido para clique constante e seguro) */}
-              <li className="nav-item position-relative">
+              {/* Item único: Doações (formulário unificado) */}
+              <li className="nav-item">
                 <span 
                   className="nav-link text-white" 
                   style={{ cursor: 'pointer' }}
-                  onClick={() => setDropdownDoacoes(!dropdownDoacoes)}
+                  onClick={() => { navigate('/solicitar-doacao'); setDropdownDoacoes(false); }}
                 >
-                  Doações <i className="bi bi-chevron-down small ms-1"></i>
+                  Doações
                 </span>
-                {dropdownDoacoes && (
-                  <ul className="position-absolute list-unstyled p-2 rounded shadow" 
-                      style={{ backgroundColor: cores.marromMenu, width: '150px', zIndex: 1000, left: 0, marginTop: '5px' }}>
-                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }} onClick={() => { navigate('/doacao-financeira'); setDropdownDoacoes(false); }}>Financeira</span></li>
-                    <li><span className="dropdown-item text-white-50 small py-1" style={{ cursor: 'pointer' }} onClick={() => { navigate('/doacao-material'); setDropdownDoacoes(false); }}>Material</span></li>
-                  </ul>
-                )}
               </li>
 
               {/* ABA DE EVENTOS CORRIGIDA */}
@@ -166,7 +159,7 @@ function Contato() {
         </div>
 
         {/* SEGUNDA FILEIRA: Outros canais e Informações adicionais */}
-        <div className="row g-4 text-start pt-4 border-top border-2" style={{ borderColor: 'rgba(74, 37, 17, 0.1)' }}>
+        <div className="row g-4 text-start pt-4 border-top border-2" style={{ borderColor: 'rgba(61, 35, 20, 0.1)' }}>
           
           {/* Coluna 4: Outros canais de contato */}
           <div className="col-md-4">
@@ -202,18 +195,18 @@ function Contato() {
       </div>
 
       {/* 3. RODAPÉ OFICIAL */}
-      <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapeMarrom, fontSize: '0.9rem', borderTop: '4px solid #aa7a44' }}>
+      <footer className="text-white py-4 mt-auto" style={{ backgroundColor: cores.rodapeMarrom, fontSize: '0.9rem', borderTop: '4px solid #A67C52' }}>
         <div className="container">
           <div className="row align-items-center g-3">
             
             <div className="col-md-4 d-flex align-items-center justify-content-center justify-content-md-start">
               <div className="d-flex align-items-center">
-                <div className="p-2 me-2 rounded text-center" style={{ backgroundColor: '#aa7a44', color: '#000000', width: '50px', height: '50px', display: 'flex', alignItems: 'center', justify: 'center' }}>
+                <div className="p-2 me-2 rounded text-center" style={{ backgroundColor: '#A67C52', color: '#000000', width: '50px', height: '50px', display: 'flex', alignItems: 'center', justify: 'center' }}>
                   <i className="bi bi-house-heart-fill fs-3"></i>
                 </div>
                 <div className="text-start lh-1">
                   <span className="fw-bold d-block fs-5 mb-1">Patas</span>
-                  <span className="fw-bold d-block fs-5" style={{ color: '#aa7a44' }}>& Lares</span>
+                  <span className="fw-bold d-block fs-5" style={{ color: '#A67C52' }}>& Lares</span>
                 </div>
               </div>
             </div>

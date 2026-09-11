@@ -28,7 +28,7 @@ export default function EditEvento() {
 
     const params = useParams();
     const navigate = useNavigate();
-    const primaryColor = '#4a2511';
+    const primaryColor = '#3D2314';
     const labelStyle = { color: primaryColor, fontWeight: '600', marginBottom: '6px' };
     const inputStyle = { borderRadius: '6px', border: '1px solid #ced4da' };
 

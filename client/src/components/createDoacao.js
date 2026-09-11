@@ -76,8 +76,8 @@ export default function CreateDoacao() {
         }
     }
 
-    const primaryColor = '#4a2511';
-    const labelStyle = { color: '#4a2511', fontWeight: '600', marginBottom: '6px' };
+    const primaryColor = '#3D2314';
+    const labelStyle = { color: '#3D2314', fontWeight: '600', marginBottom: '6px' };
     const inputStyle = { borderRadius: '6px', border: '1px solid #ced4da' };
 
     return (

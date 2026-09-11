@@ -44,6 +44,11 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Eventos from './eventos';
 import SejaVoluntario from './sejaVoluntario';
+import SolicitarDoacao from './components/solicitarDoacao';
+import FormularioDoacao from './components/formularioDoacao';
+import FormularioAdocao from './components/formularioAdocao';
+
+import estilosAdmin from './admin.module.css';
 
 // Decodifica o payload do JWT para saber o papel do usuário (sem validar assinatura,
 // que é responsabilidade do servidor). Retorna null se o token for inválido/expirado.
@@ -67,6 +72,18 @@ function getUsuarioAutenticado(token) {
   }
 }
 
+// Direciona o scroll para o topo sempre que houver troca de rota,
+// garantindo que nenhuma posição/estado de rolagem da página anterior persista.
+function ScrollToTop() {
+  const { pathname, search } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [pathname, search]);
+
+  return null;
+}
+
 // Layout do Painel Administrativo (Menu Lateral Fixo)
 function NavItem({ to, icon, label }) {
   const location = useLocation();
@@ -80,9 +97,9 @@ function NavItem({ to, icon, label }) {
   return (
     <Link
       to={to}
-      className={`admin-nav-link${ativo ? " admin-nav-link-active" : ""}`}
+      className={`${estilosAdmin.adminNavLink}${ativo ? ` ${estilosAdmin.adminNavLinkActive}` : ""}`}
     >
-      <i className={`bi ${icon} admin-nav-icon`}></i>
+      <i className={`bi ${icon} ${estilosAdmin.adminNavIcon}`}></i>
       <span>{label}</span>
     </Link>
   );
@@ -104,20 +121,20 @@ function DashboardLayout({ setToken }) {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
       {/* Overlay para fechar o menu no mobile */}
-      {menuAberto && <div className="admin-backdrop" onClick={() => setMenuAberto(false)}></div>}
+      {menuAberto && <div className={estilosAdmin.adminBackdrop} onClick={() => setMenuAberto(false)}></div>}
 
       {/* Menu Lateral para o Administrador */}
-      <aside className={`admin-sidebar${menuAberto ? " admin-sidebar-open" : ""}`}>
+      <aside className={`${estilosAdmin.adminSidebar}${menuAberto ? ` ${estilosAdmin.adminSidebarOpen}` : ""}`}>
         <div className="d-flex justify-content-between align-items-start">
           <div>
-            <h4 className="mb-1" style={{ color: '#4a2511', fontWeight: 'bold' }}>
+            <h4 className="mb-1" style={{ color: '#3D2314', fontWeight: 'bold' }}>
               Patas & Lares
             </h4>
             <p className="text-muted small mb-0">Painel Administrativo</p>
           </div>
           <button
             type="button"
-            className="btn d-lg-none admin-sidebar-close"
+            className={`btn d-lg-none ${estilosAdmin.adminSidebarClose}`}
             onClick={() => setMenuAberto(false)}
             aria-label="Fechar menu"
           >
@@ -125,41 +142,40 @@ function DashboardLayout({ setToken }) {
           </button>
         </div>
 
-        <nav className="admin-nav mt-4">
-          <div className="admin-section-title">Geral</div>
+        <nav className={`${estilosAdmin.adminNav} mt-4`}>
+          <div className={estilosAdmin.adminSectionTitle}>Geral</div>
           <NavItem to="/dashboard" icon="bi-speedometer2" label="Dashboard" />
 
-          <div className="admin-section-title">Gestão</div>
+          <div className={estilosAdmin.adminSectionTitle}>Gestão</div>
           <NavItem to="/animais" icon="bi-heart-fill" label="Animais" />
           <NavItem to="/voluntarios" icon="bi-people" label="Voluntários" />
           <NavItem to="/eventos-admin" icon="bi-calendar-event" label="Eventos" />
           <NavItem to="/adotados" icon="bi-heart-fill" label="Histórico de Adotados" />
 
-          <div className="admin-section-title">Recursos & Doações</div>
-          <NavItem to="/doacoes?aba=financeira" icon="bi-cash-coin" label="Doações Financeiras" />
-          <NavItem to="/doacoes?aba=material" icon="bi-box-seam" label="Doações Materiais" />
+          <div className={estilosAdmin.adminSectionTitle}>Recursos & Doações</div>
+          <NavItem to="/doacoes" icon="bi-cash-coin" label="Doações" />
           <NavItem to="/necessidades" icon="bi-clipboard-check" label="Necessidades" />
           <NavItem to="/relatorios-admin" icon="bi-file-earmark-bar-graph" label="Prestação de Contas" />
 
-          <div className="admin-section-title">Configurações</div>
+          <div className={estilosAdmin.adminSectionTitle}>Configurações</div>
           <NavItem to="/usuarios" icon="bi-person-gear" label="Usuários" />
           <NavItem to="/configuracoes-doacao" icon="bi-bank" label="Dados da ONG / Conta" />
         </nav>
 
         <hr className="mt-4" />
-        <Link className="admin-nav-link text-danger" to="/login" onClick={handleLogout}>
-          <i className="bi bi-box-arrow-right admin-nav-icon"></i>
+        <Link className={`${estilosAdmin.adminNavLink} text-danger`} to="/login" onClick={handleLogout}>
+          <i className={`bi bi-box-arrow-right ${estilosAdmin.adminNavIcon}`}></i>
           <span>Sair</span>
         </Link>
       </aside>
 
       {/* Conteúdo Principal do Painel */}
-      <main className="admin-main">
+      <main className={estilosAdmin.adminMain}>
         {/* Barra superior com hamburger (apenas no mobile) */}
-        <div className="admin-topbar">
+        <div className={estilosAdmin.adminTopbar}>
           <button
             type="button"
-            className="admin-topbar-btn"
+            className={estilosAdmin.adminTopbarBtn}
             onClick={() => setMenuAberto(true)}
             aria-label="Abrir menu"
           >
@@ -187,7 +203,9 @@ export default function App() {
   };
 
   return (
-    <Routes>
+    <>
+      <ScrollToTop />
+      <Routes>
       {/* 1. ROTAS PÚBLICAS (Qualquer visitante acessa sem token) */}
       <Route path="/" element={<Home />} />
       <Route path="/contato" element={<Contato />} />
@@ -197,6 +215,9 @@ export default function App() {
       <Route path="/transparencia" element={<Transparencia />} />
       <Route path="/eventos" element={<Eventos />} />
       <Route path="/seja-voluntario" element={<SejaVoluntario />} />
+      <Route path="/solicitar-doacao" element={<SolicitarDoacao />} />
+      <Route path="/doar/formulario" element={<FormularioDoacao />} />
+      <Route path="/adocao/formulario" element={<FormularioAdocao />} />
       
       {/* Somente o administrador logado vai direto ao painel; demais usuários veem o login */}
       <Route path="/login" element={isAdmin ? <Navigate to="/dashboard" replace /> : <Login onLogin={handleLogin} />} />
@@ -257,5 +278,6 @@ export default function App() {
       {/* Rota de segurança: se digitar qualquer coisa errada, volta para a Home pública */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   );
 }
