@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import cores from './theme';
 import API_BASE_URL from './api/config';
 import { resolverUrl, aoErrarImagem } from './utils/fotos';
+import { estaConcluido } from './utils/eventos';
 
 function formatarData(valor) {
     if (!valor) return "";
@@ -138,9 +139,11 @@ function Eventos() {
           </div>
         ) : (
           <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5 justify-content-center">
-            {eventos.map((evento) => (
+            {eventos.map((evento) => {
+              const concluido = estaConcluido(evento);
+              return (
               <div className="col d-flex justify-content-center" key={evento._id}>
-                <div className="card border-0 bg-white rounded-4 shadow-sm overflow-hidden" style={{ maxWidth: '360px', width: '100%', border: '1px solid rgba(166, 124, 82, 0.3)' }}>
+                <div className="card border-0 bg-white rounded-4 shadow-sm overflow-hidden" style={{ maxWidth: '360px', width: '100%', border: '1px solid rgba(166, 124, 82, 0.3)', opacity: concluido ? 0.85 : 1 }}>
                   <div className="d-flex align-items-center justify-content-center bg-white p-3" style={{ height: '220px', overflow: 'hidden' }}>
                     {evento.imagem ? (
                       <img
@@ -155,7 +158,14 @@ function Eventos() {
                     )}
                   </div>
                   <div className="card-body p-4 text-start">
-                    <h5 className="fw-bold mb-2" style={{ color: cores.textoMarrom }}>{evento.titulo}</h5>
+                    <div className="d-flex align-items-start justify-content-between gap-2 mb-2">
+                      <h5 className="fw-bold mb-0" style={{ color: cores.textoMarrom }}>{evento.titulo}</h5>
+                      {concluido && (
+                        <span className="badge rounded-pill flex-shrink-0" style={{ backgroundColor: '#e9ecef', color: '#495057', whiteSpace: 'nowrap' }}>
+                          <i className="bi bi-check-circle me-1"></i>Concluído
+                        </span>
+                      )}
+                    </div>
                     <div className="d-flex flex-wrap gap-3 small text-muted mb-2">
                       <span className="d-inline-flex align-items-center">
                         <i className="bi bi-calendar3 me-1"></i> {formatarData(evento.data)}
@@ -179,10 +189,21 @@ function Eventos() {
                         <strong style={{ color: cores.textoMarrom }}>Objetivos:</strong> {evento.objetivos}
                       </p>
                     )}
+                    {!concluido && (
+                      <button
+                        type="button"
+                        className="btn btn-sm w-100 mt-3 text-white rounded-pill fw-bold"
+                        style={{ backgroundColor: cores.textoDestaque, border: 'none' }}
+                        onClick={() => navigate('/seja-voluntario')}
+                      >
+                        <i className="bi bi-person-plus me-1"></i> Seja Voluntário
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
 

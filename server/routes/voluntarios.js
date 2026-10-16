@@ -5,6 +5,9 @@ const ObjectId = require("mongodb").ObjectId
 const { body, validationResult } = require("express-validator")
 const { authorize } = require("../middleware/auth")
 const { validarObjectId } = require("../middleware/objectId")
+const { writeLimiter } = require("../middleware/rateLimiters")
+
+const STATUS_VOLUNTARIO_VALIDOS = ["Pendente", "Aprovado", "Rejeitado", "Ativo"]
 
 const validarVoluntario = [
     body("nome").trim().notEmpty().withMessage("Nome é obrigatório").isLength({ max: 100 }),
@@ -14,7 +17,7 @@ const validarVoluntario = [
 ]
 
 // POST público — cadastro de voluntário via formulário público (permanece aberto)
-voluntariosRoutes.route("/voluntario/public/add").post(validarVoluntario, async function (req, res) {
+voluntariosRoutes.route("/voluntario/public/add").post(writeLimiter, validarVoluntario, async function (req, res) {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(400).json({ mensagem: errors.array()[0].msg })
@@ -108,8 +111,8 @@ voluntariosRoutes.route("/voluntario/status/:id").post(authorize(["Admin", "admi
     const myquery = { _id: new ObjectId(req.params.id) }
     const status = req.body.status
 
-    if (!["Pendente", "Aprovado", "Rejeitado"].includes(status)) {
-        return res.status(400).json({ mensagem: "Status inválido. Use Pendente, Aprovado ou Rejeitado." })
+    if (!STATUS_VOLUNTARIO_VALIDOS.includes(status)) {
+        return res.status(400).json({ mensagem: `Status inválido. Use um de: ${STATUS_VOLUNTARIO_VALIDOS.join(", ")}.` })
     }
 
     try {
@@ -152,6 +155,9 @@ voluntariosRoutes.route("/voluntario/update/:id").post(authorize(["Admin", "admi
     }
 
     if (req.body.status !== undefined) {
+        if (!STATUS_VOLUNTARIO_VALIDOS.includes(req.body.status)) {
+            return res.status(400).json({ mensagem: `Status inválido. Use um de: ${STATUS_VOLUNTARIO_VALIDOS.join(", ")}.` })
+        }
         updateDoc.status = req.body.status
     }
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import API_BASE_URL from "../api/config";
-import { normalizeFotos, aoErrarImagem } from "../utils/fotos";
+import { normalizeFotos, aoErrarImagem, PLACEHOLDER_IMAGEM } from "../utils/fotos";
 
 // Componente do Card do Animal
 const AnimalCard = ({ record, deleteAnimal, marcarComoAdotado }) => {
@@ -10,16 +10,14 @@ const AnimalCard = ({ record, deleteAnimal, marcarComoAdotado }) => {
     const badgeStyle = { backgroundColor: '#FAF6F0', color: primaryColor, border: '1px solid #eadfcf' };
     const fotos = normalizeFotos(record);
     const [imagemAtual, setImagemAtual] = useState(0);
-    const imagemPadrao = (record.especie || "").toLowerCase() === "gato"
-        ? "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=500"
-        : "https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=500";
+    const imagemPadrao = PLACEHOLDER_IMAGEM;
     const imagem = fotos.length > 0 ? fotos[imagemAtual] : imagemPadrao;
     const generoLabel = record.genero === "M" ? "Macho" : record.genero === "F" ? "Fêmea" : "---";
 
     return (
         <div className="card shadow-sm h-100" style={{ borderRadius: '10px', overflow: 'hidden', backgroundColor: '#fff', border: '1px solid #eadfcf' }}>
             <div style={{ height: '220px', overflow: 'hidden', backgroundColor: '#f8f9fa', position: 'relative' }}>
-                <img src={imagem} className="w-100 h-100" style={{ objectFit: 'cover' }} alt={record.nome} onError={aoErrarImagem} />
+                <img src={imagem} className="w-100 h-100" style={{ objectFit: 'cover' }} alt={record.nome || "Animal"} onError={aoErrarImagem} />
                 {fotos.length > 1 && (
                     <div className="position-absolute bottom-0 start-0 end-0 d-flex justify-content-center gap-1 pb-2" style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.5))' }}>
                         {fotos.map((url, index) => (
@@ -90,42 +88,78 @@ export default function AnimalList() {
     const [filtroPorte, setFiltroPorte] = useState("Todos");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    
+    const location = useLocation();
+    const [solicitacoes, setSolicitacoes] = useState([]);
+    const [caixaAberta, setCaixaAberta] = useState(false);
+
     const primaryColor = '#3D2314';
 
-    // 1. BUSCA TODOS OS ANIMAIS DO BANCO
-    useEffect(() => {
-        async function getAnimais() {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch(`${API_BASE_URL}/animal`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!response.ok) {
-                    if (response.status === 401) {
-                        setError("Sessão expirada. Por favor, faça login novamente.");
-                    } else {
-                        setError(`Erro ao buscar dados: ${response.statusText}`);
-                    }
-                    setLoading(false);
-                    return;
+    // 1. BUSCA TODOS OS ANIMAIS DO BANCO (carga inicial e recarga após ações da caixa)
+    async function carregarAnimais() {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/animal`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
                 }
+            });
 
-                const result = await response.json();
-                const data = Array.isArray(result) ? result : (result.data || []);
-                setAnimais(data);
-            } catch (error) {
-                console.error("Erro de conexão:", error);
-                setError("Não foi possível conectar ao servidor.");
-            } finally {
-                setLoading(false);
+            if (!response.ok) {
+                if (response.status === 401) {
+                    setError("Sessão expirada. Por favor, faça login novamente.");
+                } else {
+                    setError(`Erro ao buscar dados: ${response.statusText}`);
+                }
+                return;
             }
+
+            const result = await response.json();
+            const data = Array.isArray(result) ? result : (result.data || []);
+            setAnimais(data);
+        } catch (error) {
+            console.error("Erro de conexão:", error);
+            setError("Não foi possível conectar ao servidor.");
+        } finally {
+            setLoading(false);
         }
-        getAnimais();
-    }, []); 
+    }
+
+    useEffect(() => {
+        carregarAnimais();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // 1.1 BUSCA AS SOLICITAÇÕES DE ADOÇÃO (Caixa de Entrada — sem filtros de usuário/ID)
+    async function carregarSolicitacoes() {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/solicitacoes-adocao`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) return [];
+            const data = await response.json();
+            const lista = Array.isArray(data) ? data : [];
+            setSolicitacoes(lista);
+            return lista;
+        } catch (error) {
+            console.error("Erro ao carregar solicitações de adoção:", error);
+            return [];
+        }
+    }
+
+    useEffect(() => {
+        carregarSolicitacoes();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Abre a Caixa de Entrada automaticamente ao chegar do Dashboard
+    useEffect(() => {
+        if (location.state && location.state.caixaAdocao) {
+            setCaixaAberta(true);
+            window.history.replaceState({}, '');
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // 2. FUNÇÃO PARA MARCAR COMO ADOTADO (Move para o Histórico)
     async function marcarComoAdotado(id) {
@@ -163,6 +197,43 @@ export default function AnimalList() {
             }
         } catch (error) {
             console.error("Erro ao atualizar status:", error);
+            window.alert("Erro ao conectar ao servidor.");
+        }
+    }
+
+    // 2.1 PROCESSA SOLICITAÇÃO DE ADOÇÃO DA CAIXA DE ENTRADA (aprovar/rejeitar)
+    async function processarSolicitacao(id, novoStatus) {
+        const confirmar = novoStatus === "Aprovada"
+            ? window.confirm("Aprovar esta solicitação? O animal será marcado como Adotado e sairá da listagem de disponíveis.")
+            : window.confirm("Rejeitar esta solicitação de adoção?");
+        if (!confirmar) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/solicitacao-adocao/${id}/status`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ status: novoStatus })
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                window.alert(data.mensagem || "Erro ao processar a solicitação.");
+                return;
+            }
+
+            // Atualiza em tempo real: recarrega a caixa de entrada e a lista de animais
+            const listaAtualizada = await carregarSolicitacoes();
+            await carregarAnimais();
+
+            window.alert(data.mensagem || (novoStatus === "Aprovada" ? "Solicitação aprovada!" : "Solicitação rejeitada."));
+
+            const restantes = listaAtualizada.filter((s) => s && s.status === "Pendente").length;
+            if (restantes === 0) setCaixaAberta(false);
+        } catch (error) {
+            console.error("Erro ao processar solicitação:", error);
             window.alert("Erro ao conectar ao servidor.");
         }
     }
@@ -205,6 +276,8 @@ export default function AnimalList() {
         return correspondeBusca && correspondeEspecie && correspondeGenero && correspondePorte;
     }) : [];
 
+    const solicitacoesPendentes = solicitacoes.filter((s) => s && s.status === "Pendente");
+
     return (
         <div className="container mt-4">
             {/* Cabeçalho */}
@@ -238,6 +311,24 @@ export default function AnimalList() {
                 <div className="alert alert-danger shadow-sm border-0 mb-4" style={{ borderRadius: '8px' }}>
                     <i className="bi bi-exclamation-triangle me-2"></i> {error}
                 </div>
+            )}
+
+            {/* Banner da Caixa de Entrada de Adoções */}
+            {solicitacoesPendentes.length > 0 && (
+                <button
+                    type="button"
+                    className="btn btn-block w-100 d-flex justify-content-between align-items-center border-0 shadow-sm mb-4 px-4 py-3"
+                    onClick={() => setCaixaAberta(true)}
+                    style={{ backgroundColor: '#fff8e6', borderLeft: '6px solid #f0ad4e', borderRadius: '8px', textAlign: 'left' }}
+                >
+                    <span className="d-inline-flex align-items-center gap-2" style={{ color: '#8a6d1d', fontWeight: '600' }}>
+                        <i className="bi bi-inbox-fill fs-5"></i>
+                        Solicitações de Adoção Pendentes
+                    </span>
+                    <span className="badge fs-6 px-3 py-2" style={{ backgroundColor: '#856404', color: '#fff', borderRadius: '20px' }}>
+                        {solicitacoesPendentes.length}
+                    </span>
+                </button>
             )}
 
             {/* Barra de Pesquisa */}
@@ -327,6 +418,97 @@ export default function AnimalList() {
                 <div className="text-center text-muted py-5">
                     <i className="bi bi-heartbreak text-muted d-block mb-2" style={{ fontSize: '2rem' }}></i>
                     Nenhum animal abrigado no momento.
+                </div>
+            )}
+
+            {/* Modal: Caixa de Entrada de Adoções */}
+            {caixaAberta && (
+                <div className="modal show d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} onClick={() => setCaixaAberta(false)}>
+                    <div className="modal-dialog modal-dialog-centered modal-lg" role="document" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-content" style={{ borderRadius: '10px', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}>
+                            <div className="modal-header" style={{ borderBottom: '2px solid #e9ecef', backgroundColor: '#fff8e6', borderTopLeftRadius: '10px', borderTopRightRadius: '10px' }}>
+                                <h5 className="modal-title fw-bold" style={{ color: '#8a6d1d' }}>
+                                    <i className="bi bi-inbox-fill me-2"></i> Caixa de Entrada de Adoções
+                                </h5>
+                                <span className="badge fs-6 px-3 py-2 me-2" style={{ backgroundColor: '#856404', color: '#fff', borderRadius: '20px' }}>
+                                    {solicitacoesPendentes.length} pendente(s)
+                                </span>
+                                <button type="button" className="btn-close ms-2" onClick={() => setCaixaAberta(false)}></button>
+                            </div>
+                            <div className="modal-body" style={{ overflowY: 'auto', padding: '1.25rem' }}>
+                                {solicitacoesPendentes.length === 0 ? (
+                                    <div className="text-center text-muted py-5">
+                                        <i className="bi bi-check2-circle d-block mb-2" style={{ fontSize: '2.2rem', color: '#28a745' }}></i>
+                                        Não há solicitações de adoção pendentes no momento!
+                                    </div>
+                                ) : (
+                                    solicitacoesPendentes.map((s) => {
+                                        const fotosAnimal = s.animal ? normalizeFotos(s.animal) : [];
+                                        return (
+                                        <div key={s._id} className="border rounded-3 p-3 mb-3" style={{ backgroundColor: '#fdfbf7', borderLeft: '4px solid #ffc107' }}>
+                                            <div className="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                                <div className="d-flex align-items-center gap-2">
+                                                    <div className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 overflow-hidden" style={{ width: '42px', height: '42px', backgroundColor: '#fff3cd' }}>
+                                                        {fotosAnimal.length > 0 ? (
+                                                            <img
+                                                                src={fotosAnimal[0]}
+                                                                alt={s.animal?.nome || s.animal_nome || "Animal"}
+                                                                className="w-100 h-100"
+                                                                style={{ objectFit: 'cover' }}
+                                                                onError={aoErrarImagem}
+                                                            />
+                                                        ) : (
+                                                            <i className="bi bi-heart-fill fs-5" style={{ color: '#856404' }}></i>
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <strong className="d-block" style={{ color: primaryColor }}>{s.solicitante?.nome || "Interessado não informado"}</strong>
+                                                        <small className="text-muted">
+                                                            Animal: <strong>{s.animal?.nome || s.animal_nome || "---"}</strong>
+                                                            {s.animal?.especie ? ` · ${s.animal.especie}` : ""}
+                                                            {s.animal?.raca ? ` · ${s.animal.raca}` : ""}
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                                <span className="badge fw-semibold px-2 py-1 bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                                                    <i className="bi bi-hourglass-split me-1"></i>Pendente
+                                                </span>
+                                            </div>
+                                            <small className="text-muted d-block mt-2">
+                                                {s.solicitante?.email}
+                                                {s.solicitante?.telefone ? ` · ${s.solicitante.telefone}` : ""}
+                                                {s.solicitante?.endereco?.cidade ? ` · ${s.solicitante.endereco.cidade}` : ""}
+                                            </small>
+                                            <div className="d-flex flex-wrap justify-content-end gap-2 mt-3 pt-3 border-top">
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-sm btn-outline-danger d-inline-flex align-items-center"
+                                                    onClick={() => processarSolicitacao(s._id, "Rejeitada")}
+                                                    style={{ borderRadius: '6px' }}
+                                                >
+                                                    <i className="bi bi-x-lg me-1"></i> Rejeitar
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-sm btn-success d-inline-flex align-items-center text-white"
+                                                    onClick={() => processarSolicitacao(s._id, "Aprovada")}
+                                                    style={{ borderRadius: '6px' }}
+                                                >
+                                                    <i className="bi bi-check2-circle me-1"></i> Aprovar Adoção
+                                                </button>
+                                            </div>
+                                        </div>
+                                        );
+                                    })
+                                )}
+                            </div>
+                            <div className="modal-footer" style={{ borderTop: '2px solid #e9ecef' }}>
+                                <button type="button" className="btn text-white px-4" style={{ backgroundColor: primaryColor, borderRadius: '6px' }} onClick={() => setCaixaAberta(false)}>
+                                    Fechar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

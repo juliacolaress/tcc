@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API_BASE_URL from "./api/config";
-import { normalizeFotos, aoErrarImagem } from "./utils/fotos";
+import { normalizeFotos, aoErrarImagem, PLACEHOLDER_IMAGEM } from "./utils/fotos";
 import cores from "./theme";
 
 // Componente do Card do Animal
@@ -9,10 +9,8 @@ const AnimalCard = ({ animal, onAdotar }) => {
     const [imagemAtual, setImagemAtual] = useState(0);
     const fotos = normalizeFotos(animal);
     
-    // Definindo uma imagem padrão caso o banco não tenha foto cadastrada ainda
-    const imagemPadrao = animal.especie === "Cachorro" 
-        ? "https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=500" // Foto de cachorro
-        : "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=500"; // Foto de gato
+    // Imagem fictícia padrão quando o animal não tem foto cadastrada
+    const imagemPadrao = PLACEHOLDER_IMAGEM;
 
     const imagemExibida = fotos.length > 0 ? fotos[imagemAtual] : imagemPadrao;
 

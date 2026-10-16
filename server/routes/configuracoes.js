@@ -2,8 +2,7 @@ const express = require("express")
 const configuracoesRoutes = express.Router()
 const dbo = require("../db/conn")
 const { auth, authorize } = require("../middleware/auth")
-const fs = require("fs")
-const path = require("path")
+const { extrairFilename, deletarArquivo } = require("../utils/arquivos")
 
 const DADOS_PADRAO = {
     razaoSocial: "Organização de Amparo Animal Patas & Lares",
@@ -13,18 +12,6 @@ const DADOS_PADRAO = {
     contaCorrente: "00000-0",
     chavePix: "00.000.000/0000-00",
     qrCode: ""
-}
-
-function extrairFilename(url) {
-    if (!url || typeof url !== "string") return null
-    const match = url.match(/\/uploads\/(.+)$/)
-    return match ? match[1] : null
-}
-
-function deletarArquivo(filename) {
-    if (!filename) return
-    const caminho = path.join(__dirname, "..", "uploads", filename)
-    fs.unlink(caminho, () => {})
 }
 
 function sanitizar(body) {
@@ -38,20 +25,17 @@ function sanitizar(body) {
     return updateDoc
 }
 
-// GET pública — dados de doação da ONG (cria o registro padrão na primeira vez)
+// GET pública — dados de doação da ONG (somente leitura).
+// O registro padrão é garantido uma única vez no startup do servidor (server.js),
+// então a rota não escreve no banco.
 configuracoesRoutes.route("/configuracoes/doacao").get(async function (req, res) {
     const db_connect = dbo.getDb()
     try {
         const colecao = db_connect.collection("configuracoes")
-        let config = await colecao.findOne({})
+        const config = await colecao.findOne({})
 
-        if (!config) {
-            const padrao = { ...DADOS_PADRAO, atualizadoEm: new Date() }
-            await colecao.insertOne(padrao)
-            config = padrao
-        }
-
-        res.status(200).json(config)
+        // Fallback em memória caso o registro ainda não exista (não persiste)
+        res.status(200).json(config || { ...DADOS_PADRAO, atualizadoEm: null })
     } catch (error) {
         console.error("Erro ao buscar dados de doação:", error)
         res.status(500).json({ mensagem: "Erro no servidor" })

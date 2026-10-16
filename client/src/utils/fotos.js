@@ -8,7 +8,10 @@ export function resolverUrl(valor) {
   if (!texto) return "";
   if (/^(https?:)\/\//i.test(texto)) return texto;
   if (/^\/\//.test(texto)) return texto;
-  if (texto.startsWith("/")) return `${API_BASE_URL}${texto}`;
+  // Caminho relativo ao servidor da API (uploads é o único diretório estático do backend)
+  if (texto.startsWith("/uploads/")) return `${API_BASE_URL}${texto}`;
+  if (texto.startsWith("uploads/")) return `${API_BASE_URL}/${texto}`;
+  // Demais caminhos iniciados com "/" são assets estáticos do frontend (ex: placeholder)
   return texto;
 }
 

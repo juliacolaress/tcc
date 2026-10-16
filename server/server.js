@@ -56,6 +56,14 @@ const limiter = rateLimit({
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }))
 app.use(cors(corsOptions))
 app.use(express.json({ limit: "1mb" }))
+
+// Atrás de proxy reverso (Nginx, Render, Heroku...) é preciso confiar no
+// X-Forwarded-For para o rate limit enxergar o IP real. Habilitar apenas por
+// env (TRUST_PROXY=1) para não permitir spoof de IP em exposição direta.
+if (process.env.TRUST_PROXY === "1" || process.env.TRUST_PROXY === "true") {
+    app.set("trust proxy", 1)
+}
+
 app.use(limiter)
 app.use("/uploads", express.static(path.join(__dirname, "uploads")))
 app.use(require("./routes/user")) 
@@ -72,6 +80,21 @@ const dbo = require("./db/conn")
 
 app.get("/", function(req, res) {
     res.send("App is running")
+})
+
+// Rota inexistente → 404 JSON (em vez do HTML padrão do Express)
+app.use(function(req, res, next) {
+    res.status(404).json({ mensagem: "Recurso não encontrado" })
+})
+
+// Handler de erro central: captura exceções não tratadas e devolve JSON.
+// (Erros de upload já são tratados dentro de cada router antes de chegar aqui.)
+app.use(function(err, req, res, next) {
+    console.error("Erro não tratado:", err)
+    if (res.headersSent) {
+        return next(err)
+    }
+    res.status(err.status || 500).json({ mensagem: "Erro no servidor" })
 })
 
 dbo.connectToMongoDB(function (error) {
@@ -99,6 +122,12 @@ dbo.connectToMongoDB(function (error) {
     }).catch((err) => {
         console.error("Erro ao garantir configuração padrão:", err.message)
     })
+
+    // Índices (best-effort): não impedem o boot se houver dados legados conflitantes.
+    db.collection("users").createIndex({ email: 1 }, { unique: true })
+        .catch((err) => console.error("Índice único de e-mail não criado:", err.message))
+    db.collection("animais").createIndex({ status: 1 })
+        .catch((err) => console.error("Índice de status de animais não criado:", err.message))
 
     app.listen(port, () => {
         console.log("Servidor rodando na porta: " + port)

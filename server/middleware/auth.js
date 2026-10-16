@@ -16,6 +16,27 @@ const auth = (req, res, next) => {
     }
 };
 
+// Autenticação opcional: se vier um token válido, popula req.user; caso contrário
+// segue como visitante anônimo. Útil em rotas públicas que devolvem mais (ou menos)
+// dados conforme o perfil (ex: GET /animal esconde PII do adotante para visitantes).
+const authOpcional = (req, res, next) => {
+    const token = req.header("Authorization")?.replace("Bearer ", "");
+    if (token) {
+        try {
+            req.user = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (error) {
+            // Token inválido/expirado: trata como visitante anônimo, sem bloquear
+        }
+    }
+    next();
+};
+
+const adminRoles = ["Admin", "admin"];
+
+function ehAdmin(req) {
+    return Boolean(req.user && adminRoles.includes(req.user.tipo));
+}
+
 const authorize = (roles = []) => {
     if (typeof roles === 'string') {
         roles = [roles];
@@ -32,4 +53,4 @@ const authorize = (roles = []) => {
     ];
 };
 
-module.exports = { auth, authorize };
+module.exports = { auth, authorize, authOpcional, ehAdmin, adminRoles };

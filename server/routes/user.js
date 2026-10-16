@@ -26,6 +26,21 @@ const validarLogin = [
     body("senha").notEmpty().withMessage("Senha é obrigatória"),
 ]
 
+// Escapa caracteres especiais de regex (o e-mail é validado, mas nunca confie no input)
+function escaparRegex(texto) {
+    return String(texto).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+}
+
+// Busca usuário por e-mail de forma robusta: primeiro exato (novo padrão em
+// minúsculas), depois case-insensitive para não quebrar contas legadas.
+async function buscarPorEmail(colecao, email) {
+    const normalizado = String(email || "").trim().toLowerCase()
+    if (!normalizado) return null
+    const exato = await colecao.findOne({ email: normalizado })
+    if (exato) return exato
+    return colecao.findOne({ email: { $regex: `^${escaparRegex(normalizado)}$`, $options: "i" } })
+}
+
 // Projeção: nunca devolver o hash da senha para o cliente
 const SEM_SENHA = { senha: 0 }
 
@@ -39,7 +54,7 @@ userRoutes.route("/user/login").post(authLimiter, validarLogin, async function (
     const { email, senha } = req.body
 
     try {
-        const usuario = await db_connect.collection("users").findOne({ email })
+        const usuario = await buscarPorEmail(db_connect.collection("users"), email)
 
         // Mensagem genérica para não permitir enumeração de contas
         if (!usuario) {
@@ -72,10 +87,11 @@ userRoutes.route("/user/register").post(authLimiter, validarCadastro, async func
     }
 
     const db_connect = dbo.getDb()
-    const { nome, email, senha } = req.body
+    const { nome, senha } = req.body
 
     try {
-        const userExistente = await db_connect.collection("users").findOne({ email })
+        const email = String(req.body.email || "").trim().toLowerCase()
+        const userExistente = await buscarPorEmail(db_connect.collection("users"), email)
 
         if (userExistente) {
             return res.status(400).json({ mensagem: "Usuário já cadastrado" })
@@ -135,7 +151,7 @@ userRoutes.route("/user/add").post(authorize(["Admin", "admin"]), async function
     const db_connect = dbo.getDb()
 
     const name = (req.body.name || "").trim()
-    const email = (req.body.email || "").trim()
+    const email = (req.body.email || "").trim().toLowerCase()
     if (!name || !email) {
         return res.status(400).json({ mensagem: "Nome e email são obrigatórios" })
     }
@@ -156,6 +172,12 @@ userRoutes.route("/user/add").post(authorize(["Admin", "admin"]), async function
     }
 
     try {
+        // Impede e-mails duplicados (checagem explícita além do índice único)
+        const existente = await buscarPorEmail(db_connect.collection("users"), email)
+        if (existente) {
+            return res.status(409).json({ mensagem: "Já existe um usuário com este e-mail" })
+        }
+
         const result = await db_connect.collection("users").insertOne(myobj)
         res.status(201).json({ mensagem: "Usuário criado com sucesso" })
     } catch (error) {

@@ -5,22 +5,11 @@ const ObjectId = require("mongodb").ObjectId
 const { body, validationResult } = require("express-validator")
 const { authorize } = require("../middleware/auth")
 const { validarObjectId } = require("../middleware/objectId")
+const { extrairFilename, deletarArquivo } = require("../utils/arquivos")
 const multer = require("multer")
 const path = require("path")
 const crypto = require("crypto")
 const fs = require("fs")
-
-function extrairFilename(url) {
-    if (!url || typeof url !== "string") return null
-    const match = url.match(/\/uploads\/(.+)$/)
-    return match ? match[1] : null
-}
-
-function deletarArquivo(filename) {
-    if (!filename) return
-    const caminho = path.join(__dirname, "..", "uploads", filename)
-    fs.unlink(caminho, () => {})
-}
 
 function extrairProtocolo(req) {
     const forwarded = req.headers["x-forwarded-proto"]
@@ -95,11 +84,22 @@ relatoriosRoutes.route("/relatorios").post(authorize(["Admin", "admin"]), valida
 
     const db_connect = dbo.getDb()
 
+    const totalArrecadacao = req.body.totalArrecadacao === undefined || String(req.body.totalArrecadacao).trim() === ""
+        ? 0
+        : parseFloat(req.body.totalArrecadacao)
+    const totalDespesas = req.body.totalDespesas === undefined || String(req.body.totalDespesas).trim() === ""
+        ? 0
+        : parseFloat(req.body.totalDespesas)
+
+    if (isNaN(totalArrecadacao) || isNaN(totalDespesas)) {
+        return res.status(400).json({ mensagem: "Total de arrecadação/despesas inválido" })
+    }
+
     const myobj = {
         titulo: req.body.titulo,
         mesReferencia: req.body.mesReferencia,
-        totalArrecadacao: parseFloat(req.body.totalArrecadacao) || 0,
-        totalDespesas: parseFloat(req.body.totalDespesas) || 0,
+        totalArrecadacao,
+        totalDespesas,
         resumo: req.body.resumo || "",
         balanceteUrl: req.body.balanceteUrl || "",
         criadoEm: new Date()
@@ -128,8 +128,20 @@ relatoriosRoutes.route("/relatorios/:id").put(authorize(["Admin", "admin"]), val
         }
     })
 
-    if (updateDoc.totalArrecadacao !== undefined) updateDoc.totalArrecadacao = parseFloat(updateDoc.totalArrecadacao) || 0
-    if (updateDoc.totalDespesas !== undefined) updateDoc.totalDespesas = parseFloat(updateDoc.totalDespesas) || 0
+    if (updateDoc.totalArrecadacao !== undefined) {
+        const total = parseFloat(updateDoc.totalArrecadacao)
+        if (isNaN(total) || total < 0) {
+            return res.status(400).json({ mensagem: "Total de arrecadação inválido" })
+        }
+        updateDoc.totalArrecadacao = total
+    }
+    if (updateDoc.totalDespesas !== undefined) {
+        const total = parseFloat(updateDoc.totalDespesas)
+        if (isNaN(total) || total < 0) {
+            return res.status(400).json({ mensagem: "Total de despesas inválido" })
+        }
+        updateDoc.totalDespesas = total
+    }
 
     if (Object.keys(updateDoc).length === 0) {
         return res.status(400).json({ mensagem: "Nenhum dado para atualizar" })

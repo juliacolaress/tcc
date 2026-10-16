@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import API_BASE_URL from "../api/config";
-import { resolverUrl, aoErrarImagem } from "../utils/fotos";
+import { resolverUrl, aoErrarImagem, PLACEHOLDER_IMAGEM } from "../utils/fotos";
 import BackButton from "./BackButton";
 
 const RACAS_POR_ESPECIE = {
@@ -100,9 +100,11 @@ export default function EditAnimais() {
             });
 
             const fotos = [];
-            [record.fotoUrl, ...(record.fotos || [])].filter(Boolean).forEach(u => {
-                if (!fotos.includes(u)) fotos.push(u);
-            });
+            [record.fotoUrl, ...(record.fotos || [])]
+                .filter(u => u && u !== PLACEHOLDER_IMAGEM)
+                .forEach(u => {
+                    if (!fotos.includes(u)) fotos.push(u);
+                });
             setFotosExistentes(fotos);
         }
         fetchData();

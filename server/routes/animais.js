@@ -3,21 +3,26 @@ const animalRoutes = express.Router()
 const dbo = require("../db/conn")
 const ObjectId = require("mongodb").ObjectId
 const { body, validationResult } = require("express-validator")
-const { authorize } = require("../middleware/auth")
+const { authorize, authOpcional, ehAdmin } = require("../middleware/auth")
 const { validarObjectId } = require("../middleware/objectId")
-const fs = require("fs")
-const path = require("path")
+const { writeLimiter } = require("../middleware/rateLimiters")
+const { extrairFilename, deletarArquivo } = require("../utils/arquivos")
 
-function extrairFilename(url) {
-    if (!url || typeof url !== "string") return null
-    const match = url.match(/\/uploads\/(.+)$/)
-    return match ? match[1] : null
-}
+// Imagem fictícia padrão (servida pelo frontend em client/public)
+const FOTO_PADRAO = "/placeholder-padrao.svg"
 
-function deletarArquivo(filename) {
-    if (!filename) return
-    const caminho = path.join(__dirname, "..", "uploads", filename)
-    fs.unlink(caminho, () => {})
+// Status possíveis de uma solicitação de adoção (Caixa de Entrada)
+const STATUS_SOLICITACAO_VALIDOS = ["Pendente", "Aprovada", "Rejeitada"]
+
+// Projeção pública: remove os dados pessoais do adotante de animais já adotados.
+// Aplica-se apenas a visitantes anônimos (authOpcional + ehAdmin libera para admin).
+const SEM_PII_ADOTANTE = {
+    adotante: 0,
+    adotante_cpf: 0,
+    adotante_email: 0,
+    adotante_telefone: 0,
+    adotante_nascimento: 0,
+    adotante_endereco: 0,
 }
 
 function extrairUrls(animal) {
@@ -45,10 +50,11 @@ const validarAdocaoPublica = [
     body("cidade").trim().notEmpty().withMessage("Cidade é obrigatória"),
 ]
 
-animalRoutes.route("/animal").get(async function (req, res) {
+animalRoutes.route("/animal").get(authOpcional, async function (req, res) {
     const db_connect = dbo.getDb()
     try {
-        const result = await db_connect.collection("animais").find({}).toArray()
+        const projection = ehAdmin(req) ? {} : SEM_PII_ADOTANTE
+        const result = await db_connect.collection("animais").find({}, { projection }).toArray()
         res.status(200).json(result)
     } catch (error) {
         console.error("Erro ao listar animais:", error)
@@ -56,11 +62,12 @@ animalRoutes.route("/animal").get(async function (req, res) {
     }
 })
 
-animalRoutes.route("/animal/:id").get(validarObjectId, async function (req, res) {
+animalRoutes.route("/animal/:id").get(authOpcional, validarObjectId, async function (req, res) {
     const db_connect = dbo.getDb()
     const myquery = { _id: new ObjectId(req.params.id) }
     try {
-        const result = await db_connect.collection("animais").findOne(myquery)
+        const projection = ehAdmin(req) ? {} : SEM_PII_ADOTANTE
+        const result = await db_connect.collection("animais").findOne(myquery, { projection })
         if (!result) return res.status(404).json({ mensagem: "Animal não encontrado" })
         res.status(200).json(result)
     } catch (error) {
@@ -69,8 +76,47 @@ animalRoutes.route("/animal/:id").get(validarObjectId, async function (req, res)
     }
 })
 
-// Rota pública: registra o Questionário de Adoção e marca o animal como Adotado
-animalRoutes.route("/animal/:id/adotar").post(validarObjectId, validarAdocaoPublica, async function (req, res) {
+// Histórico de Adoções: retorna o documento COMPLETO de cada animal adotado
+// (nome, especie, raca, genero, porte, fotoUrl, fotos + adotante, data_adocao).
+// Não há Model/referência separada: animal e dados de adoção vivem no mesmo
+// documento da coleção "animais", então nenhuma propriedade vem nula por JOIN.
+animalRoutes.route("/adocoes").get(authorize(["Admin", "admin"]), async function (req, res) {
+    const db_connect = dbo.getDb()
+    try {
+        const docs = await db_connect.collection("animais")
+            .find({ status: "Adotado" })
+            .sort({ data_adocao: -1 })
+            .toArray()
+
+        // Tratamento defensivo: documentos legados/corrompidos (campos ausentes,
+        // fotos inválidas ou animais já devolvidos ao abrigo que perderam o status)
+        // não podem quebrar a API — recebem valores padrão.
+        const result = docs
+            .filter((doc) => doc && doc._id)
+            .map((doc) => ({
+                ...doc,
+                nome: typeof doc.nome === "string" && doc.nome.trim() ? doc.nome : "Animal não identificado",
+                especie: typeof doc.especie === "string" ? doc.especie : "",
+                raca: typeof doc.raca === "string" ? doc.raca : "",
+                genero: typeof doc.genero === "string" ? doc.genero : "",
+                porte: typeof doc.porte === "string" ? doc.porte : "",
+                fotoUrl: typeof doc.fotoUrl === "string" ? doc.fotoUrl : "",
+                fotos: Array.isArray(doc.fotos) ? doc.fotos.filter((f) => typeof f === "string" && f) : [],
+                adotante: typeof doc.adotante === "string" && doc.adotante.trim() ? doc.adotante : "Não informado",
+                data_adocao: doc.data_adocao || null
+            }))
+
+        res.status(200).json(result)
+    } catch (error) {
+        console.error("Erro ao listar histórico de adoções:", error)
+        res.status(500).json({ mensagem: "Erro no servidor" })
+    }
+})
+
+// Rota pública: registra a solicitação de adoção (Questionário).
+// Não altera o status do animal: ele permanece "Disponível" e na listagem pública.
+// A mudança para "Adotado" só ocorre após aprovação manual no painel administrativo.
+animalRoutes.route("/animal/:id/adotar").post(writeLimiter, validarObjectId, validarAdocaoPublica, async function (req, res) {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(400).json({ mensagem: errors.array()[0].msg })
@@ -88,16 +134,18 @@ animalRoutes.route("/animal/:id/adotar").post(validarObjectId, validarAdocaoPubl
             return res.status(409).json({ mensagem: "Este animal já foi adotado." })
         }
 
-        const newvalues = {
-            $set: {
-                status: "Adotado",
-                adotante: req.body.nome,
-                data_adocao: new Date().toISOString().split("T")[0],
-                adotante_cpf: req.body.cpf,
-                adotante_email: req.body.email,
-                adotante_nascimento: req.body.data_nascimento,
-                adotante_telefone: req.body.telefone,
-                adotante_endereco: {
+        const solicitacao = {
+            animal_id: animal._id,
+            animal_nome: animal.nome,
+            status: "Pendente",
+            data_solicitacao: new Date().toISOString(),
+            solicitante: {
+                nome: req.body.nome,
+                cpf: req.body.cpf,
+                email: req.body.email,
+                data_nascimento: req.body.data_nascimento,
+                telefone: req.body.telefone,
+                endereco: {
                     rua: req.body.rua,
                     numero: req.body.numero,
                     bairro: req.body.bairro,
@@ -106,11 +154,111 @@ animalRoutes.route("/animal/:id/adotar").post(validarObjectId, validarAdocaoPubl
             }
         }
 
-        await db_connect.collection("animais").updateOne(myquery, newvalues)
-        res.status(200).json({ mensagem: "Adoção registrada com sucesso!" })
+        await db_connect.collection("solicitacoes_adocao").insertOne(solicitacao)
+        res.status(201).json({ mensagem: "Solicitação de adoção registrada com sucesso! Nossa equipe entrará em contato." })
     } catch (error) {
-        console.error("Erro ao registrar adoção:", error)
-        res.status(500).json({ mensagem: "Erro ao registrar adoção" })
+        console.error("Erro ao registrar solicitação de adoção:", error)
+        res.status(500).json({ mensagem: "Erro ao registrar solicitação de adoção" })
+    }
+})
+
+// Caixa de Entrada: lista todas as solicitações de adoção (sem filtros de usuário/ID —
+// apenas exigência de perfil admin). O driver nativo do MongoDB não possui .populate():
+// o "join" manual abaixo anexa o documento completo do animal em cada solicitação
+// (campo `animal`), garantindo nome, especie, raca, genero, porte, fotoUrl e fotos.
+animalRoutes.route("/solicitacoes-adocao").get(authorize(["Admin", "admin"]), async function (req, res) {
+    const db_connect = dbo.getDb()
+    try {
+        const solicitacoes = await db_connect.collection("solicitacoes_adocao")
+            .find({})
+            .sort({ data_solicitacao: -1 })
+            .toArray()
+
+        const animalIds = solicitacoes
+            .map((s) => s.animal_id)
+            .filter((id) => id instanceof ObjectId)
+
+        const animais = animalIds.length > 0
+            ? await db_connect.collection("animais").find({ _id: { $in: animalIds } }).toArray()
+            : []
+        const animaisPorId = new Map(animais.map((a) => [String(a._id), a]))
+
+        const result = solicitacoes.map((s) => ({
+            ...s,
+            animal: animaisPorId.get(String(s.animal_id)) || null
+        }))
+
+        res.status(200).json(result)
+    } catch (error) {
+        console.error("Erro ao listar solicitações de adoção:", error)
+        res.status(500).json({ mensagem: "Erro no servidor" })
+    }
+})
+
+// Caixa de Entrada: aprovar (marca o animal como Adotado) ou rejeitar uma solicitação
+animalRoutes.route("/solicitacao-adocao/:id/status").patch(authorize(["Admin", "admin"]), validarObjectId, async function (req, res) {
+    const novoStatus = req.body.status
+    if (!STATUS_SOLICITACAO_VALIDOS.includes(novoStatus) || novoStatus === "Pendente") {
+        return res.status(400).json({ mensagem: "Status inválido" })
+    }
+
+    const db_connect = dbo.getDb()
+    const solicitacoes = db_connect.collection("solicitacoes_adocao")
+    const solicitacaoId = { _id: new ObjectId(req.params.id) }
+
+    try {
+        const solicitacao = await solicitacoes.findOne(solicitacaoId)
+        if (!solicitacao) {
+            return res.status(404).json({ mensagem: "Solicitação não encontrada" })
+        }
+        if (solicitacao.status !== "Pendente") {
+            return res.status(409).json({ mensagem: "Esta solicitação já foi processada." })
+        }
+
+        if (novoStatus === "Aprovada") {
+            // Registro legado/corrompido sem referência de animal: responde 400 sem quebrar
+            if (!(solicitacao.animal_id instanceof ObjectId)) {
+                return res.status(400).json({ mensagem: "Solicitação sem referência de animal válida." })
+            }
+
+            const animalQuery = { _id: solicitacao.animal_id }
+            const animal = await db_connect.collection("animais").findOne(animalQuery)
+            if (!animal) {
+                return res.status(404).json({ mensagem: "Animal não encontrado" })
+            }
+            if (animal.status === "Adotado") {
+                return res.status(409).json({ mensagem: "Este animal já foi adotado." })
+            }
+
+            // Dados do solicitante com fallbacks (nunca lança exceção em doc legado)
+            const solicitante = solicitacao.solicitante || {}
+
+            // Marca o animal como Adotado sem tocar em fotoUrl/fotos
+            await db_connect.collection("animais").updateOne(animalQuery, {
+                $set: {
+                    status: "Adotado",
+                    adotante: solicitante.nome || "Não informado",
+                    data_adocao: new Date().toISOString().split("T")[0],
+                    adotante_cpf: solicitante.cpf || "",
+                    adotante_email: solicitante.email || "",
+                    adotante_nascimento: solicitante.data_nascimento || "",
+                    adotante_telefone: solicitante.telefone || "",
+                    adotante_endereco: solicitante.endereco || null
+                }
+            })
+        }
+
+        await solicitacoes.updateOne(solicitacaoId, {
+            $set: { status: novoStatus, data_resposta: new Date().toISOString() }
+        })
+
+        const mensagem = novoStatus === "Aprovada"
+            ? "Solicitação aprovada! O animal foi marcado como Adotado."
+            : "Solicitação rejeitada."
+        res.status(200).json({ mensagem })
+    } catch (error) {
+        console.error("Erro ao processar solicitação de adoção:", error)
+        res.status(500).json({ mensagem: "Erro ao processar solicitação" })
     }
 })
 
@@ -141,7 +289,7 @@ animalRoutes.route("/animal/add").post(authorize(["Admin", "admin"]), validarAni
         amputacao: req.body.amputacao,
         cor: req.body.cor,
         ong: req.body.ong,
-        fotoUrl: req.body.fotoUrl || "",
+        fotoUrl: req.body.fotoUrl || FOTO_PADRAO,
         fotos: req.body.fotos || [],
     }
 
@@ -154,7 +302,10 @@ animalRoutes.route("/animal/add").post(authorize(["Admin", "admin"]), validarAni
     }
 })
 
-animalRoutes.route("/animal/update/:id").post(authorize(["Admin", "admin"]), validarObjectId, async function (req, res) {
+// Atualização genérica do animal (POST legado e PUT REST), válida para animais
+// abrigados, adotados ou em qualquer outro status. Update PARCIAL via whitelist:
+// só grava campos enviados, preservando fotoUrl/fotos/status/adotante quando ausentes.
+async function atualizarAnimal(req, res) {
     const db_connect = dbo.getDb()
     const myquery = { _id: new ObjectId(req.params.id) }
 
@@ -173,6 +324,13 @@ animalRoutes.route("/animal/update/:id").post(authorize(["Admin", "admin"]), val
         }
     })
 
+    // Sem foto enviada (ou upload falhou): usa a imagem fictícia padrão
+    if (updateDoc.fotoUrl !== undefined && !String(updateDoc.fotoUrl || "").trim()) {
+        updateDoc.fotoUrl = Array.isArray(updateDoc.fotos) && updateDoc.fotos[0]
+            ? updateDoc.fotos[0]
+            : FOTO_PADRAO
+    }
+
     const newvalues = { $set: updateDoc }
 
     try {
@@ -183,12 +341,17 @@ animalRoutes.route("/animal/update/:id").post(authorize(["Admin", "admin"]), val
 
         const result = await db_connect.collection("animais").updateOne(myquery, newvalues)
 
-        const urlsAntigas = new Set(extrairUrls(antigo))
-        const urlsNovas = new Set(extrairUrls(updateDoc))
+        // Remove arquivos antigos do disco SOMENTE quando o update realmente
+        // altera fotoUrl/fotos. Atualizações que só mudam status/obs/adotante
+        // (ex: devolução do animal ao abrigo) preservam as imagens intactas.
+        if (updateDoc.fotoUrl !== undefined || updateDoc.fotos !== undefined) {
+            const urlsAntigas = new Set(extrairUrls(antigo))
+            const urlsNovas = new Set(extrairUrls(updateDoc))
 
-        for (const url of urlsAntigas) {
-            if (!urlsNovas.has(url)) {
-                deletarArquivo(extrairFilename(url))
+            for (const url of urlsAntigas) {
+                if (!urlsNovas.has(url)) {
+                    deletarArquivo(extrairFilename(url))
+                }
             }
         }
 
@@ -197,7 +360,12 @@ animalRoutes.route("/animal/update/:id").post(authorize(["Admin", "admin"]), val
         console.error("Erro ao atualizar animal:", error)
         res.status(500).json({ mensagem: "Erro ao atualizar animal" })
     }
-})
+}
+
+animalRoutes.route("/animal/update/:id").post(authorize(["Admin", "admin"]), validarObjectId, atualizarAnimal)
+
+// Alias REST: PUT /animal/:id — mesma lógica genérica de atualização parcial
+animalRoutes.route("/animal/:id").put(authorize(["Admin", "admin"]), validarObjectId, atualizarAnimal)
 
 animalRoutes.route("/animal/:id").delete(authorize(["Admin", "admin"]), validarObjectId, async function (req, res) {
     const db_connect = dbo.getDb()

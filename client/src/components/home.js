@@ -4,6 +4,7 @@ import Logo from './gatoecachorro.png';
 import cores from '../theme';
 import API_BASE_URL from '../api/config';
 import { resolverUrl, aoErrarImagem } from '../utils/fotos';
+import { estaConcluido } from '../utils/eventos';
 
 function formatarData(valor) {
     if (!valor) return "";
@@ -25,16 +26,17 @@ const CAMPANHA_PADRAO = {
 };
 
 function CampanhaCard({ campanha, onClick }) {
+    const concluido = estaConcluido(campanha);
     return (
         <div
-            className="card border-0 text-white p-4 shadow-sm mx-auto"
-            style={{ backgroundColor: cores.marromCampanha, borderRadius: '24px', maxWidth: '1000px', cursor: 'pointer' }}
+            className="card border-0 text-white p-4 shadow-sm h-100"
+            style={{ backgroundColor: cores.marromCampanha, borderRadius: '24px', cursor: 'pointer', opacity: concluido ? 0.85 : 1 }}
             onClick={onClick}
             role="button"
             aria-label={`Ver detalhes: ${campanha.titulo}`}
         >
-            <div className="card-body d-flex flex-column flex-md-row align-items-center justify-content-between px-md-5 py-3">
-                <div className="d-flex align-items-center mb-3 mb-md-0">
+            <div className="card-body d-flex flex-column align-items-center text-center px-3 py-3">
+                <div className="d-flex align-items-center">
                     {campanha.imagem ? (
                         <img
                             src={resolverUrl(campanha.imagem)}
@@ -50,10 +52,15 @@ function CampanhaCard({ campanha, onClick }) {
                     )}
                 </div>
 
-                <div className="text-center text-md-start flex-grow-1 mx-md-4">
-                    <h2 className="fw-bold mb-0 display-6" style={{ letterSpacing: '0.5px' }}>
+                <div className="mt-3">
+                    <h2 className="fw-bold mb-0" style={{ letterSpacing: '0.5px', fontSize: 'clamp(1.15rem, 2.4vw, 1.75rem)' }}>
                         {campanha.titulo}
                     </h2>
+                    {concluido && (
+                        <span className="badge rounded-pill mt-2" style={{ backgroundColor: '#e9ecef', color: '#495057' }}>
+                            <i className="bi bi-check-circle me-1"></i>Concluído
+                        </span>
+                    )}
                     {(campanha.data || campanha.local) && (
                         <span className="small opacity-75 fw-light d-block mt-2">
                             <i className="bi bi-calendar3 me-1"></i>
@@ -64,8 +71,8 @@ function CampanhaCard({ campanha, onClick }) {
                     )}
                 </div>
 
-                <div className="d-none d-md-block opacity-90 fs-1">
-                    <i className="bi bi-envelope-heart-fill" style={{ fontSize: '4.5rem' }}></i>
+                <div className="opacity-90 mt-2">
+                    <i className="bi bi-envelope-heart-fill" style={{ fontSize: '2.25rem' }}></i>
                 </div>
             </div>
         </div>
@@ -299,7 +306,15 @@ export default function Home() {
                 <div className="spinner-border" style={{ color: cores.marromCampanha }} role="status"></div>
               </div>
             ) : (
-              <div className="d-flex flex-column gap-4 align-items-center">
+              <div
+                style={{
+                  maxWidth: '1000px',
+                  margin: '0 auto',
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))',
+                  gap: '1.5rem'
+                }}
+              >
                 {eventosCampanhas.length > 0 ? (
                   eventosCampanhas.map((campanha) => (
                     <CampanhaCard key={campanha._id || campanha.titulo} campanha={campanha} onClick={() => setCampanhaDetalhe(campanha)} />
@@ -405,7 +420,14 @@ export default function Home() {
                   </div>
                 )}
 
-                <h4 className="fw-bold mb-2" style={{ color: cores.textoMarrom }}>{campanhaDetalhe.titulo}</h4>
+                <h4 className="fw-bold mb-2 d-flex align-items-center gap-2 flex-wrap" style={{ color: cores.textoMarrom }}>
+                    {campanhaDetalhe.titulo}
+                    {estaConcluido(campanhaDetalhe) && (
+                        <span className="badge rounded-pill" style={{ backgroundColor: '#e9ecef', color: '#495057', fontSize: '0.75rem' }}>
+                            <i className="bi bi-check-circle me-1"></i>Concluído
+                        </span>
+                    )}
+                </h4>
 
                 <div className="d-flex flex-wrap gap-3 small text-muted mb-3">
                   {campanhaDetalhe.data && (
@@ -438,14 +460,16 @@ export default function Home() {
                 <button type="button" className="btn btn-outline-secondary px-4" style={{ borderRadius: '6px' }} onClick={() => setCampanhaDetalhe(null)}>
                   Fechar
                 </button>
-                <button
-                  type="button"
-                  className="btn text-white px-4"
-                  style={{ backgroundColor: cores.btnVoluntario, borderRadius: '6px', fontWeight: '500' }}
-                  onClick={() => { setCampanhaDetalhe(null); navigate('/seja-voluntario'); }}
-                >
-                  <i className="bi bi-person-plus me-1"></i> Seja Voluntário
-                </button>
+                {!estaConcluido(campanhaDetalhe) && (
+                  <button
+                    type="button"
+                    className="btn text-white px-4"
+                    style={{ backgroundColor: cores.btnVoluntario, borderRadius: '6px', fontWeight: '500' }}
+                    onClick={() => { setCampanhaDetalhe(null); navigate('/seja-voluntario'); }}
+                  >
+                    <i className="bi bi-person-plus me-1"></i> Seja Voluntário
+                  </button>
+                )}
                 <button
                   type="button"
                   className="btn text-white px-4"

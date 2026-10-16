@@ -5,20 +5,7 @@ const ObjectId = require("mongodb").ObjectId
 const { body, validationResult } = require("express-validator")
 const { authorize } = require("../middleware/auth")
 const { validarObjectId } = require("../middleware/objectId")
-const fs = require("fs")
-const path = require("path")
-
-function extrairFilename(url) {
-    if (!url || typeof url !== "string") return null
-    const match = url.match(/\/uploads\/(.+)$/)
-    return match ? match[1] : null
-}
-
-function deletarArquivo(filename) {
-    if (!filename) return
-    const caminho = path.join(__dirname, "..", "uploads", filename)
-    fs.unlink(caminho, () => {})
-}
+const { extrairFilename, deletarArquivo } = require("../utils/arquivos")
 
 const validarNecessidade = [
     body("titulo").trim().notEmpty().withMessage("Título/item é obrigatório").isLength({ max: 120 }),
@@ -92,8 +79,15 @@ necessidadesRoutes.route("/necessidades/:id").put(authorize(["Admin", "admin"]),
         }
     })
 
-    if (!updateDoc.titulo || !updateDoc.categoria) {
-        return res.status(400).json({ mensagem: "Título e categoria são obrigatórios" })
+    // Update parcial: exige valor apenas dos campos que vierem no body
+    if (updateDoc.titulo !== undefined && !String(updateDoc.titulo).trim()) {
+        return res.status(400).json({ mensagem: "Título não pode ser vazio" })
+    }
+    if (updateDoc.categoria !== undefined && !String(updateDoc.categoria).trim()) {
+        return res.status(400).json({ mensagem: "Categoria não pode ser vazia" })
+    }
+    if (Object.keys(updateDoc).length === 0) {
+        return res.status(400).json({ mensagem: "Nenhum dado para atualizar" })
     }
 
     try {

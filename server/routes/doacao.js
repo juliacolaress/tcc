@@ -5,6 +5,8 @@ const ObjectId = require("mongodb").ObjectId
 const { body, validationResult } = require("express-validator")
 const { authorize } = require("../middleware/auth")
 const { validarObjectId } = require("../middleware/objectId")
+const { writeLimiter } = require("../middleware/rateLimiters")
+const { extrairFilename, deletarArquivo } = require("../utils/arquivos")
 const multer = require("multer")
 const path = require("path")
 const crypto = require("crypto")
@@ -160,7 +162,7 @@ doacoesRoutes.route("/doacao/add").post(authorize(["Admin", "admin"]), validarDo
 })
 
 // Doação pública: qualquer visitante pode enviar (multipart com comprovante opcional)
-doacoesRoutes.route("/doacao/publica").post(uploadComprovante.single("comprovante"), async function (req, res) {
+doacoesRoutes.route("/doacao/publica").post(writeLimiter, uploadComprovante.single("comprovante"), async function (req, res) {
     if (!req.body.nome || !req.body.email) {
         if (req.file) fs.unlink(req.file.path, () => {})
         return res.status(400).json({ mensagem: "Nome e e-mail do doador são obrigatórios." })
@@ -216,9 +218,21 @@ doacoesRoutes.route("/doacao/:id").delete(authorize(["Admin", "admin"]), validar
     const db_connect = dbo.getDb()
     const myquery = { _id: new ObjectId(req.params.id) }
     try {
+        // Busca antes de excluir para remover o comprovante do disco (evita arquivo órfão)
+        const doacao = await db_connect.collection("doacoes").findOne(myquery)
+        if (!doacao) {
+            return res.status(404).json({ mensagem: "Doação não encontrada" })
+        }
+
         const result = await db_connect.collection("doacoes").deleteOne(myquery)
+
+        if (doacao.comprovante) {
+            deletarArquivo(extrairFilename(doacao.comprovante))
+        }
+
         res.status(200).json(result)
     } catch (error) {
+        console.error("Erro ao deletar doação:", error)
         res.status(500).json({ mensagem: "Erro ao deletar" })
     }
 })
@@ -241,8 +255,14 @@ doacoesRoutes.route("/doacao/update/:id").post(authorize(["Admin", "admin"]), va
         }
     })
 
-    if (req.body.valor !== undefined) {
-        updateDoc.valor = parseFloat(req.body.valor) || 0
+    if (req.body.valor !== undefined && String(req.body.valor).trim() !== "") {
+        const valor = parseFloat(req.body.valor)
+        if (isNaN(valor) || valor < 0) {
+            return res.status(400).json({ mensagem: "Valor da doação inválido" })
+        }
+        updateDoc.valor = valor
+    } else if (req.body.valor !== undefined) {
+        updateDoc.valor = 0
     }
 
     if (req.body.categoria !== undefined || req.body.tipo_doacao !== undefined) {

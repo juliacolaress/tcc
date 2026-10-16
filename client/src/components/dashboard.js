@@ -9,6 +9,7 @@ export default function Dashboard() {
   const [totalVoluntarios, setTotalVoluntarios] = useState(0);
   const [totalPendentes, setTotalPendentes] = useState(0);
   const [totalDoacoesPendentes, setTotalDoacoesPendentes] = useState(0);
+  const [totalAdocoesPendentes, setTotalAdocoesPendentes] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,10 +20,11 @@ export default function Dashboard() {
           'Authorization': `Bearer ${token}`
         };
 
-        const [animaisRes, doacoesRes, voluntariosRes] = await Promise.all([
+        const [animaisRes, doacoesRes, voluntariosRes, solicitacoesRes] = await Promise.all([
           fetch(`${API_BASE_URL}/animal`, { headers }).catch(() => null),
           fetch(`${API_BASE_URL}/doacoes`, { headers }).catch(() => null),
-          fetch(`${API_BASE_URL}/voluntarios`, { headers }).catch(() => null)
+          fetch(`${API_BASE_URL}/voluntarios`, { headers }).catch(() => null),
+          fetch(`${API_BASE_URL}/solicitacoes-adocao`, { headers }).catch(() => null)
         ]);
 
         if (animaisRes && animaisRes.ok) {
@@ -44,6 +46,12 @@ export default function Dashboard() {
           const listaVoluntarios = Array.isArray(voluntariosData) ? voluntariosData : (voluntariosData.data || []);
           setTotalVoluntarios(listaVoluntarios.length);
           setTotalPendentes(listaVoluntarios.filter((v) => (v.status || 'Ativo') === 'Pendente').length);
+        }
+
+        if (solicitacoesRes && solicitacoesRes.ok) {
+          const solicitacoesData = await solicitacoesRes.json();
+          const listaSolicitacoes = Array.isArray(solicitacoesData) ? solicitacoesData : (solicitacoesData.data || []);
+          setTotalAdocoesPendentes(listaSolicitacoes.filter((s) => (s.status || 'Pendente') === 'Pendente').length);
         }
       } catch (error) {
         console.error('Erro de conexão com o backend:', error);
@@ -147,6 +155,41 @@ export default function Dashboard() {
             </div>
             <span className="btn px-4 py-2 text-white shadow-sm" style={{ backgroundColor: totalDoacoesPendentes > 0 ? '#f0ad4e' : '#8a8a8a', borderRadius: '6px', fontWeight: '500' }}>
               <i className="bi bi-arrow-right-circle me-2"></i> Ir para a Caixa de Entrada de Doações
+            </span>
+          </div>
+        </div>
+      </Link>
+
+      {/* Card de Notificação: Solicitações de Adoção Pendentes */}
+      <Link to="/animais" state={{ caixaAdocao: true }} style={{ textDecoration: 'none', color: 'inherit' }}>
+        <div
+          className="card border-0 shadow-sm mb-4"
+          style={{
+            borderRadius: '12px',
+            backgroundColor: totalAdocoesPendentes > 0 ? '#fff8e6' : '#f2f2f2',
+            borderLeft: totalAdocoesPendentes > 0 ? '6px solid #f0ad4e' : '6px solid #c8c8c8',
+            cursor: 'pointer'
+          }}
+        >
+          <div className="card-body d-flex flex-wrap justify-content-between align-items-center gap-3 py-3 px-4">
+            <div className="d-flex align-items-center gap-3">
+              <div
+                className="rounded-circle d-flex align-items-center justify-content-center"
+                style={{ width: '52px', height: '52px', backgroundColor: totalAdocoesPendentes > 0 ? '#ffecb3' : '#e0e0e0' }}
+              >
+                <i className={`bi ${totalAdocoesPendentes > 0 ? 'bi-inbox-fill' : 'bi-inbox'} fs-3`} style={{ color: totalAdocoesPendentes > 0 ? '#8a6d1d' : '#888' }}></i>
+              </div>
+              <div>
+                <span className="text-muted small text-uppercase fw-bold d-block" style={{ color: totalAdocoesPendentes > 0 ? '#8a6d1d' : '#666' }}>
+                  Solicitações de Adoção Pendentes
+                </span>
+                <h3 className="fw-bold mb-0" style={{ color: totalAdocoesPendentes > 0 ? '#856404' : '#666' }}>
+                  {loading ? <span className="spinner-border spinner-border-sm" role="status"></span> : totalAdocoesPendentes}
+                </h3>
+              </div>
+            </div>
+            <span className="btn px-4 py-2 text-white shadow-sm" style={{ backgroundColor: totalAdocoesPendentes > 0 ? '#f0ad4e' : '#8a8a8a', borderRadius: '6px', fontWeight: '500' }}>
+              <i className="bi bi-arrow-right-circle me-2"></i> Ir para a Caixa de Entrada de Adoções
             </span>
           </div>
         </div>
