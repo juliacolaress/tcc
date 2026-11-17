@@ -26,7 +26,7 @@ const VoluntarioRecord = (props) => {
             <td className="fw-semibold text-dark" style={{ paddingLeft: '1.5rem' }}>{props.record.nome}</td>
             <td className="text-muted">{props.record.email}</td>
             <td className="text-secondary">
-                {props.record.ddd && props.record.telefone ? `(${props.record.ddd}) ${props.record.telefone}` : "---"}
+                {props.record.telefone ? props.record.telefone : "---"}
             </td>
             <td className="text-muted">{props.record.cidade ? `${props.record.cidade} - ${props.record.estado}` : "---"}</td>
             <td>
@@ -379,7 +379,7 @@ export default function VoluntarioList() {
                                     </div>
                                 ) : (
                                     pendentes.map((v) => {
-                                        const telefone = v.ddd && v.telefone ? `(${v.ddd}) ${v.telefone}` : null;
+                                        const telefone = v.telefone || null;
                                         return (
                                             <div key={v._id} className="border rounded-3 p-3 mb-3" style={{ backgroundColor: '#fdfbf7', borderLeft: '4px solid #ffc107' }}>
                                                 <div className="d-flex flex-wrap justify-content-between align-items-center gap-2">
@@ -425,7 +425,7 @@ export default function VoluntarioList() {
                                                     </div>
                                                     <div className="mt-3">
                                                         <small className="text-muted text-uppercase fw-bold d-block mb-1" style={{ fontSize: '0.7rem', letterSpacing: '0.5px' }}>Observações</small>
-                                                        <div className="bg-light p-3 rounded" style={{ borderLeft: '4px solid #A67C52', whiteSpace: 'pre-wrap' }}>
+                                                        <div className="bg-light p-3 rounded" style={{ borderLeft: '4px solid #A67C52', whiteSpace: 'pre-wrap', wordBreak: "break-word", overflowWrap: "break-word" }}>
                                                             {v.observacoes && v.observacoes.trim() ? v.observacoes : <span className="text-muted">Nenhuma observação enviada.</span>}
                                                         </div>
                                                     </div>

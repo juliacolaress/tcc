@@ -18,9 +18,10 @@ const VALOR_PADRAO = {
 };
 
 function mascaraTelefone(valor) {
-  let limpo = valor.replace(/\D/g, "").slice(0, 10);
-  if (limpo.length > 6) limpo = `${limpo.slice(0, 5)}-${limpo.slice(5, 10)}`;
-  return limpo;
+  const limpo = valor.replace(/\D/g, "").slice(0, 11);
+  if (limpo.length <= 2) return limpo;
+  if (limpo.length <= 7) return `${limpo.slice(0, 2)} ${limpo.slice(2)}`;
+  return `${limpo.slice(0, 2)} ${limpo.slice(2, 7)}-${limpo.slice(7, 11)}`;
 }
 
 function mascaraCpf(valor) {
@@ -44,6 +45,7 @@ function FormularioAdocao() {
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState(false);
+  const [jaEnviado, setJaEnviado] = useState(false);
 
   useEffect(() => {
     let ativo = true;
@@ -83,6 +85,7 @@ function FormularioAdocao() {
     e.preventDefault();
     setErro("");
     setSucesso(false);
+    if (jaEnviado) return;
     setEnviando(true);
     try {
       const response = await fetch(`${API_BASE_URL}/animal/${animalId}/adotar`, {
@@ -96,6 +99,7 @@ function FormularioAdocao() {
         try {
           const data = await response.json();
           if (data && data.mensagem) mensagem = data.mensagem;
+          if (response.status === 409) setJaEnviado(true);
         } catch (err) {
         }
         setErro(mensagem);
@@ -272,11 +276,11 @@ function FormularioAdocao() {
               <div className="row">
                 <div className="form-group col-md-6 mb-3">
                   <label htmlFor="nome" className="fw-semibold mb-1" style={{ color: cores.textoMarrom }}>Nome Completo</label>
-                  <input type="text" className="form-control px-3 py-2" id="nome" style={inputStyle} value={form.nome} onChange={(e) => updateForm({ nome: e.target.value })} placeholder="Ex: Maria Silva" required />
+                  <input type="text" className="form-control px-3 py-2" id="nome" style={inputStyle} value={form.nome} onChange={(e) => updateForm({ nome: e.target.value })} placeholder="Ex: Maria Silva" maxLength={60} required />
                 </div>
                 <div className="form-group col-md-6 mb-3">
                   <label htmlFor="email" className="fw-semibold mb-1" style={{ color: cores.textoMarrom }}>E-mail</label>
-                  <input type="email" className="form-control px-3 py-2" id="email" style={inputStyle} value={form.email} onChange={(e) => updateForm({ email: e.target.value })} placeholder="Ex: maria@email.com" required />
+                  <input type="email" className="form-control px-3 py-2" id="email" style={inputStyle} value={form.email} onChange={(e) => updateForm({ email: e.target.value })} placeholder="Ex: maria@email.com" maxLength={120} required />
                 </div>
               </div>
 
@@ -287,11 +291,11 @@ function FormularioAdocao() {
                 </div>
                 <div className="form-group col-md-4 mb-3">
                   <label htmlFor="telefone" className="fw-semibold mb-1" style={{ color: cores.textoMarrom }}>Telefone / WhatsApp</label>
-                  <input type="tel" className="form-control px-3 py-2" id="telefone" style={inputStyle} maxLength="10" placeholder="(48) 99999-9999" value={form.telefone} onChange={(e) => updateForm({ telefone: mascaraTelefone(e.target.value) })} required />
+                  <input type="tel" className="form-control px-3 py-2" id="telefone" style={inputStyle} maxLength="13" placeholder="48 99861-2965" value={form.telefone} onChange={(e) => updateForm({ telefone: mascaraTelefone(e.target.value) })} required />
                 </div>
                 <div className="form-group col-md-4 mb-3">
                   <label htmlFor="cpf" className="fw-semibold mb-1" style={{ color: cores.textoMarrom }}>CPF</label>
-                  <input type="text" className="form-control px-3 py-2" id="cpf" style={inputStyle} maxLength="14" placeholder="000.000.000-00" value={form.cpf} onChange={(e) => updateForm({ cpf: mascaraCpf(e.target.value) })} required />
+                  <input type="text" className="form-control px-3 py-2" id="cpf" style={inputStyle} maxLength={14} placeholder="000.000.000-00" value={form.cpf} onChange={(e) => updateForm({ cpf: mascaraCpf(e.target.value) })} required />
                 </div>
               </div>
 
@@ -300,33 +304,38 @@ function FormularioAdocao() {
               <div className="row">
                 <div className="form-group col-md-8 mb-3">
                   <label htmlFor="rua" className="fw-semibold mb-1" style={{ color: cores.textoMarrom }}>Rua</label>
-                  <input type="text" className="form-control px-3 py-2" id="rua" style={inputStyle} value={form.rua} onChange={(e) => updateForm({ rua: e.target.value })} placeholder="Ex: Rua das Flores" required />
+                  <input type="text" className="form-control px-3 py-2" id="rua" style={inputStyle} value={form.rua} onChange={(e) => updateForm({ rua: e.target.value })} placeholder="Ex: Rua das Flores" maxLength={150} required />
                 </div>
                 <div className="form-group col-md-4 mb-3">
                   <label htmlFor="numero" className="fw-semibold mb-1" style={{ color: cores.textoMarrom }}>Número</label>
-                  <input type="text" className="form-control px-3 py-2" id="numero" style={inputStyle} value={form.numero} onChange={(e) => updateForm({ numero: e.target.value })} placeholder="Ex: 123" required />
+                  <input type="text" className="form-control px-3 py-2" id="numero" style={inputStyle} value={form.numero} onChange={(e) => updateForm({ numero: e.target.value })} placeholder="Ex: 123" maxLength={20} required />
                 </div>
               </div>
 
               <div className="row">
                 <div className="form-group col-md-6 mb-3">
                   <label htmlFor="bairro" className="fw-semibold mb-1" style={{ color: cores.textoMarrom }}>Bairro</label>
-                  <input type="text" className="form-control px-3 py-2" id="bairro" style={inputStyle} value={form.bairro} onChange={(e) => updateForm({ bairro: e.target.value })} placeholder="Ex: Centro" required />
+                  <input type="text" className="form-control px-3 py-2" id="bairro" style={inputStyle} value={form.bairro} onChange={(e) => updateForm({ bairro: e.target.value })} placeholder="Ex: Centro" maxLength={150} required />
                 </div>
                 <div className="form-group col-md-6 mb-3">
                   <label htmlFor="cidade" className="fw-semibold mb-1" style={{ color: cores.textoMarrom }}>Cidade</label>
-                  <input type="text" className="form-control px-3 py-2" id="cidade" style={inputStyle} value={form.cidade} onChange={(e) => updateForm({ cidade: e.target.value })} placeholder="Ex: Sombrio" required />
+                  <input type="text" className="form-control px-3 py-2" id="cidade" style={inputStyle} value={form.cidade} onChange={(e) => updateForm({ cidade: e.target.value })} placeholder="Ex: Sombrio" maxLength={150} required />
                 </div>
               </div>
 
-              {erro && (
+              {jaEnviado && (
+                <div className="alert py-2" role="alert" style={{ backgroundColor: '#FAF6F0', border: '1px solid #eadfcf', color: '#3D2314' }}>
+                  <i className="bi bi-info-circle-fill me-2" style={{ color: '#7a5a43' }}></i> Você já enviou uma solicitação de adoção para este animal. Aguarde a análise da ONG.
+                </div>
+              )}
+              {erro && !jaEnviado && (
                 <div className="alert alert-danger py-2" role="alert">
                   <i className="bi bi-exclamation-triangle me-2"></i> {erro}
                 </div>
               )}
 
               <div className="text-end">
-                <button type="submit" className="btn text-white px-5 py-2 shadow-sm" style={{ backgroundColor: cores.btnDoe, borderRadius: '6px', fontSize: '1rem', fontWeight: '500', border: 'none' }} disabled={enviando}>
+                <button type="submit" className="btn text-white px-5 py-2 shadow-sm" style={{ backgroundColor: cores.btnDoe, borderRadius: '6px', fontSize: '1rem', fontWeight: '500', border: 'none' }} disabled={enviando || jaEnviado}>
                   {enviando ? (
                     <>
                       <span className="spinner-border spinner-border-sm me-2" role="status"></span> Enviando...

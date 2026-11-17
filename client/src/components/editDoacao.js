@@ -7,7 +7,6 @@ export default function EditDoacao() {
     const [form, setForm] = useState({
         email: "",
         nome: "",
-        ddd: "",
         telefone: "",
         cidade: "",     
         estado: "",
@@ -44,7 +43,6 @@ export default function EditDoacao() {
             setForm({
                 email: record.email || "",
                 nome: record.nome || "",
-                ddd: record.ddd || "",
                 telefone: record.telefone || "",
                 cidade: record.cidade || "",
                 estado: record.estado || "",
@@ -65,10 +63,10 @@ export default function EditDoacao() {
     }
 
     const handleTelefoneChange = (e) => {
-        let val = e.target.value.replace(/\D/g, ""); 
-        if (val.length > 5) {
-            val = `${val.slice(0, 5)}-${val.slice(5, 9)}`; 
-        }
+        const limpo = e.target.value.replace(/\D/g, "").slice(0, 11);
+        let val = limpo;
+        if (limpo.length > 2 && limpo.length <= 7) val = `${limpo.slice(0, 2)} ${limpo.slice(2)}`;
+        else if (limpo.length > 7) val = `${limpo.slice(0, 2)} ${limpo.slice(2, 7)}-${limpo.slice(7, 11)}`;
         updateForm({ telefone: val });
     };
 
@@ -134,26 +132,22 @@ export default function EditDoacao() {
                     <div className="row">
                         <div className="form-group col-md-6 mb-3">
                             <label htmlFor="nome" style={labelStyle}>Nome Completo</label>
-                            <input type="text" className="form-control px-3 py-2" id="nome" style={inputStyle} value={form.nome} onChange={(e) => updateForm({ nome: e.target.value })} required />
+                            <input type="text" className="form-control px-3 py-2" id="nome" style={inputStyle} value={form.nome} onChange={(e) => updateForm({ nome: e.target.value })} maxLength={60} required />
                         </div>
                         <div className="form-group col-md-6 mb-3">
                             <label htmlFor="email" style={labelStyle}>E-mail</label>
-                            <input type="email" className="form-control px-3 py-2" id="email" style={inputStyle} value={form.email} onChange={(e) => updateForm({ email: e.target.value })} required />
+                            <input type="email" className="form-control px-3 py-2" id="email" style={inputStyle} value={form.email} onChange={(e) => updateForm({ email: e.target.value })} maxLength={120} required />
                         </div>
                     </div>
 
                     <div className="row">
-                        <div className="form-group col-md-2 mb-3">
-                            <label htmlFor="ddd" style={labelStyle}>DDD</label>
-                            <input type="text" className="form-control px-3 py-2" id="ddd" style={inputStyle} maxLength="2" placeholder="48" value={form.ddd} onChange={(e) => updateForm({ ddd: e.target.value.replace(/\D/g, "") })} />
-                        </div>
-                        <div className="form-group col-md-4 mb-3">
-                            <label htmlFor="telefone" style={labelStyle}>Telefone</label>
-                            <input type="text" className="form-control px-3 py-2" id="telefone" style={inputStyle} maxLength="10" placeholder="99999-9999" value={form.telefone} onChange={handleTelefoneChange} />
+                        <div className="form-group col-md-6 mb-3">
+                            <label htmlFor="telefone" style={labelStyle}>Telefone / WhatsApp</label>
+                            <input type="text" className="form-control px-3 py-2" id="telefone" style={inputStyle} maxLength="13" placeholder="48 99861-2965" value={form.telefone} onChange={handleTelefoneChange} />
                         </div>
                         <div className="form-group col-md-4 mb-3">
                             <label htmlFor="cidade" style={labelStyle}>Cidade</label>
-                            <input type="text" className="form-control px-3 py-2" id="cidade" style={inputStyle} value={form.cidade} onChange={(e) => updateForm({ cidade: e.target.value })} />
+                            <input type="text" className="form-control px-3 py-2" id="cidade" style={inputStyle} value={form.cidade} onChange={(e) => updateForm({ cidade: e.target.value })} maxLength={150} />
                         </div>
                         <div className="form-group col-md-2 mb-3">
                             <label htmlFor="estado" style={labelStyle}>UF</label>
@@ -194,7 +188,7 @@ export default function EditDoacao() {
                         ) : (
                             <div className="form-group col-md-6 mb-3">
                                 <label htmlFor="quantidade" style={labelStyle}>Quantidade</label>
-                                <input type="text" className="form-control px-3 py-2" id="quantidade" style={inputStyle} value={form.quantidade} onChange={(e) => updateForm({ quantidade: e.target.value })} placeholder="Ex: 2 sacos de 15kg / 3 caixas" />
+                                <input type="text" className="form-control px-3 py-2" id="quantidade" style={inputStyle} value={form.quantidade} onChange={(e) => updateForm({ quantidade: e.target.value })} placeholder="Ex: 2 sacos de 15kg / 3 caixas" maxLength={80} />
                             </div>
                         )}
                     </div>
@@ -202,11 +196,11 @@ export default function EditDoacao() {
                     <div className="row">
                         <div className="form-group col-md-6 mb-3">
                             <label htmlFor="item" style={labelStyle}>Descrição do Item</label>
-                            <input type="text" className="form-control px-3 py-2" id="item" style={inputStyle} value={form.item} onChange={(e) => updateForm({ item: e.target.value })} />
+                            <input type="text" className="form-control px-3 py-2" id="item" style={inputStyle} value={form.item} onChange={(e) => updateForm({ item: e.target.value })} maxLength={500} />
                         </div>
                         <div className="form-group col-md-6 mb-3">
                             <label htmlFor="forma_entrega" style={labelStyle}>Entrega / Coleta</label>
-                            <input type="text" className="form-control px-3 py-2" id="forma_entrega" style={inputStyle} value={form.forma_entrega} onChange={(e) => updateForm({ forma_entrega: e.target.value })} />
+                            <input type="text" className="form-control px-3 py-2" id="forma_entrega" style={inputStyle} value={form.forma_entrega} onChange={(e) => updateForm({ forma_entrega: e.target.value })} maxLength={150} />
                         </div>
                     </div>
 

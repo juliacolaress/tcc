@@ -428,7 +428,7 @@ export default function AnimalList() {
                         <div className="modal-content" style={{ borderRadius: '10px', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}>
                             <div className="modal-header" style={{ borderBottom: '2px solid #e9ecef', backgroundColor: '#fff8e6', borderTopLeftRadius: '10px', borderTopRightRadius: '10px' }}>
                                 <h5 className="modal-title fw-bold" style={{ color: '#8a6d1d' }}>
-                                    <i className="bi bi-inbox-fill me-2"></i> Caixa de Entrada de Adoções
+                                    <i className="bi bi-inbox-fill me-2"></i> Caixa de Entrada de Solicitações de Adoção
                                 </h5>
                                 <span className="badge fs-6 px-3 py-2 me-2" style={{ backgroundColor: '#856404', color: '#fff', borderRadius: '20px' }}>
                                     {solicitacoesPendentes.length} pendente(s)
@@ -474,10 +474,10 @@ export default function AnimalList() {
                                                     <i className="bi bi-hourglass-split me-1"></i>Pendente
                                                 </span>
                                             </div>
-                                            <small className="text-muted d-block mt-2">
+                                            <small className="text-muted d-block mt-2" style={{ wordBreak: "break-word", overflowWrap: "break-word", maxWidth: "100%" }}>
                                                 {s.solicitante?.email}
-                                                {s.solicitante?.telefone ? ` · ${s.solicitante.telefone}` : ""}
-                                                {s.solicitante?.endereco?.cidade ? ` · ${s.solicitante.endereco.cidade}` : ""}
+                                                {s.solicitante?.telefone ? ` �� ${s.solicitante.telefone}` : ""}
+                                                {s.solicitante?.endereco?.cidade ? ` �� ${s.solicitante.endereco.cidade}` : ""}
                                             </small>
                                             <div className="d-flex flex-wrap justify-content-end gap-2 mt-3 pt-3 border-top">
                                                 <button
@@ -494,7 +494,7 @@ export default function AnimalList() {
                                                     onClick={() => processarSolicitacao(s._id, "Aprovada")}
                                                     style={{ borderRadius: '6px' }}
                                                 >
-                                                    <i className="bi bi-check2-circle me-1"></i> Aprovar Adoção
+                                                    <i className="bi bi-check2-circle me-1"></i> Aceitar solicitação de adoção
                                                 </button>
                                             </div>
                                         </div>

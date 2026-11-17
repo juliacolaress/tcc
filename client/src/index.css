@@ -1,69 +1,127 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* Cores da Identidade Visual (padrão centralizado da página de Doações) */
-  --color-marrom-escuro: #3D2314;   /* Header, botões primários, títulos, card QR Code */
-  --color-marrom-medio: #A67C52;    /* Botão "Copiar Chave PIX", destaques secundários, bordas ativas */
-  --color-bg-cream: #FAF6F0;        /* Fundo de página (bege claro / off-white) */
-  --color-card-bg: #FFFFFF;         /* Fundo de cards e containers (branco puro) */
-  --color-text-primary: #3D2314;    /* Texto principal (títulos e destaques) */
-  --color-text-secondary: #555555;  /* Textos secundários */
-
-  /* Mapeamento legado (para compatibilidade) */
+  --color-marrom-escuro: #3D2314;
+  --color-marrom-medio: #A67C52;
+  --color-bg-cream: #FAF6F0;
+  --color-card-bg: #FFFFFF;
+  --color-text-primary: #3D2314;
+  --color-text-secondary: #555555;
   --color-brand-menu: var(--color-marrom-escuro);
   --color-brand-banner: var(--color-marrom-medio);
   --color-text-dark: var(--color-marrom-escuro);
   --color-text-highlight: var(--color-marrom-escuro);
   --color-footer-bg: var(--color-marrom-escuro);
-
-  /* Cores de Botões (padrão "Doar": fundo marrom escuro, texto branco, cantos arredondados) */
   --color-btn-adote: var(--color-marrom-escuro);
   --color-btn-doe: var(--color-marrom-escuro);
   --color-btn-voluntario: var(--color-marrom-escuro);
   --color-btn-hover-adote: #2A150B;
   --color-btn-hover-doe: #2A150B;
   --color-btn-hover-voluntario: #2A150B;
-
-  /* Outras Cores */
   --color-campaign-banner: var(--color-marrom-escuro);
-
-  /* Tokens de Design */
   --font-family: 'Poppins', sans-serif;
   --radius-sm: 6px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-pill: 50rem;
-  
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
-  
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Estilos de Reset e Base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
 body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
   font-family: var(--font-family) !important;
   background-color: var(--color-bg-cream);
   color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Textos secundários padronizados */
+img,
+video,
+iframe,
+canvas,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+table {
+  max-width: 100%;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.container,
+.container-fluid {
+  width: 100%;
+}
+
+.btn {
+  max-width: 100%;
+  white-space: normal;
+}
+
 .text-muted {
   color: var(--color-text-secondary) !important;
 }
 
-/* Transições Suaves globais */
-a, button, span, select, input, textarea {
+a,
+button,
+span,
+select,
+input,
+textarea {
   transition: var(--transition-smooth);
 }
 
-/* Estilização da Navbar (Efeitos Hover Nativo) */
 .navbar-nav .nav-link {
   position: relative;
   opacity: 0.9;
 }
+
 .navbar-nav .nav-link:hover {
   opacity: 1;
+}
+
+@media (max-width: 991.98px) {
+  .navbar .navbar-collapse {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  h1,
+  .h1 {
+    font-size: 1.65rem;
+  }
+  h2,
+  .h2 {
+    font-size: 1.4rem;
+  }
+  .container,
+  .container-fluid {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
 }

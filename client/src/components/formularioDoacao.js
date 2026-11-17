@@ -17,7 +17,6 @@ function FormularioDoacao() {
   const [form, setForm] = useState({
     nome: "",
     email: "",
-    ddd: "",
     telefone: "",
     cidade: "",
     estado: "",
@@ -41,10 +40,10 @@ function FormularioDoacao() {
   }
 
   const handleTelefoneChange = (e) => {
-    let val = e.target.value.replace(/\D/g, "");
-    if (val.length > 5) {
-      val = `${val.slice(0, 5)}-${val.slice(5, 9)}`;
-    }
+    const limpo = e.target.value.replace(/\D/g, "").slice(0, 11);
+    let val = limpo;
+    if (limpo.length > 2 && limpo.length <= 7) val = `${limpo.slice(0, 2)} ${limpo.slice(2)}`;
+    else if (limpo.length > 7) val = `${limpo.slice(0, 2)} ${limpo.slice(2, 7)}-${limpo.slice(7, 11)}`;
     updateForm({ telefone: val });
   };
 
@@ -88,7 +87,6 @@ function FormularioDoacao() {
       const body = new FormData();
       body.append("nome", form.nome);
       body.append("email", form.email);
-      body.append("ddd", form.ddd);
       body.append("telefone", form.telefone);
       body.append("cidade", form.cidade);
       body.append("estado", form.estado);
@@ -290,26 +288,22 @@ function FormularioDoacao() {
               <div className="row">
                 <div className="form-group col-md-6 mb-3">
                   <label htmlFor="nome" className="fw-semibold mb-1" style={{ color: cores.textoMarrom }}>Nome Completo</label>
-                  <input type="text" className="form-control px-3 py-2" id="nome" style={inputStyle} value={form.nome} onChange={(e) => updateForm({ nome: e.target.value })} placeholder="Ex: Lucas Mendes" required />
+                  <input type="text" className="form-control px-3 py-2" id="nome" style={inputStyle} value={form.nome} onChange={(e) => updateForm({ nome: e.target.value })} placeholder="Ex: Lucas Mendes" maxLength={60} required />
                 </div>
                 <div className="form-group col-md-6 mb-3">
                   <label htmlFor="email" className="fw-semibold mb-1" style={{ color: cores.textoMarrom }}>E-mail</label>
-                  <input type="email" className="form-control px-3 py-2" id="email" style={inputStyle} value={form.email} onChange={(e) => updateForm({ email: e.target.value })} placeholder="Ex: lucas@email.com" required />
+                  <input type="email" className="form-control px-3 py-2" id="email" style={inputStyle} value={form.email} onChange={(e) => updateForm({ email: e.target.value })} placeholder="Ex: lucas@email.com" maxLength={120} required />
                 </div>
               </div>
 
               <div className="row">
-                <div className="form-group col-md-2 mb-3">
-                  <label htmlFor="ddd" className="fw-semibold mb-1" style={{ color: cores.textoMarrom }}>DDD</label>
-                  <input type="text" className="form-control px-3 py-2" id="ddd" style={inputStyle} maxLength="2" placeholder="48" value={form.ddd} onChange={(e) => updateForm({ ddd: e.target.value.replace(/\D/g, "") })} />
-                </div>
-                <div className="form-group col-md-4 mb-3">
-                  <label htmlFor="telefone" className="fw-semibold mb-1" style={{ color: cores.textoMarrom }}>Telefone</label>
-                  <input type="text" className="form-control px-3 py-2" id="telefone" style={inputStyle} maxLength="10" placeholder="99999-9999" value={form.telefone} onChange={handleTelefoneChange} />
+                <div className="form-group col-md-6 mb-3">
+                  <label htmlFor="telefone" className="fw-semibold mb-1" style={{ color: cores.textoMarrom }}>Telefone / WhatsApp</label>
+                  <input type="text" className="form-control px-3 py-2" id="telefone" style={inputStyle} maxLength="13" placeholder="48 99861-2965" value={form.telefone} onChange={handleTelefoneChange} />
                 </div>
                 <div className="form-group col-md-4 mb-3">
                   <label htmlFor="cidade" className="fw-semibold mb-1" style={{ color: cores.textoMarrom }}>Cidade</label>
-                  <input type="text" className="form-control px-3 py-2" id="cidade" style={inputStyle} value={form.cidade} onChange={(e) => updateForm({ cidade: e.target.value })} placeholder="Ex: Araranguá" />
+                  <input type="text" className="form-control px-3 py-2" id="cidade" style={inputStyle} value={form.cidade} onChange={(e) => updateForm({ cidade: e.target.value })} placeholder="Ex: Araranguá" maxLength={150} />
                 </div>
                 <div className="form-group col-md-2 mb-3">
                   <label htmlFor="estado" className="fw-semibold mb-1" style={{ color: cores.textoMarrom }}>UF</label>
@@ -352,15 +346,15 @@ function FormularioDoacao() {
                   </div>
                   <div className="form-group col-md-6 mb-3">
                     <label htmlFor="quantidade" className="fw-semibold mb-1" style={{ color: cores.textoMarrom }}>Quantidade</label>
-                    <input type="text" className="form-control px-3 py-2" id="quantidade" style={inputStyle} value={form.quantidade} onChange={(e) => updateForm({ quantidade: e.target.value })} placeholder="Ex: 2 sacos de 15kg / 3 caixas" />
+                    <input type="text" className="form-control px-3 py-2" id="quantidade" style={inputStyle} value={form.quantidade} onChange={(e) => updateForm({ quantidade: e.target.value })} placeholder="Ex: 2 sacos de 15kg / 3 caixas" maxLength={80} />
                   </div>
                   <div className="form-group col-md-12 mb-3">
                     <label htmlFor="item" className="fw-semibold mb-1" style={{ color: cores.textoMarrom }}>Descrição dos Itens</label>
-                    <input type="text" className="form-control px-3 py-2" id="item" style={inputStyle} value={form.item} onChange={(e) => updateForm({ item: e.target.value })} placeholder="Ex: Ração para Cão Adulto 15kg" required />
+                    <input type="text" className="form-control px-3 py-2" id="item" style={inputStyle} value={form.item} onChange={(e) => updateForm({ item: e.target.value })} placeholder="Ex: Ração para Cão Adulto 15kg" maxLength={500} required />
                   </div>
                   <div className="form-group col-md-12 mb-3">
                     <label htmlFor="forma_entrega" className="fw-semibold mb-1" style={{ color: cores.textoMarrom }}>Entrega / Coleta</label>
-                    <input type="text" className="form-control px-3 py-2" id="forma_entrega" style={inputStyle} value={form.forma_entrega} onChange={(e) => updateForm({ forma_entrega: e.target.value })} placeholder="Ex: Deixei na sede / Buscar no local" />
+                    <input type="text" className="form-control px-3 py-2" id="forma_entrega" style={inputStyle} value={form.forma_entrega} onChange={(e) => updateForm({ forma_entrega: e.target.value })} placeholder="Ex: Deixei na sede / Buscar no local" maxLength={150} />
                   </div>
                 </div>
               )}

@@ -7,7 +7,6 @@ export default function CreateDoacaoFinanceira() {
     const [form, setForm] = useState({
         email: "",
         nome: "",
-        ddd: "",
         telefone: "",
         cidade: "",     
         estado: "",
@@ -30,10 +29,10 @@ export default function CreateDoacaoFinanceira() {
     }
 
     const handleTelefoneChange = (e) => {
-        let val = e.target.value.replace(/\D/g, "");
-        if (val.length > 5) {
-            val = `${val.slice(0, 5)}-${val.slice(5, 9)}`;
-        }
+        const limpo = e.target.value.replace(/\D/g, "").slice(0, 11);
+        let val = limpo;
+        if (limpo.length > 2 && limpo.length <= 7) val = `${limpo.slice(0, 2)} ${limpo.slice(2)}`;
+        else if (limpo.length > 7) val = `${limpo.slice(0, 2)} ${limpo.slice(2, 7)}-${limpo.slice(7, 11)}`;
         updateForm({ telefone: val });
     };
 
@@ -99,26 +98,22 @@ export default function CreateDoacaoFinanceira() {
                     <div className="row">
                         <div className="form-group col-md-6 mb-3">
                             <label style={labelStyle}>Nome Completo</label>
-                            <input type="text" className="form-control px-3 py-2" style={inputStyle} value={form.nome} onChange={(e) => updateForm({ nome: e.target.value })} placeholder="Ex: Júlia Colares" required />
+                            <input type="text" className="form-control px-3 py-2" style={inputStyle} value={form.nome} onChange={(e) => updateForm({ nome: e.target.value })} placeholder="Ex: Júlia Colares" maxLength={100} required />
                         </div>
                         <div className="form-group col-md-6 mb-3">
                             <label style={labelStyle}>E-mail</label>
-                            <input type="email" className="form-control px-3 py-2" style={inputStyle} value={form.email} onChange={(e) => updateForm({ email: e.target.value })} placeholder="Ex: julia@email.com" required />
+                            <input type="email" className="form-control px-3 py-2" style={inputStyle} value={form.email} onChange={(e) => updateForm({ email: e.target.value })} placeholder="Ex: julia@email.com" maxLength={120} required />
                         </div>
                     </div>
 
                     <div className="row">
-                        <div className="form-group col-md-2 mb-3">
-                            <label style={labelStyle}>DDD</label>
-                            <input type="text" className="form-control px-3 py-2" style={inputStyle} maxLength="2" placeholder="48" value={form.ddd} onChange={(e) => updateForm({ ddd: e.target.value.replace(/\D/g, "") })} />
-                        </div>
-                        <div className="form-group col-md-4 mb-3">
-                            <label style={labelStyle}>Telefone</label>
-                            <input type="text" className="form-control px-3 py-2" style={inputStyle} maxLength="10" placeholder="99999-9999" value={form.telefone} onChange={handleTelefoneChange} />
+                        <div className="form-group col-md-6 mb-3">
+                            <label style={labelStyle}>Telefone / WhatsApp</label>
+                            <input type="text" className="form-control px-3 py-2" style={inputStyle} maxLength="13" placeholder="48 99861-2965" value={form.telefone} onChange={handleTelefoneChange} />
                         </div>
                         <div className="form-group col-md-4 mb-3">
                             <label style={labelStyle}>Cidade</label>
-                            <input type="text" className="form-control px-3 py-2" style={inputStyle} value={form.cidade} onChange={(e) => updateForm({ cidade: e.target.value })} placeholder="Ex: Araranguá" />
+                            <input type="text" className="form-control px-3 py-2" style={inputStyle} value={form.cidade} onChange={(e) => updateForm({ cidade: e.target.value })} placeholder="Ex: Araranguá" maxLength={150} />
                         </div>
                         <div className="form-group col-md-2 mb-3">
                             <label style={labelStyle}>UF</label>
